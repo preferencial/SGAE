@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Footer Drawers - Alimentação Escolar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <style>
+    /* ========================================
+       FOOTER DRAWERS - DESIGN SYSTEM
+       ======================================== */
+    :root {
+      --ae-primary: #2E7D32;
+      --ae-primary-light: #4CAF50;
+      --ae-primary-dark: #1B5E20;
+      --ae-secondary: #EF6C00;
+      --ae-secondary-light: #FF9800;
+      --ae-accent: #C62828;
+      --ae-info: #1565C0;
+      --ae-success: #2E7D32;
+      --ae-warning: #F9A825;
+      --ae-bg-main: #F1F8E9;
+      --ae-bg-card: #FFFFFF;
+      --ae-bg-overlay: rgba(0, 0, 0, 0.5);
+      --ae-text-primary: #263238;
+      --ae-text-secondary: #546E7A;
+      --ae-text-light: #FFFFFF;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      --footer-height: 64px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--ae-bg-main);
+      color: var(--ae-text-primary);
+      padding-bottom: var(--footer-height);
+    }
+
+    /* ========================================
+       FOOTER FIXO
+       ======================================== */
+    .ae-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--footer-height);
+      background: var(--ae-bg-card);
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ae-footer-nav {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 400px;
+      padding: 0 16px;
+    }
+
+    .ae-footer-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--ae-text-secondary);
+      transition: var(--transition-fast);
+      min-width: 72px;
+    }
+
+    .ae-footer-btn:hover {
+      background: var(--ae-bg-main);
+      color: var(--ae-primary);
+    }
+
+    .ae-footer-btn:active {
+      transform: scale(0.95);
+    }
+
+    .ae-footer-btn.active {
+      color: var(--ae-primary);
+    }
+
+    .ae-footer-btn .material-icons {
+      font-size: 24px;
+    }
+
+    .ae-footer-btn span:last-child {
+      font-size: 0.65rem;
+      font-weight: 500;
+    }
+
+    /* ========================================
+       DRAWER BASE (Bottom Sheet)
+       ======================================== */
+    .ae-footer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--ae-bg-overlay);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+      z-index: 1500;
+    }
+
+    .ae-footer-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ae-bottom-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-height: 85vh;
+      background: var(--ae-bg-card);
+      border-radius: 20px 20px 0 0;
+      transform: translateY(100%);
+      transition: transform var(--transition-normal);
+      z-index: 1501;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ae-bottom-drawer.active {
+      transform: translateY(0);
+    }
+
+    /* Handle de arraste */
+    .ae-drawer-handle {
+      width: 40px;
+      height: 4px;
+      background: #DDD;
+      border-radius: 2px;
+      margin: 12px auto;
+    }
+
+    /* Header do Drawer */
+    .ae-bottom-drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px 16px;
+      border-bottom: 1px solid #E8E8E8;
+    }
+
+    .ae-bottom-drawer-head h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ae-bottom-drawer-head h2 .material-icons {
+      color: var(--ae-primary);
+    }
+
+    .ae-bottom-drawer-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--ae-bg-main);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ae-text-secondary);
+      transition: var(--transition-fast);
+    }
+
+    .ae-bottom-drawer-close:hover {
+      background: #E0E0E0;
+    }
+
+    /* Body do Drawer */
+    .ae-bottom-drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* ========================================
+       1. DRAWER RESUMO FINANCEIRO
+       ======================================== */
+    .ae-finance-period {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .ae-period-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #E0E0E0;
+      background: white;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-period-btn.active {
+      background: var(--ae-primary);
+      color: white;
+      border-color: var(--ae-primary);
+    }
+
+    .ae-finance-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .ae-finance-card {
+      padding: 16px;
+      background: var(--ae-bg-main);
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .ae-finance-card.highlight {
+      background: linear-gradient(135deg, var(--ae-primary) 0%, var(--ae-primary-dark) 100%);
+      color: white;
+      grid-column: span 2;
+    }
+
+    .ae-finance-card-label {
+      font-size: 0.7rem;
+      color: var(--ae-text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .ae-finance-card.highlight .ae-finance-card-label {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .ae-finance-card-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ae-text-primary);
+    }
+
+    .ae-finance-card.highlight .ae-finance-card-value {
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .ae-finance-card-change {
+      font-size: 0.65rem;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .ae-finance-card-change.positive { color: var(--ae-success); }
+    .ae-finance-card-change.negative { color: var(--ae-accent); }
+
+    /* Mini gráfico de barras */
+    .ae-mini-chart {
+      margin-top: 20px;
+    }
+
+    .ae-mini-chart h4 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-chart-bar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .ae-chart-bar-label {
+      font-size: 0.75rem;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .ae-chart-bar-track {
+      flex: 1;
+      height: 8px;
+      background: #E8E8E8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .ae-chart-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .ae-chart-bar-value {
+      font-size: 0.7rem;
+      font-weight: 600;
+      width: 60px;
+      text-align: right;
+    }
+
+    /* ========================================
+       2. DRAWER SCANNER QR
+       ======================================== */
+    .ae-scanner-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ae-scanner-preview {
+      width: 100%;
+      max-width: 300px;
+      aspect-ratio: 1;
+      background: #1a1a1a;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .ae-scanner-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border: 2px solid var(--ae-primary);
+      border-radius: 12px;
+    }
+
+    .ae-scanner-frame::before,
+    .ae-scanner-frame::after {
+      content: '';
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-color: var(--ae-primary);
+      border-style: solid;
+    }
+
+    .ae-scanner-frame::before {
+      top: -2px;
+      left: -2px;
+      border-width: 4px 0 0 4px;
+      border-radius: 8px 0 0 0;
+    }
+
+    .ae-scanner-frame::after {
+      bottom: -2px;
+      right: -2px;
+      border-width: 0 4px 4px 0;
+      border-radius: 0 0 8px 0;
+    }
+
+    .ae-scanner-line {
+      position: absolute;
+      top: 0;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--ae-primary), transparent);
+      animation: scanLine 2s linear infinite;
+    }
+
+    @keyframes scanLine {
+      0% { top: 10%; }
+      50% { top: 90%; }
+      100% { top: 10%; }
+    }
+
+    .ae-scanner-hint {
+      text-align: center;
+      color: var(--ae-text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .ae-scanner-actions {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .ae-scanner-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-fast);
+    }
+
+    .ae-scanner-btn.primary {
+      background: var(--ae-primary);
+      color: white;
+    }
+
+    .ae-scanner-btn.secondary {
+      background: var(--ae-bg-main);
+      color: var(--ae-text-primary);
+    }
+
+    .ae-scanner-btn:hover {
+      transform: scale(1.02);
+    }
+
+    .ae-scanner-result {
+      width: 100%;
+      max-width: 300px;
+      padding: 16px;
+      background: #E8F5E9;
+      border-radius: 12px;
+      border: 1px solid var(--ae-primary-light);
+      margin-top: 16px;
+      display: none;
+    }
+
+    .ae-scanner-result.active {
+      display: block;
+    }
+
+    .ae-scanner-result h4 {
+      font-size: 0.85rem;
+      color: var(--ae-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ae-scanner-result p {
+      font-size: 0.8rem;
+      color: var(--ae-text-secondary);
+      word-break: break-all;
+    }
+
+    /* ========================================
+       3. DRAWER SUPORTE
+       ======================================== */
+    .ae-support-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #E8F5E9;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .ae-support-status-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--ae-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .ae-support-status-info h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ae-primary);
+    }
+
+    .ae-support-status-info p {
+      font-size: 0.75rem;
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-support-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .ae-support-option {
+      padding: 20px 16px;
+      background: var(--ae-bg-card);
+      border: 1px solid #E8E8E8;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-support-option:hover {
+      border-color: var(--ae-primary-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ae-support-option .material-icons {
+      font-size: 32px;
+      color: var(--ae-primary);
+      margin-bottom: 8px;
+    }
+
+    .ae-support-option h4 {
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .ae-support-option p {
+      font-size: 0.7rem;
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-support-quick-links {
+      margin-top: 20px;
+    }
+
+    .ae-support-quick-links h4 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ae-text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .ae-support-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--ae-bg-main);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-support-link:hover {
+      background: #E8F5E9;
+    }
+
+    .ae-support-link .material-icons {
+      color: var(--ae-primary);
+    }
+
+    .ae-support-link span {
+      flex: 1;
+      font-size: 0.85rem;
+    }
+
+    .ae-support-link .ae-link-arrow {
+      color: var(--ae-text-secondary);
+    }
+
+    /* Chat flutuante */
+    .ae-chat-container {
+      margin-top: 20px;
+      border: 1px solid #E8E8E8;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .ae-chat-header {
+      background: var(--ae-primary);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ae-chat-header h4 {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .ae-chat-messages {
+      height: 200px;
+      overflow-y: auto;
+      padding: 16px;
+      background: #FAFAFA;
+    }
+
+    .ae-chat-message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+    }
+
+    .ae-chat-message.bot {
+      background: white;
+      border: 1px solid #E8E8E8;
+      border-radius: 12px 12px 12px 4px;
+    }
+
+    .ae-chat-message.user {
+      background: var(--ae-primary);
+      color: white;
+      margin-left: auto;
+      border-radius: 12px 12px 4px 12px;
+    }
+
+    .ae-chat-input-wrap {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      background: white;
+      border-top: 1px solid #E8E8E8;
+    }
+
+    .ae-chat-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #E0E0E0;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .ae-chat-input:focus {
+      outline: none;
+      border-color: var(--ae-primary);
+    }
+
+    .ae-chat-send {
+      width: 40px;
+      height: 40px;
+      background: var(--ae-primary);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+    }
+
+    .ae-chat-send:hover {
+      background: var(--ae-primary-dark);
+    }
+  
+
+
+/* codex-school-community-ux: ajustes finos para uso recorrente por comunidade escolar */
+:root {
+  --codex-school-focus: #ffd166;
+  --codex-school-touch: 44px;
+  --codex-school-radius: 8px;
+  --codex-school-field-radius: 7px;
+  --codex-school-form-gap: 14px;
+  --codex-school-field-border: rgba(120, 132, 156, 0.45);
+  --codex-school-field-bg: rgba(255, 255, 255, 0.96);
+  --codex-school-field-text: #1f2937;
+  --codex-school-muted-text: #64748b;
+  --codex-school-soft-surface: rgba(248, 250, 252, 0.82);
+  --codex-school-safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+:where(html) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+:where(body) {
+  overscroll-behavior-y: contain;
+}
+
+:where(p, li, dd, dt, blockquote, figcaption, label, td, th) {
+  line-height: 1.5;
+}
+
+:where(main, .main, .content, .page, .app, .app-shell, .container, .dashboard, .workspace) {
+  padding-bottom: var(--codex-school-safe-bottom);
+}
+
+:where(a, button, .btn, .button, [role="button"], input, select, textarea, summary) {
+  min-height: var(--codex-school-touch);
+  touch-action: manipulation;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="submit"], input[type="button"]) {
+  border-radius: var(--codex-school-radius) !important;
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--codex-school-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+  font-weight: 700;
+}
+
+:where(form) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(fieldset) {
+  border-radius: var(--codex-school-radius) !important;
+  border-color: var(--codex-school-field-border);
+}
+
+:where(legend) {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+:where(.form-group, .input-field, .field, .form-field, .control-group) {
+  margin-bottom: var(--codex-school-form-gap);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: min(100%, 100%);
+  border-radius: var(--codex-school-field-radius) !important;
+  border-color: var(--codex-school-field-border) !important;
+  background-color: var(--input-bg, var(--field-bg, var(--codex-school-field-bg)));
+  color: var(--input-text, var(--text-color, var(--codex-school-field-text)));
+  font-size: 16px !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--placeholder-color, #94a3b8);
+  opacity: 1;
+}
+
+:where(input[required], select[required], textarea[required]) {
+  border-left: 3px solid var(--codex-gentle-primary-strong, #aecbfa) !important;
+}
+
+:where(input:disabled, select:disabled, textarea:disabled, button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed !important;
+  opacity: 0.68;
+}
+
+:where(.help, .hint, .help-text, .form-help, small) {
+  line-height: 1.45;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+}
+
+:where(.actions, .form-actions, .button-row, .toolbar, .topbar, nav, [role="toolbar"]) {
+  gap: 8px;
+}
+
+:where(.actions, .form-actions, .button-row) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+:where(.actions, .form-actions, .button-row) > :where(button, .btn, .button, [role="button"]) {
+  flex: 1 1 148px;
+}
+
+:where(.card, .panel, .box, .tile, .item, .list-item, .action-card) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.section, .surface, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.filters, .search-panel, .form-section) {
+  border-radius: var(--codex-school-radius) !important;
+  background: var(--codex-school-soft-surface);
+}
+
+:where(table) {
+  border-collapse: collapse;
+}
+
+:where(table, .table, .data-table) {
+  max-width: 100%;
+}
+
+:where(.table-wrap, .table-wrapper, .table-container, .responsive-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(th, td) {
+  vertical-align: top;
+}
+
+:where(.toast, .alert, .notice, .snackbar, [role="status"], [role="alert"]) {
+  border-radius: var(--codex-school-radius) !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+  :where(body) {
+    font-size: 16px;
+  }
+
+  :where(h1) {
+    font-size: clamp(1.55rem, 1.35rem + 1vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  :where(h2) {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  :where(.toolbar, .topbar, nav, [role="toolbar"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  :where(.hide-mobile, .desktop-only) {
+    display: none !important;
+  }
+}
+</style>
+  <style id="codex-mobile-a11y">
+  /* Mobile-first accessibility baseline for Chrome and Google-style readability. */
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  :where(body) {
+    min-width: 0;
+    overflow-x: hidden;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption, label, td, th, input, select, textarea, button) {
+    line-height: 1.5;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption) {
+    max-width: 72ch;
+  }
+
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+
+  :where(button, [role="button"], input:not([type="hidden"]), select, textarea) {
+    font: inherit;
+    min-height: 44px;
+  }
+
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid #1a73e8;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+  }
+
+  :where(img, video, canvas, svg, iframe) {
+    max-width: 100%;
+  }
+
+  :where(img, video, canvas, svg) {
+    height: auto;
+  }
+
+  :where(table) {
+    max-width: 100%;
+  }
+
+  :where(.table-responsive, .table-wrapper, .data-table, .table-container, .responsive-table) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :where(.container, .content, .main, .page, .page-content, .app-content, main) {
+    min-width: 0;
+  }
+
+  :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+    min-width: 0;
+  }
+
+  @media (max-width: 640px) {
+    :where(body) {
+      font-size: 16px;
+    }
+
+    :where(.container, .content, .page-content, .app-content, main) {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+      flex-wrap: wrap;
+    }
+
+    :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea, button) {
+      max-width: 100%;
+    }
+
+    :where(.hide-on-mobile) {
+      display: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+<style>
+/* codex-s20-mobile-first: Samsung S20 / Chrome mobile baseline (360x800 CSS px) */
+@media screen {
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+  :where(body) {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  :where(main, .app, .page, .container, .content, .main-content, .dashboard, .view) {
+    max-width: 100%;
+  }
+  :where(img, video, canvas, svg) {
+    max-width: 100%;
+    height: auto;
+  }
+  :where(p, li, td, th, label, legend, button, a, h1, h2, h3, h4, h5, h6) {
+    overflow-wrap: anywhere;
+  }
+  :where(input, select, textarea, button) {
+    font: inherit;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    font-size: max(16px, 1rem);
+  }
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+  :where(.table-wrap, .table-wrapper, .table-responsive, .table-container, .responsive-table, .data-table-wrapper) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 480px) {
+  :where(body) {
+    font-size: 16px;
+  }
+  :where(.grid, .cards, .dashboard-grid, .stats-grid, .form-grid, .filters-grid) {
+    grid-template-columns: 1fr !important;
+  }
+  :where(.toolbar, .actions, .button-row, .filters, .form-actions, .modal-actions, .header-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(.btn, button, input, select, textarea) {
+    min-height: 44px;
+  }
+  :where(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :where(th, td) {
+    white-space: nowrap;
+  }
+  :where(.card, .panel, .modal, .dialog, .drawer) {
+    max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 360px) {
+  :where(body) {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  :where(.card, .panel, .section, .modal-content, .dialog-content) {
+    padding: 12px;
+  }
+  :where(h1) {
+    font-size: clamp(1.45rem, 1.2rem + 2vw, 2rem);
+  }
+  :where(h2) {
+    font-size: clamp(1.2rem, 1rem + 1.4vw, 1.55rem);
+  }
+}
+</style>
+<style>
+/* codex-design-system: shared contrast, button sizing and minimal button icon styling */
+:root {
+  --codex-ds-primary: var(--primary, var(--color-primary, var(--theme-primary, #1a73e8)));
+  --codex-ds-primary-strong: var(--primary-dark, var(--color-primary-strong, var(--theme-primary-dark, #1558d6)));
+  --codex-ds-text: var(--text, var(--color-ink, var(--text-primary, #202124)));
+  --codex-ds-muted: var(--muted, var(--color-muted, var(--text-secondary, #5f6368)));
+  --codex-ds-surface: var(--surface, var(--color-surface, var(--bg-surface, #ffffff)));
+  --codex-ds-border: var(--border, var(--color-border, var(--line, #dadce0)));
+  --codex-ds-focus: #1a73e8;
+  --codex-ds-radius: 8px;
+}
+
+:where(body) {
+  color: var(--codex-ds-text);
+}
+
+:where(.text-muted, .muted, .secondary, small, figcaption, caption) {
+  color: var(--codex-ds-muted);
+}
+
+:where(a) {
+  color: var(--codex-ds-primary);
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--codex-ds-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: var(--codex-ds-primary);
+  color: #ffffff;
+}
+
+:where(.btn:hover, .button:hover, button:hover, [role="button"]:hover) {
+  filter: none;
+}
+
+:where(.btn-primary:hover, .button-primary:hover, button[type="submit"]:hover, input[type="submit"]:hover) {
+  background: var(--codex-ds-primary-strong);
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: var(--codex-ds-surface);
+  color: var(--codex-ds-text);
+  border-color: var(--codex-ds-border);
+}
+
+:where(.btn-small, .btn.sm, .button-small, .button.sm) {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+:where(.icon-button, .btn-icon, button.icon, button[aria-label]:not([aria-label=""])) {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: var(--codex-ds-radius);
+}
+
+:where(button svg, .btn svg, .button svg, [role="button"] svg, button .material-icons, .btn .material-icons, .button .material-icons, button .icon, .btn .icon, .button .icon) {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  stroke-width: 2;
+  flex: 0 0 auto;
+}
+
+:where(button .material-icons, .btn .material-icons, .button .material-icons) {
+  font-feature-settings: "liga";
+  vertical-align: middle;
+}
+
+:where(button:focus-visible, .btn:focus-visible, .button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 3px solid var(--codex-ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--codex-ds-surface) 80%, transparent);
+}
+
+:where(button:disabled, .btn:disabled, .button:disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  :where(.btn, .button, button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    width: auto;
+  }
+  :where(.form-actions > .btn, .form-actions > .button, .form-actions > button, .actions > .btn, .actions > .button, .actions > button) {
+    width: 100%;
+  }
+}
+</style>
+<style>
+/* codex-gentle-dark-theme: default graphite theme with soft, kind UI accents */
+:root {
+  color-scheme: dark;
+  --codex-gentle-bg: #15171c;
+  --codex-gentle-bg-soft: #1a1d23;
+  --codex-gentle-surface: #20242b;
+  --codex-gentle-surface-2: #272b33;
+  --codex-gentle-border: #343941;
+  --codex-gentle-text: #eef1f5;
+  --codex-gentle-muted: #c8ced8;
+  --codex-gentle-dim: #9aa4b2;
+  --codex-gentle-primary: #8ab4f8;
+  --codex-gentle-primary-strong: #aecbfa;
+  --codex-gentle-accent: #8fa0b8;
+  --codex-gentle-success: #9be7c1;
+  --bg: var(--codex-gentle-bg);
+  --background: var(--codex-gentle-bg);
+  --surface: var(--codex-gentle-surface);
+  --panel: var(--codex-gentle-surface);
+  --card: var(--codex-gentle-surface);
+  --text: var(--codex-gentle-text);
+  --text-main: var(--codex-gentle-text);
+  --text-primary: var(--codex-gentle-text);
+  --text-muted: var(--codex-gentle-muted);
+  --muted: var(--codex-gentle-muted);
+  --border: var(--codex-gentle-border);
+  --line: var(--codex-gentle-border);
+  --primary: var(--codex-gentle-primary);
+  --primary-dark: #6ea0ef;
+  --codex-ds-primary: var(--codex-gentle-primary);
+  --codex-ds-primary-strong: var(--codex-gentle-primary-strong);
+  --codex-ds-text: var(--codex-gentle-text);
+  --codex-ds-muted: var(--codex-gentle-muted);
+  --codex-ds-surface: var(--codex-gentle-surface);
+  --codex-ds-border: var(--codex-gentle-border);
+}
+
+:where(html, body) {
+  background: var(--codex-gentle-bg) !important;
+  color: var(--codex-gentle-text) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(main, .app, .page, .layout, .content, .main-content, .app-content, .container, .dashboard, .view) {
+  background-color: transparent !important;
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(.card, .panel, .section, .surface, .box, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu, .table-wrapper, .table-wrap, .table-container, form) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+              var(--codex-gentle-surface) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+}
+
+:where(header, nav, aside, footer, .navbar, .sidebar, .topbar, .app-header, .app-footer) {
+  background: rgba(12, 15, 21, 0.92) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, label, span, strong, td, th, legend, small, caption) {
+  color: inherit;
+}
+
+:where(h1, .page-title, .view-title) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(h1:not(.no-emoji), .page-title:not(.no-emoji), .view-title:not(.no-emoji))::after {
+  content: "";
+  font-size: 0.82em;
+}
+
+:where(.empty-state, .empty, .no-data, .no-results, .loading, .placeholder)::before {
+  content: "";
+}
+
+:where(.text-muted, .muted, .secondary, .subtitle, .description, .help-text, .hint, small, figcaption, caption) {
+  color: var(--codex-gentle-muted) !important;
+}
+
+:where(a) {
+  color: var(--codex-gentle-primary-strong) !important;
+}
+
+:where(input, select, textarea) {
+  background: var(--codex-gentle-bg-soft) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--codex-gentle-dim) !important;
+}
+
+:where(table) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(th) {
+  color: var(--codex-gentle-muted) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:where(td) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  background: var(--codex-gentle-surface-2) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: none !important;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: linear-gradient(180deg, rgba(174, 203, 250, 0.24), rgba(138, 180, 248, 0.16)),
+              #182235 !important;
+  color: #f8fbff !important;
+  border-color: rgba(174, 203, 250, 0.45) !important;
+}
+
+:where(button[type="submit"]:not(.icon-button):not(.btn-icon), input[type="submit"])::after {
+  content: "";
+  font-size: 0.9em;
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(.badge, .tag, .chip, .pill, .status) {
+  background: rgba(248, 199, 220, 0.12) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: rgba(248, 199, 220, 0.26) !important;
+}
+
+:where(hr) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(svg, canvas, img) {
+  color: inherit;
+}
+</style>
+
+
+<style id="up-oracular-design-system">
+:root {
+  color-scheme: dark;
+  --uo-bg: #15171c;
+  --uo-panel: #20242b;
+  --uo-text: #e9ecf1;
+  --uo-muted: #b2b9c4;
+  --uo-border: #343941;
+  --uo-accent: #7aa2d6;
+  --uo-radius-group: 10px;
+  --uo-radius-control: 8px;
+}
+
+html, body {
+  background: var(--uo-bg) !important;
+  color: var(--uo-text) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body, input, select, textarea, button {
+  color: var(--uo-text);
+}
+
+.card, .panel, .modal, .dialog, dialog, .container,
+.box, .widget, .section, .sidebar, .drawer, .popover,
+[role="dialog"], [class*="card"], [class*="panel"] {
+  background-color: var(--uo-panel) !important;
+  border-color: var(--uo-border) !important;
+  border-radius: var(--uo-radius-group) !important;
+}
+
+button, input, select, textarea, .btn, .button,
+[role="button"], [role="menuitem"], .dropdown-item,
+.menu-item, [class*="button"], [class*="dropdown-item"] {
+  border-radius: var(--uo-radius-control) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  background-color: var(--uo-panel) !important;
+  border: 1px solid var(--uo-border) !important;
+  padding: 8px !important;
+  box-sizing: border-box;
+}
+
+label, .form-label, [class*="form-label"] {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--uo-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.uo-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.uo-feedback-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  min-width: 220px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--uo-border);
+  border-radius: var(--uo-radius-group);
+  background: var(--uo-panel);
+  color: var(--uo-text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.uo-feedback-box.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.uo-feedback-box[data-kind="ok"] {
+  border-color: #8fc2a6;
+  color: #8fc2a6;
+}
+
+.uo-feedback-box[data-kind="err"] {
+  border-color: #d98b93;
+  color: #d98b93;
+}
+
+form[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+form[aria-busy="true"] :is(button, input[type="submit"], input[type="button"]) {
+  pointer-events: none;
+}
+
+button, .btn-primary, .button-primary,
+[class*="primary"][role="button"] {
+  background-color: var(--uo-accent) !important;
+}
+
+p, small, .muted, .secondary, .subtitle,
+[class*="muted"], [class*="secondary"] {
+  color: var(--uo-muted) !important;
+}
+
+hr, table, th, td, fieldset {
+  border-color: var(--uo-border) !important;
+}
+
+a {
+  color: var(--uo-accent);
+}
+
+/* Geometrias funcionais permanecem circulares. */
+.avatar, .spinner, .loading-ring, .dot, .status-dot,
+[class*="avatar"], [class*="spinner"], [class*="loading-ring"] {
+  border-radius: 50% !important;
+}
+</style>
+<script id="up-oracular-form-feedback">
+(function () {
+  'use strict';
+  if (window.UpOracularFeedback) return;
+
+  var timer = null;
+  function notify(kind, message) {
+    var box = document.getElementById('uo-feedback-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'uo-feedback-box';
+      box.className = 'uo-feedback-box';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      document.body.appendChild(box);
+    }
+    box.dataset.kind = kind === 'err' ? 'err' : 'ok';
+    box.textContent = String(message || (kind === 'err' ? 'Nao foi possivel concluir.' : 'Operacao concluida.'));
+    box.classList.add('is-visible');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      box.classList.remove('is-visible');
+    }, 1000);
+  }
+
+  function connectLabels(form) {
+    form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field, index) {
+      var id = field.id || ('uo-field-' + index + '-' + Math.random().toString(36).slice(2, 7));
+      field.id = id;
+      var label = form.querySelector('label[for="' + id + '"]');
+      if (!label) {
+        var sibling = field.previousElementSibling;
+        if (sibling && sibling.tagName === 'LABEL') {
+          sibling.htmlFor = id;
+          label = sibling;
+        }
+      }
+      if (label && field.parentElement && !field.parentElement.classList.contains('uo-field')) {
+        field.parentElement.classList.add('uo-field');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(connectLabels);
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    form.setAttribute('aria-busy', 'true');
+    notify('ok', 'Enviando...');
+    window.setTimeout(function () {
+      if (form.getAttribute('aria-busy') === 'true') {
+        form.removeAttribute('aria-busy');
+      }
+    }, 10000);
+  }, true);
+
+  window.UpOracularFeedback = {
+    ok: function (message) { notify('ok', message); },
+    err: function (message) { notify('err', message); },
+    done: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('ok', message);
+    },
+    fail: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('err', message);
+    }
+  };
+}());
+</script>
+
+  <style id="cdx-border-to-color">
+/* Padronização de borders → cores complementares (FROTA-20) */
+input:not([type="hidden"]),
+textarea,
+select,
+[class*="input"],
+[class*="field"],
+[class*="form"],
+.card,
+.panel,
+.box,
+.container,
+.modal,
+[class*="modal"],
+[class*="dialog"],
+dialog {
+  border: none !important;
+  border-width: 0 !important;
+}
+
+input:not([type="hidden"]),
+textarea,
+select {
+  background-color: #20242b !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 2px #e9ecf1 !important;
+}
+  </style>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style id="fleet-mobile-wcag-aa">
+    /* Contrato FROTA: ergonomia S20 e WCAG 2.1 AA. */
+    html, body { max-width: 100%; overflow-x: hidden; }
+    :is(button, [role="button"], input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+      min-width: 48px !important;
+      min-height: 48px !important;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+    <main>
+
+  <!-- Footer Fixo -->
+  <footer class="ae-footer">
+    <nav class="ae-footer-nav">
+      <button class="ae-footer-btn" id="btnResumo" onclick="FooterDrawers.open('resumo')">
+        <span class="material-icons">monitoring</span>
+        <span>Resumo</span>
+      </button>
+      <button class="ae-footer-btn" id="btnScanner" onclick="FooterDrawers.open('scanner')">
+        <span class="material-icons">qr_code_scanner</span>
+        <span>Scanner</span>
+      </button>
+      <button class="ae-footer-btn" id="btnSuporte" onclick="FooterDrawers.open('suporte')">
+        <span class="material-icons">support_agent</span>
+        <span>Suporte</span>
+      </button>
+    </nav>
+  </footer>
+
+  <!-- Overlay -->
+  <div class="ae-footer-overlay" id="footerOverlay"></div>
+
+  <!-- ========================================
+       1. DRAWER RESUMO FINANCEIRO
+       ======================================== -->
+  <aside class="ae-bottom-drawer" id="resumoDrawer">
+    <div class="ae-drawer-handle"></div>
+    <div class="ae-bottom-drawer-head">
+      <h2><span class="material-icons">monitoring</span> Resumo Financeiro</h2>
+      <button class="ae-bottom-drawer-close" onclick="FooterDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-bottom-drawer-body">
+      <div class="ae-finance-period">
+        <button class="ae-period-btn active" data-period="mes">Este Mês</button>
+        <button class="ae-period-btn" data-period="trimestre">Trimestre</button>
+        <button class="ae-period-btn" data-period="ano">Ano</button>
+      </div>
+      
+      <div class="ae-finance-cards">
+        <div class="ae-finance-card highlight">
+          <div class="ae-finance-card-label">Total Empenhado</div>
+          <div class="ae-finance-card-value" id="totalEmpenhado">R$ 2.450.000,00</div>
+        </div>
+        <div class="ae-finance-card">
+          <div class="ae-finance-card-label">Pago</div>
+          <div class="ae-finance-card-value" id="totalPago">R$ 1.890.500,00</div>
+          <div class="ae-finance-card-change positive">
+            <span class="material-icons" style="font-size:14px">trending_up</span> 77,2%
+          </div>
+        </div>
+        <div class="ae-finance-card">
+          <div class="ae-finance-card-label">A Pagar</div>
+          <div class="ae-finance-card-value" id="totalAPagar">R$ 559.500,00</div>
+          <div class="ae-finance-card-change negative">
+            <span class="material-icons" style="font-size:14px">schedule</span> 22,8%
+          </div>
+        </div>
+        <div class="ae-finance-card">
+          <div class="ae-finance-card-label">NFs Pendentes</div>
+          <div class="ae-finance-card-value" id="nfsPendentes">12</div>
+        </div>
+        <div class="ae-finance-card">
+          <div class="ae-finance-card-label">Glosas</div>
+          <div class="ae-finance-card-value" id="totalGlosas">R$ 8.430,00</div>
+        </div>
+      </div>
+      
+      <div class="ae-mini-chart">
+        <h4>Execução por Grupo</h4>
+        <div id="chartBars">
+          <!-- Barras via JS -->
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================
+       2. DRAWER SCANNER QR
+       ======================================== -->
+  <aside class="ae-bottom-drawer" id="scannerDrawer">
+    <div class="ae-drawer-handle"></div>
+    <div class="ae-bottom-drawer-head">
+      <h2><span class="material-icons">qr_code_scanner</span> Scanner de NF</h2>
+      <button class="ae-bottom-drawer-close" onclick="FooterDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-bottom-drawer-body">
+      <div class="ae-scanner-container">
+        <div class="ae-scanner-preview" id="scannerPreview">
+          <div class="ae-scanner-frame">
+            <div class="ae-scanner-line"></div>
+          </div>
+          <video id="scannerVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+        </div>
+        
+        <p class="ae-scanner-hint">Posicione o QR Code ou código de barras da NF dentro da área</p>
+        
+        <div class="ae-scanner-actions">
+          <button class="ae-scanner-btn primary" id="btnStartScan" onclick="FooterDrawers.scanner.toggle()">
+            <span class="material-icons">photo_camera</span>
+            Iniciar
+          </button>
+          <button class="ae-scanner-btn secondary" onclick="FooterDrawers.scanner.manual()">
+            <span class="material-icons">keyboard</span>
+            Digitar
+          </button>
+        </div>
+        
+        <div class="ae-scanner-result" id="scannerResult">
+          <h4><span class="material-icons">check_circle</span> Chave Detectada</h4>
+          <p id="scannerResultText"></p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================
+       3. DRAWER SUPORTE
+       ======================================== -->
+  <aside class="ae-bottom-drawer" id="suporteDrawer">
+    <div class="ae-drawer-handle"></div>
+    <div class="ae-bottom-drawer-head">
+      <h2><span class="material-icons">support_agent</span> Suporte</h2>
+      <button class="ae-bottom-drawer-close" onclick="FooterDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-bottom-drawer-body">
+      <div class="ae-support-status">
+        <div class="ae-support-status-icon">
+          <span class="material-icons">headset_mic</span>
+        </div>
+        <div class="ae-support-status-info">
+          <h4>Suporte Disponível</h4>
+          <p>Seg a Sex, 8h às 18h • Tempo médio: 5 min</p>
+        </div>
+      </div>
+      
+      <div class="ae-support-options">
+        <div class="ae-support-option" onclick="FooterDrawers.support.openChat()">
+          <span class="material-icons">chat</span>
+          <h4>Chat</h4>
+          <p>Fale conosco agora</p>
+        </div>
+        <div class="ae-support-option" onclick="FooterDrawers.support.openPhone()">
+          <span class="material-icons">call</span>
+          <h4>Telefone</h4>
+          <p>(61) 3333-4444</p>
+        </div>
+        <div class="ae-support-option" onclick="FooterDrawers.support.openEmail()">
+          <span class="material-icons">mail</span>
+          <h4>E-mail</h4>
+          <p>Resposta em 24h</p>
+        </div>
+        <div class="ae-support-option" onclick="FooterDrawers.support.openManual()">
+          <span class="material-icons">menu_book</span>
+          <h4>Manual</h4>
+          <p>Documentação</p>
+        </div>
+      </div>
+      
+      <div class="ae-support-quick-links">
+        <h4>Links Rápidos</h4>
+        <div class="ae-support-link" onclick="FooterDrawers.support.openLink('faq')">
+          <span class="material-icons">help</span>
+          <span>Perguntas Frequentes</span>
+          <span class="material-icons">chevron_right</span>
+        </div>
+        <div class="ae-support-link" onclick="FooterDrawers.support.openLink('videos')">
+          <span class="material-icons">play_circle</span>
+          <span>Vídeos Tutoriais</span>
+          <span class="material-icons">chevron_right</span>
+        </div>
+        <div class="ae-support-link" onclick="FooterDrawers.support.openLink('novidades')">
+          <span class="material-icons">new_releases</span>
+          <span>Novidades do Sistema</span>
+          <span class="material-icons">chevron_right</span>
+        </div>
+      </div>
+      
+      <div class="ae-chat-container" id="chatContainer" style="display:none;">
+        <div class="ae-chat-header">
+          <span class="material-icons">smart_toy</span>
+          <h4>Assistente AE</h4>
+        </div>
+        <div class="ae-chat-messages" id="chatMessages">
+          <div class="ae-chat-message bot">Olá! Sou o assistente do Sistema AE. Como posso ajudar?</div>
+        </div>
+        <div class="ae-chat-input-wrap">
+          <input inputmode="text" type="text" class="ae-chat-input" id="chatInput" placeholder="Digite sua dúvida..." autocomplete="name">
+          <button class="ae-chat-send" onclick="FooterDrawers.support.sendMessage()">
+            <span class="material-icons">send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    /**
+     * ========================================
+     * FOOTER DRAWERS - ALIMENTAÇÃO ESCOLAR
+     * 3 Drawers: Resumo Financeiro, Scanner QR, Suporte
+     * ========================================
+     */
+    const FooterDrawers = {
+      state: {
+        activeDrawer: null,
+        scannerActive: false,
+        videoStream: null
+      },
+
+      elements: {
+        overlay: null,
+        drawers: {}
+      },
+
+      init() {
+        this.cacheElements();
+        this.bindEvents();
+        this.loadFinanceData();
+      },
+
+      cacheElements() {
+        this.elements.overlay = document.getElementById('footerOverlay');
+        this.elements.drawers = {
+          resumo: document.getElementById('resumoDrawer'),
+          scanner: document.getElementById('scannerDrawer'),
+          suporte: document.getElementById('suporteDrawer')
+        };
+      },
+
+      bindEvents() {
+        this.elements.overlay?.addEventListener('click', () => this.close());
+        
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') this.close();
+        });
+
+        // Período financeiro
+        document.querySelectorAll('.ae-period-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => this.finance.setPeriod(e.target.dataset.period));
+        });
+
+        // Chat input
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.support.sendMessage();
+        });
+      },
+
+      open(drawerName) {
+        this.close();
+        
+        const drawer = this.elements.drawers[drawerName];
+        if (!drawer) return;
+
+        this.state.activeDrawer = drawerName;
+        drawer.classList.add('active');
+        this.elements.overlay?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Atualiza botão ativo
+        document.querySelectorAll('.ae-footer-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn${drawerName.charAt(0).toUpperCase() + drawerName.slice(1)}`)?.classList.add('active');
+      },
+
+      close() {
+        if (!this.state.activeDrawer) return;
+
+        const drawer = this.elements.drawers[this.state.activeDrawer];
+        drawer?.classList.remove('active');
+        this.elements.overlay?.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Para scanner se estiver ativo
+        if (this.state.activeDrawer === 'scanner') {
+          this.scanner.stop();
+        }
+
+        document.querySelectorAll('.ae-footer-btn').forEach(btn => btn.classList.remove('active'));
+        this.state.activeDrawer = null;
+      },
+
+      loadFinanceData() {
+        this.finance.renderChart();
+      },
+
+      // ========================================
+      // MÓDULO: RESUMO FINANCEIRO
+      // ========================================
+      finance: {
+        setPeriod(period) {
+          document.querySelectorAll('.ae-period-btn').forEach(btn => btn.classList.remove('active'));
+          document.querySelector(`[data-period="${period}"]`)?.classList.add('active');
+          this.loadData(period);
+        },
+
+        loadData(period) {
+          // Simula dados por período
+          const data = {
+            mes: { empenhado: 2450000, pago: 1890500, aPagar: 559500, nfs: 12, glosas: 8430 },
+            trimestre: { empenhado: 7200000, pago: 6100000, aPagar: 1100000, nfs: 28, glosas: 24500 },
+            ano: { empenhado: 28500000, pago: 25200000, aPagar: 3300000, nfs: 156, glosas: 89000 }
+          };
+
+          const d = data[period] || data.mes;
+          document.getElementById('totalEmpenhado').textContent = this.formatCurrency(d.empenhado);
+          document.getElementById('totalPago').textContent = this.formatCurrency(d.pago);
+          document.getElementById('totalAPagar').textContent = this.formatCurrency(d.aPagar);
+          document.getElementById('nfsPendentes').textContent = d.nfs;
+          document.getElementById('totalGlosas').textContent = this.formatCurrency(d.glosas);
+        },
+
+        formatCurrency(value) {
+          return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        },
+
+        renderChart() {
+          const container = document.getElementById('chartBars');
+          if (!container) return;
+
+          const groups = [
+            { name: 'Hortifruti', value: 85, amount: 450000, color: '#4CAF50' },
+            { name: 'Carnes', value: 72, amount: 380000, color: '#EF6C00' },
+            { name: 'Laticínios', value: 68, amount: 320000, color: '#1565C0' },
+            { name: 'Grãos', value: 90, amount: 280000, color: '#7B1FA2' },
+            { name: 'Outros', value: 55, amount: 180000, color: '#546E7A' }
+          ];
+
+          container.innerHTML = groups.map(g => `
+            <div class="ae-chart-bar-item">
+              <span class="ae-chart-bar-label">${g.name}</span>
+              <div class="ae-chart-bar-track">
+                <div class="ae-chart-bar-fill" style="width:${g.value}%;background:${g.color}"></div>
+              </div>
+              <span class="ae-chart-bar-value">${g.value}%</span>
+            </div>
+          `).join('');
+        }
+      },
+
+      // ========================================
+      // MÓDULO: SCANNER QR
+      // ========================================
+      scanner: {
+        async toggle() {
+          if (FooterDrawers.state.scannerActive) {
+            this.stop();
+          } else {
+            await this.start();
+          }
+        },
+
+        async start() {
+          try {
+            const video = document.getElementById('scannerVideo');
+            const btn = document.getElementById('btnStartScan');
+            
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'environment' }
+            });
+            
+            video.srcObject = stream;
+            FooterDrawers.state.videoStream = stream;
+            FooterDrawers.state.scannerActive = true;
+            
+            btn.innerHTML = '<span class="material-icons">stop</span> Parar';
+            
+            // Simula detecção após 3 segundos
+            setTimeout(() => {
+              if (FooterDrawers.state.scannerActive) {
+                this.onDetect('35241234567890123456789012345678901234567890123');
+              }
+            }, 3000);
+            
+          } catch (err) {
+            console.error('Erro ao acessar câmera:', err);
+            alert('Não foi possível acessar a câmera. Verifique as permissões.');
+          }
+        },
+
+        stop() {
+          const video = document.getElementById('scannerVideo');
+          const btn = document.getElementById('btnStartScan');
+          
+          if (FooterDrawers.state.videoStream) {
+            FooterDrawers.state.videoStream.getTracks().forEach(track => track.stop());
+            FooterDrawers.state.videoStream = null;
+          }
+          
+          video.srcObject = null;
+          FooterDrawers.state.scannerActive = false;
+          btn.innerHTML = '<span class="material-icons">photo_camera</span> Iniciar';
+        },
+
+        onDetect(code) {
+          this.stop();
+          
+          const result = document.getElementById('scannerResult');
+          const resultText = document.getElementById('scannerResultText');
+          
+          result.classList.add('active');
+          resultText.textContent = code;
+          
+          // Vibra se disponível
+          if (navigator.vibrate) {
+            navigator.vibrate(200);
+          }
+          
+          // Emite evento para processamento
+          console.log('Chave NF detectada:', code);
+        },
+
+        manual() {
+          const code = prompt('Digite a chave de acesso da NF (44 dígitos):');
+          if (code && code.length === 44) {
+            this.onDetect(code);
+          } else if (code) {
+            alert('Chave inválida. A chave deve ter 44 dígitos.');
+          }
+        }
+      },
+
+      // ========================================
+      // MÓDULO: SUPORTE
+      // ========================================
+      support: {
+        openChat() {
+          const container = document.getElementById('chatContainer');
+          container.style.display = container.style.display === 'none' ? 'block' : 'none';
+          if (container.style.display === 'block') {
+            document.getElementById('chatInput')?.focus();
+          }
+        },
+
+        sendMessage() {
+          const input = document.getElementById('chatInput');
+          const messages = document.getElementById('chatMessages');
+          const text = input.value.trim();
+          
+          if (!text) return;
+          
+          // Adiciona mensagem do usuário
+          messages.innerHTML += `<div class="ae-chat-message user">${text}</div>`;
+          input.value = '';
+          
+          // Simula resposta do bot
+          setTimeout(() => {
+            const responses = [
+              'Entendi sua dúvida. Deixe-me verificar...',
+              'Para isso, você pode acessar o menu "Notas Fiscais" e clicar em "Nova NF".',
+              'Posso ajudar com mais alguma coisa?'
+            ];
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            messages.innerHTML += `<div class="ae-chat-message bot">${response}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+          }, 1000);
+          
+          messages.scrollTop = messages.scrollHeight;
+        },
+
+        openPhone() {
+          window.open('tel:+556133334444', '_self');
+        },
+
+        openEmail() {
+          window.open('mailto:suporte.ae@edu.df.gov.br?subject=Suporte%20Sistema%20AE', '_self');
+        },
+
+        openManual() {
+          console.log('Abrindo manual...');
+          // Abrir página de documentação
+        },
+
+        openLink(type) {
+          console.log('Abrindo link:', type);
+          // Navegar para seção específica
+        }
+      }
+    };
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => FooterDrawers.init());
+
+    // Expor globalmente
+    window.FooterDrawers = FooterDrawers;
+  </script>
+
+<script>
+/* codex-school-community-ux-script: pequenos ajustes de contexto escolar */
+(function() {
+  if (window.__codexSchoolCommunityUx) return;
+  window.__codexSchoolCommunityUx = true;
+
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  }
+
+  ready(function() {
+    document.documentElement.setAttribute('data-community-context', 'school');
+
+    document.querySelectorAll('form').forEach(function(form) {
+      if (!form.getAttribute('aria-label') && !form.getAttribute('aria-labelledby')) {
+        form.setAttribute('aria-label', 'Formulario da comunidade escolar');
+      }
+    });
+
+    document.querySelectorAll('input, select, textarea').forEach(function(field) {
+      if (!field.id && field.name) field.id = 'field-' + String(field.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      if (field.required && !field.getAttribute('aria-required')) field.setAttribute('aria-required', 'true');
+      if (!field.getAttribute('autocomplete')) {
+        var type = (field.getAttribute('type') || '').toLowerCase();
+        var name = (field.getAttribute('name') || field.id || '').toLowerCase();
+        if (type === 'email' || name.indexOf('email') >= 0) field.setAttribute('autocomplete', 'email');
+        else if (name.indexOf('nome') >= 0 || name.indexOf('name') >= 0) field.setAttribute('autocomplete', 'name');
+        else if (name.indexOf('senha') >= 0 || name.indexOf('password') >= 0) field.setAttribute('autocomplete', 'current-password');
+      }
+    });
+
+    document.querySelectorAll('button:not([type])').forEach(function(button) {
+      button.setAttribute('type', 'button');
+    });
+  });
+})();
+</script>
+
+<script>
+/* codex-project-behavior-standardization: microcomportamentos compartilhados */
+(function() {
+  if (window.__codexProjectBehaviorStandardization) return;
+  window.__codexProjectBehaviorStandardization = true;
+
+  var SUBMIT_LOCK_MS = 2500;
+  var invalidFocusPending = false;
+
+  function isElement(value) {
+    return value && value.nodeType === 1;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function unlockForm(form, button) {
+    if (isElement(form)) {
+      delete form.dataset.codexSubmitting;
+      if (form.getAttribute('aria-busy') === 'true') form.setAttribute('aria-busy', 'false');
+    }
+
+    if (isElement(button) && button.dataset.codexSubmitLocked === 'true') {
+      delete button.dataset.codexSubmitLocked;
+      button.disabled = false;
+      button.removeAttribute('aria-disabled');
+    }
+  }
+
+  function restoreSubmitLocks(scope) {
+    var root = scope && scope.querySelectorAll ? scope : document;
+
+    root.querySelectorAll('form[data-codex-submitting="true"]').forEach(function(form) {
+      unlockForm(form);
+    });
+
+    root.querySelectorAll('[data-codex-submit-locked="true"]').forEach(function(button) {
+      unlockForm(null, button);
+    });
+  }
+
+  document.addEventListener('submit', function(event) {
+    var form = event.target;
+    if (!isElement(form) || String(form.tagName).toLowerCase() !== 'form') return;
+    if (form.hasAttribute('data-no-submit-lock')) return;
+
+    if (form.dataset.codexSubmitting === 'true') {
+      event.preventDefault();
+      return;
+    }
+
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+    form.dataset.codexSubmitting = 'true';
+    form.setAttribute('aria-busy', 'true');
+
+    var button = event.submitter || form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+    if (isElement(button) && !button.disabled && !button.hasAttribute('data-no-submit-lock')) {
+      button.dataset.codexSubmitLocked = 'true';
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    }
+
+    window.setTimeout(function() {
+      unlockForm(form, button);
+    }, SUBMIT_LOCK_MS);
+  }, true);
+
+  document.addEventListener('invalid', function(event) {
+    var field = event.target;
+    if (!isElement(field) || invalidFocusPending) return;
+    invalidFocusPending = true;
+
+    window.setTimeout(function() {
+      invalidFocusPending = false;
+      if (!document.documentElement.contains(field)) return;
+      try {
+        field.scrollIntoView({ block: 'center', inline: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        field.focus({ preventScroll: true });
+      } catch (error) {
+        field.focus();
+      }
+    }, 0);
+  }, true);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key !== 'Escape') return;
+    var closedSomething = false;
+
+    var dialogs = Array.prototype.slice.call(document.querySelectorAll('dialog[open]'));
+    var dialog = dialogs[dialogs.length - 1];
+    if (dialog && typeof dialog.close === 'function') {
+      dialog.close();
+      closedSomething = true;
+    }
+
+    if (!closedSomething) {
+      var details = Array.prototype.slice.call(document.querySelectorAll('details[open]'));
+      var detail = details[details.length - 1];
+      if (detail) {
+        detail.removeAttribute('open');
+        closedSomething = true;
+      }
+    }
+
+    document.querySelectorAll('[aria-expanded="true"]').forEach(function(toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      closedSomething = true;
+    });
+
+    if (closedSomething) event.preventDefault();
+  }, true);
+
+  window.addEventListener('pageshow', function() {
+    restoreSubmitLocks(document);
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') restoreSubmitLocks(document);
+  });
+})();
+</script>
+
+    </main>
+</body>
+</html>
+
+
+
+
+
+

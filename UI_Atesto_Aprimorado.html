@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sistema de Atesto - UNIAE/CRE-PP</title>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #818cf8;
+      --primary-dark: #3730a3;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --info: #3b82f6;
+      --info-light: #dbeafe;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.5;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .header-title p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .user-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-card.active {
+      border-color: var(--primary);
+    }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon .material-icons {
+      font-size: 26px;
+    }
+
+    .stat-icon.blue {
+      background: var(--info-light);
+      color: var(--info);
+    }
+
+    .stat-icon.green {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .stat-icon.yellow {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .stat-icon.red {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .stat-info h3 {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .stat-info p {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    /* Workflow Visual */
+    .workflow-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gray-700);
+    }
+
+    .workflow-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      padding: 0 20px;
+    }
+
+    .workflow-steps::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: 80px;
+      right: 80px;
+      height: 3px;
+      background: var(--gray-200);
+      z-index: 0;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      max-width: 160px;
+      cursor: pointer;
+    }
+
+    .step-circle {
+      width: 56px;
+      height: 56px;
+      background: var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+      border: 3px solid white;
+      box-shadow: var(--shadow);
+    }
+
+    .step-circle .material-icons {
+      font-size: 24px;
+      color: var(--gray-500);
+    }
+
+    .step.completed .step-circle {
+      background: var(--success);
+    }
+
+    .step.completed .step-circle .material-icons {
+      color: white;
+    }
+
+    .step.active .step-circle {
+      background: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .step.active .step-circle .material-icons {
+      color: white;
+    }
+
+    .step-label {
+      font-size: 12px;
+      text-align: center;
+      color: var(--gray-500);
+      font-weight: 500;
+    }
+
+    .step.active .step-label {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .step.completed .step-label {
+      color: var(--success);
+    }
+
+    .step-count {
+      font-size: 10px;
+      background: var(--gray-100);
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-top: 4px;
+    }
+
+    .step.active .step-count {
+      background: var(--primary-light);
+      color: white;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-outline {
+      background: white;
+      border: 1px solid var(--gray-300);
+      color: var(--gray-700);
+    }
+
+    .btn-outline:hover {
+      background: var(--gray-50);
+      border-color: var(--gray-400);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    .btn-icon {
+      padding: 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--gray-50);
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    td {
+      font-size: 14px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    tr:hover td {
+      background: var(--gray-50);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-success {
+      background: var(--success-light);
+      color: #065f46;
+    }
+
+    .badge-warning {
+      background: var(--warning-light);
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background: var(--danger-light);
+      color: #991b1b;
+    }
+
+    .badge-info {
+      background: var(--info-light);
+      color: #1e40af;
+    }
+
+    .badge-gray {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+
+    /* Prazo Indicator */
+    .prazo-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .prazo-indicator.ok {
+      color: var(--success);
+    }
+
+    .prazo-indicator.atencao {
+      color: var(--warning);
+    }
+
+    .prazo-indicator.vencido {
+      color: var(--danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(90vh - 140px);
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: var(--gray-50);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--gray-500);
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .close-btn:hover {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+
+    /* Form */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--gray-700);
+    }
+
+    .form-group label .required {
+      color: var(--danger);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-control.error {
+      border-color: var(--danger);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+
+    .form-error {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 4px;
+    }
+
+    select.form-control {
+      cursor: pointer;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 12px center;
+      appearance: none;
+      padding-right: 36px;
+    }
+
+    /* Alert */
+    .alert {
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .alert-info {
+      background: var(--info-light);
+      color: #1e40af;
+      border: 1px solid #93c5fd;
+    }
+
+    .alert-success {
+      background: var(--success-light);
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .alert-warning {
+      background: var(--warning-light);
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    .alert-danger {
+      background: var(--danger-light);
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .alert .material-icons {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Checklist */
+    .checklist {
+      background: var(--gray-50);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .checklist-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checklist-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .checklist-item label {
+      font-size: 13px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .checklist-item.checked label {
+      color: var(--gray-500);
+      text-decoration: line-through;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 2px solid var(--gray-200);
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--gray-700);
+    }
+
+    .tab.active {
+      color: var(--primary);
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Toast */
+    #toast-container {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: white;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 300px;
+      max-width: 400px;
+      animation: toastIn 0.3s ease;
+      border-left: 4px solid;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast.error {
+      border-left-color: var(--danger);
+    }
+
+    .toast.warning {
+      border-left-color: var(--warning);
+    }
+
+    .toast.info {
+      border-left-color: var(--info);
+    }
+
+    .toast-icon {
+      font-size: 22px;
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--danger);
+    }
+
+    .toast.warning .toast-icon {
+      color: var(--warning);
+    }
+
+    .toast.info .toast-icon {
+      color: var(--info);
+    }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--gray-400);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      margin-top: 12px;
+      color: var(--gray-500);
+      font-size: 14px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      color: var(--gray-300);
+      margin-bottom: 16px;
+    }
+
+    .empty-state-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 8px;
+    }
+
+    .empty-state-text {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .workflow-steps {
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+      }
+
+      .workflow-steps::before {
+        display: none;
+      }
+
+      .step {
+        max-width: 100px;
+      }
+
+      .header-title h1 {
+        font-size: 16px;
+      }
+
+      .modal {
+        max-width: 100%;
+        margin: 10px;
+      }
+    }
+  
+
+
+/* codex-school-community-ux: ajustes finos para uso recorrente por comunidade escolar */
+:root {
+  --codex-school-focus: #ffd166;
+  --codex-school-touch: 44px;
+  --codex-school-radius: 8px;
+  --codex-school-field-radius: 7px;
+  --codex-school-form-gap: 14px;
+  --codex-school-field-border: rgba(120, 132, 156, 0.45);
+  --codex-school-field-bg: rgba(255, 255, 255, 0.96);
+  --codex-school-field-text: #1f2937;
+  --codex-school-muted-text: #64748b;
+  --codex-school-soft-surface: rgba(248, 250, 252, 0.82);
+  --codex-school-safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+:where(html) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+:where(body) {
+  overscroll-behavior-y: contain;
+}
+
+:where(p, li, dd, dt, blockquote, figcaption, label, td, th) {
+  line-height: 1.5;
+}
+
+:where(main, .main, .content, .page, .app, .app-shell, .container, .dashboard, .workspace) {
+  padding-bottom: var(--codex-school-safe-bottom);
+}
+
+:where(a, button, .btn, .button, [role="button"], input, select, textarea, summary) {
+  min-height: var(--codex-school-touch);
+  touch-action: manipulation;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="submit"], input[type="button"]) {
+  border-radius: var(--codex-school-radius) !important;
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--codex-school-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+  font-weight: 700;
+}
+
+:where(form) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(fieldset) {
+  border-radius: var(--codex-school-radius) !important;
+  border-color: var(--codex-school-field-border);
+}
+
+:where(legend) {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+:where(.form-group, .input-field, .field, .form-field, .control-group) {
+  margin-bottom: var(--codex-school-form-gap);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: min(100%, 100%);
+  border-radius: var(--codex-school-field-radius) !important;
+  border-color: var(--codex-school-field-border) !important;
+  background-color: var(--input-bg, var(--field-bg, var(--codex-school-field-bg)));
+  color: var(--input-text, var(--text-color, var(--codex-school-field-text)));
+  font-size: 16px !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--placeholder-color, #94a3b8);
+  opacity: 1;
+}
+
+:where(input[required], select[required], textarea[required]) {
+  border-left: 3px solid var(--codex-gentle-primary-strong, #aecbfa) !important;
+}
+
+:where(input:disabled, select:disabled, textarea:disabled, button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed !important;
+  opacity: 0.68;
+}
+
+:where(.help, .hint, .help-text, .form-help, small) {
+  line-height: 1.45;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+}
+
+:where(.actions, .form-actions, .button-row, .toolbar, .topbar, nav, [role="toolbar"]) {
+  gap: 8px;
+}
+
+:where(.actions, .form-actions, .button-row) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+:where(.actions, .form-actions, .button-row) > :where(button, .btn, .button, [role="button"]) {
+  flex: 1 1 148px;
+}
+
+:where(.card, .panel, .box, .tile, .item, .list-item, .action-card) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.section, .surface, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.filters, .search-panel, .form-section) {
+  border-radius: var(--codex-school-radius) !important;
+  background: var(--codex-school-soft-surface);
+}
+
+:where(table) {
+  border-collapse: collapse;
+}
+
+:where(table, .table, .data-table) {
+  max-width: 100%;
+}
+
+:where(.table-wrap, .table-wrapper, .table-container, .responsive-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(th, td) {
+  vertical-align: top;
+}
+
+:where(.toast, .alert, .notice, .snackbar, [role="status"], [role="alert"]) {
+  border-radius: var(--codex-school-radius) !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+  :where(body) {
+    font-size: 16px;
+  }
+
+  :where(h1) {
+    font-size: clamp(1.55rem, 1.35rem + 1vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  :where(h2) {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  :where(.toolbar, .topbar, nav, [role="toolbar"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  :where(.hide-mobile, .desktop-only) {
+    display: none !important;
+  }
+}
+</style>
+  <style id="codex-mobile-a11y">
+  /* Mobile-first accessibility baseline for Chrome and Google-style readability. */
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  :where(body) {
+    min-width: 0;
+    overflow-x: hidden;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption, label, td, th, input, select, textarea, button) {
+    line-height: 1.5;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption) {
+    max-width: 72ch;
+  }
+
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+
+  :where(button, [role="button"], input:not([type="hidden"]), select, textarea) {
+    font: inherit;
+    min-height: 44px;
+  }
+
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid #1a73e8;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+  }
+
+  :where(img, video, canvas, svg, iframe) {
+    max-width: 100%;
+  }
+
+  :where(img, video, canvas, svg) {
+    height: auto;
+  }
+
+  :where(table) {
+    max-width: 100%;
+  }
+
+  :where(.table-responsive, .table-wrapper, .data-table, .table-container, .responsive-table) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :where(.container, .content, .main, .page, .page-content, .app-content, main) {
+    min-width: 0;
+  }
+
+  :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+    min-width: 0;
+  }
+
+  @media (max-width: 640px) {
+    :where(body) {
+      font-size: 16px;
+    }
+
+    :where(.container, .content, .page-content, .app-content, main) {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+      flex-wrap: wrap;
+    }
+
+    :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea, button) {
+      max-width: 100%;
+    }
+
+    :where(.hide-on-mobile) {
+      display: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+<style>
+/* codex-s20-mobile-first: Samsung S20 / Chrome mobile baseline (360x800 CSS px) */
+@media screen {
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+  :where(body) {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  :where(main, .app, .page, .container, .content, .main-content, .dashboard, .view) {
+    max-width: 100%;
+  }
+  :where(img, video, canvas, svg) {
+    max-width: 100%;
+    height: auto;
+  }
+  :where(p, li, td, th, label, legend, button, a, h1, h2, h3, h4, h5, h6) {
+    overflow-wrap: anywhere;
+  }
+  :where(input, select, textarea, button) {
+    font: inherit;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    font-size: max(16px, 1rem);
+  }
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+  :where(.table-wrap, .table-wrapper, .table-responsive, .table-container, .responsive-table, .data-table-wrapper) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 480px) {
+  :where(body) {
+    font-size: 16px;
+  }
+  :where(.grid, .cards, .dashboard-grid, .stats-grid, .form-grid, .filters-grid) {
+    grid-template-columns: 1fr !important;
+  }
+  :where(.toolbar, .actions, .button-row, .filters, .form-actions, .modal-actions, .header-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(.btn, button, input, select, textarea) {
+    min-height: 44px;
+  }
+  :where(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :where(th, td) {
+    white-space: nowrap;
+  }
+  :where(.card, .panel, .modal, .dialog, .drawer) {
+    max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 360px) {
+  :where(body) {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  :where(.card, .panel, .section, .modal-content, .dialog-content) {
+    padding: 12px;
+  }
+  :where(h1) {
+    font-size: clamp(1.45rem, 1.2rem + 2vw, 2rem);
+  }
+  :where(h2) {
+    font-size: clamp(1.2rem, 1rem + 1.4vw, 1.55rem);
+  }
+}
+</style>
+<style>
+/* codex-design-system: shared contrast, button sizing and minimal button icon styling */
+:root {
+  --codex-ds-primary: var(--primary, var(--color-primary, var(--theme-primary, #1a73e8)));
+  --codex-ds-primary-strong: var(--primary-dark, var(--color-primary-strong, var(--theme-primary-dark, #1558d6)));
+  --codex-ds-text: var(--text, var(--color-ink, var(--text-primary, #202124)));
+  --codex-ds-muted: var(--muted, var(--color-muted, var(--text-secondary, #5f6368)));
+  --codex-ds-surface: var(--surface, var(--color-surface, var(--bg-surface, #ffffff)));
+  --codex-ds-border: var(--border, var(--color-border, var(--line, #dadce0)));
+  --codex-ds-focus: #1a73e8;
+  --codex-ds-radius: 8px;
+}
+
+:where(body) {
+  color: var(--codex-ds-text);
+}
+
+:where(.text-muted, .muted, .secondary, small, figcaption, caption) {
+  color: var(--codex-ds-muted);
+}
+
+:where(a) {
+  color: var(--codex-ds-primary);
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--codex-ds-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: var(--codex-ds-primary);
+  color: #ffffff;
+}
+
+:where(.btn:hover, .button:hover, button:hover, [role="button"]:hover) {
+  filter: none;
+}
+
+:where(.btn-primary:hover, .button-primary:hover, button[type="submit"]:hover, input[type="submit"]:hover) {
+  background: var(--codex-ds-primary-strong);
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: var(--codex-ds-surface);
+  color: var(--codex-ds-text);
+  border-color: var(--codex-ds-border);
+}
+
+:where(.btn-small, .btn.sm, .button-small, .button.sm) {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+:where(.icon-button, .btn-icon, button.icon, button[aria-label]:not([aria-label=""])) {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: var(--codex-ds-radius);
+}
+
+:where(button svg, .btn svg, .button svg, [role="button"] svg, button .material-icons, .btn .material-icons, .button .material-icons, button .icon, .btn .icon, .button .icon) {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  stroke-width: 2;
+  flex: 0 0 auto;
+}
+
+:where(button .material-icons, .btn .material-icons, .button .material-icons) {
+  font-feature-settings: "liga";
+  vertical-align: middle;
+}
+
+:where(button:focus-visible, .btn:focus-visible, .button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 3px solid var(--codex-ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--codex-ds-surface) 80%, transparent);
+}
+
+:where(button:disabled, .btn:disabled, .button:disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  :where(.btn, .button, button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    width: auto;
+  }
+  :where(.form-actions > .btn, .form-actions > .button, .form-actions > button, .actions > .btn, .actions > .button, .actions > button) {
+    width: 100%;
+  }
+}
+</style>
+<style>
+/* codex-gentle-dark-theme: default graphite theme with soft, kind UI accents */
+:root {
+  color-scheme: dark;
+  --codex-gentle-bg: #15171c;
+  --codex-gentle-bg-soft: #1a1d23;
+  --codex-gentle-surface: #20242b;
+  --codex-gentle-surface-2: #272b33;
+  --codex-gentle-border: #343941;
+  --codex-gentle-text: #eef1f5;
+  --codex-gentle-muted: #c8ced8;
+  --codex-gentle-dim: #9aa4b2;
+  --codex-gentle-primary: #8ab4f8;
+  --codex-gentle-primary-strong: #aecbfa;
+  --codex-gentle-accent: #8fa0b8;
+  --codex-gentle-success: #9be7c1;
+  --bg: var(--codex-gentle-bg);
+  --background: var(--codex-gentle-bg);
+  --surface: var(--codex-gentle-surface);
+  --panel: var(--codex-gentle-surface);
+  --card: var(--codex-gentle-surface);
+  --text: var(--codex-gentle-text);
+  --text-main: var(--codex-gentle-text);
+  --text-primary: var(--codex-gentle-text);
+  --text-muted: var(--codex-gentle-muted);
+  --muted: var(--codex-gentle-muted);
+  --border: var(--codex-gentle-border);
+  --line: var(--codex-gentle-border);
+  --primary: var(--codex-gentle-primary);
+  --primary-dark: #6ea0ef;
+  --codex-ds-primary: var(--codex-gentle-primary);
+  --codex-ds-primary-strong: var(--codex-gentle-primary-strong);
+  --codex-ds-text: var(--codex-gentle-text);
+  --codex-ds-muted: var(--codex-gentle-muted);
+  --codex-ds-surface: var(--codex-gentle-surface);
+  --codex-ds-border: var(--codex-gentle-border);
+}
+
+:where(html, body) {
+  background: var(--codex-gentle-bg) !important;
+  color: var(--codex-gentle-text) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(main, .app, .page, .layout, .content, .main-content, .app-content, .container, .dashboard, .view) {
+  background-color: transparent !important;
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(.card, .panel, .section, .surface, .box, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu, .table-wrapper, .table-wrap, .table-container, form) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+              var(--codex-gentle-surface) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+}
+
+:where(header, nav, aside, footer, .navbar, .sidebar, .topbar, .app-header, .app-footer) {
+  background: rgba(12, 15, 21, 0.92) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, label, span, strong, td, th, legend, small, caption) {
+  color: inherit;
+}
+
+:where(h1, .page-title, .view-title) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(h1:not(.no-emoji), .page-title:not(.no-emoji), .view-title:not(.no-emoji))::after {
+  content: "";
+  font-size: 0.82em;
+}
+
+:where(.empty-state, .empty, .no-data, .no-results, .loading, .placeholder)::before {
+  content: "";
+}
+
+:where(.text-muted, .muted, .secondary, .subtitle, .description, .help-text, .hint, small, figcaption, caption) {
+  color: var(--codex-gentle-muted) !important;
+}
+
+:where(a) {
+  color: var(--codex-gentle-primary-strong) !important;
+}
+
+:where(input, select, textarea) {
+  background: var(--codex-gentle-bg-soft) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--codex-gentle-dim) !important;
+}
+
+:where(table) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(th) {
+  color: var(--codex-gentle-muted) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:where(td) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  background: var(--codex-gentle-surface-2) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: none !important;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: linear-gradient(180deg, rgba(174, 203, 250, 0.24), rgba(138, 180, 248, 0.16)),
+              #182235 !important;
+  color: #f8fbff !important;
+  border-color: rgba(174, 203, 250, 0.45) !important;
+}
+
+:where(button[type="submit"]:not(.icon-button):not(.btn-icon), input[type="submit"])::after {
+  content: "";
+  font-size: 0.9em;
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(.badge, .tag, .chip, .pill, .status) {
+  background: rgba(248, 199, 220, 0.12) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: rgba(248, 199, 220, 0.26) !important;
+}
+
+:where(hr) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(svg, canvas, img) {
+  color: inherit;
+}
+</style>
+
+
+<style id="up-oracular-design-system">
+:root {
+  color-scheme: dark;
+  --uo-bg: #15171c;
+  --uo-panel: #20242b;
+  --uo-text: #e9ecf1;
+  --uo-muted: #b2b9c4;
+  --uo-border: #343941;
+  --uo-accent: #7aa2d6;
+  --uo-radius-group: 10px;
+  --uo-radius-control: 8px;
+}
+
+html, body {
+  background: var(--uo-bg) !important;
+  color: var(--uo-text) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body, input, select, textarea, button {
+  color: var(--uo-text);
+}
+
+.card, .panel, .modal, .dialog, dialog, .container,
+.box, .widget, .section, .sidebar, .drawer, .popover,
+[role="dialog"], [class*="card"], [class*="panel"] {
+  background-color: var(--uo-panel) !important;
+  border-color: var(--uo-border) !important;
+  border-radius: var(--uo-radius-group) !important;
+}
+
+button, input, select, textarea, .btn, .button,
+[role="button"], [role="menuitem"], .dropdown-item,
+.menu-item, [class*="button"], [class*="dropdown-item"] {
+  border-radius: var(--uo-radius-control) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  background-color: var(--uo-panel) !important;
+  border: 1px solid var(--uo-border) !important;
+  padding: 8px !important;
+  box-sizing: border-box;
+}
+
+label, .form-label, [class*="form-label"] {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--uo-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.uo-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.uo-feedback-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  min-width: 220px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--uo-border);
+  border-radius: var(--uo-radius-group);
+  background: var(--uo-panel);
+  color: var(--uo-text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.uo-feedback-box.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.uo-feedback-box[data-kind="ok"] {
+  border-color: #8fc2a6;
+  color: #8fc2a6;
+}
+
+.uo-feedback-box[data-kind="err"] {
+  border-color: #d98b93;
+  color: #d98b93;
+}
+
+form[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+form[aria-busy="true"] :is(button, input[type="submit"], input[type="button"]) {
+  pointer-events: none;
+}
+
+button, .btn-primary, .button-primary,
+[class*="primary"][role="button"] {
+  background-color: var(--uo-accent) !important;
+}
+
+p, small, .muted, .secondary, .subtitle,
+[class*="muted"], [class*="secondary"] {
+  color: var(--uo-muted) !important;
+}
+
+hr, table, th, td, fieldset {
+  border-color: var(--uo-border) !important;
+}
+
+a {
+  color: var(--uo-accent);
+}
+
+/* Geometrias funcionais permanecem circulares. */
+.avatar, .spinner, .loading-ring, .dot, .status-dot,
+[class*="avatar"], [class*="spinner"], [class*="loading-ring"] {
+  border-radius: 50% !important;
+}
+</style>
+<script id="up-oracular-form-feedback">
+(function () {
+  'use strict';
+  if (window.UpOracularFeedback) return;
+
+  var timer = null;
+  function notify(kind, message) {
+    var box = document.getElementById('uo-feedback-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'uo-feedback-box';
+      box.className = 'uo-feedback-box';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      document.body.appendChild(box);
+    }
+    box.dataset.kind = kind === 'err' ? 'err' : 'ok';
+    box.textContent = String(message || (kind === 'err' ? 'Nao foi possivel concluir.' : 'Operacao concluida.'));
+    box.classList.add('is-visible');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      box.classList.remove('is-visible');
+    }, 1000);
+  }
+
+  function connectLabels(form) {
+    form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field, index) {
+      var id = field.id || ('uo-field-' + index + '-' + Math.random().toString(36).slice(2, 7));
+      field.id = id;
+      var label = form.querySelector('label[for="' + id + '"]');
+      if (!label) {
+        var sibling = field.previousElementSibling;
+        if (sibling && sibling.tagName === 'LABEL') {
+          sibling.htmlFor = id;
+          label = sibling;
+        }
+      }
+      if (label && field.parentElement && !field.parentElement.classList.contains('uo-field')) {
+        field.parentElement.classList.add('uo-field');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(connectLabels);
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    form.setAttribute('aria-busy', 'true');
+    notify('ok', 'Enviando...');
+    window.setTimeout(function () {
+      if (form.getAttribute('aria-busy') === 'true') {
+        form.removeAttribute('aria-busy');
+      }
+    }, 10000);
+  }, true);
+
+  window.UpOracularFeedback = {
+    ok: function (message) { notify('ok', message); },
+    err: function (message) { notify('err', message); },
+    done: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('ok', message);
+    },
+    fail: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('err', message);
+    }
+  };
+}());
+</script>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style id="cdx-mi-style">.cdx-mi{font-size:1.1em;line-height:1;vertical-align:-0.15em}</style>
+  <style id="cdx-border-to-color">
+/* Padronização de borders → cores complementares (FROTA-20) */
+input:not([type="hidden"]),
+textarea,
+select,
+[class*="input"],
+[class*="field"],
+[class*="form"],
+.card,
+.panel,
+.box,
+.container,
+.modal,
+[class*="modal"],
+[class*="dialog"],
+dialog {
+  border: none !important;
+  border-width: 0 !important;
+}
+
+input:not([type="hidden"]),
+textarea,
+select {
+  background-color: #20242b !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 2px #e9ecf1 !important;
+}
+  </style>
+
+  <style id="fleet-mobile-wcag-aa">
+    /* Contrato FROTA: ergonomia S20 e WCAG 2.1 AA. */
+    html, body { max-width: 100%; overflow-x: hidden; }
+    :is(button, [role="button"], input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+      min-width: 48px !important;
+      min-height: 48px !important;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+
+<body>
+    <main>
+
+  <div id="toast-container"></div>
+
+  <header class="header">
+    <div class="header-content">
+      <div class="header-title">
+        <span class="material-icons" style="font-size:32px;">fact_check</span>
+        <div>
+          <h1>Sistema de Atesto de Gêneros Alimentícios</h1>
+          <p>UNIAE/CRE-PP • Programa de Alimentação Escolar</p>
+        </div>
+      </div>
+      <div class="user-badge">
+        <span class="material-icons">person</span>
+        <span id="user-name">Analista</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Stats -->
+    <section class="stats-grid">
+      <div class="stat-card" onclick="filtrarProcessos('todos')" id="card-total">
+        <div class="stat-icon blue"><span class="material-icons">receipt_long</span></div>
+        <div class="stat-info">
+          <h3 id="stat-total">0</h3>
+          <p>Total de Processos</p>
+        </div>
+      </div>
+      <div class="stat-card" onclick="filtrarProcessos('pendente')" id="card-pendentes">
+        <div class="stat-icon yellow"><span class="material-icons">pending_actions</span></div>
+        <div class="stat-info">
+          <h3 id="stat-pendentes">0</h3>
+          <p>Aguardando Análise</p>
+        </div>
+      </div>
+      <div class="stat-card" onclick="filtrarProcessos('atestado')" id="card-atestados">
+        <div class="stat-icon green"><span class="material-icons">verified</span></div>
+        <div class="stat-info">
+          <h3 id="stat-atestados">0</h3>
+          <p>Atestados (Mês)</p>
+        </div>
+      </div>
+      <div class="stat-card" onclick="filtrarProcessos('alerta')" id="card-alertas">
+        <div class="stat-icon red"><span class="material-icons">warning</span></div>
+        <div class="stat-info">
+          <h3 id="stat-alertas">0</h3>
+          <p>Prazo Crítico</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workflow Visual -->
+    <section class="workflow-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="material-icons">timeline</span>
+          Fluxo Processual do Atesto (Lei 4.320/64, Arts. 62-63)
+        </div>
+      </div>
+      <div class="workflow-steps">
+        <div class="step" onclick="mostrarEtapa(1)" id="step-1">
+          <div class="step-circle"><span class="material-icons">local_shipping</span></div>
+          <div class="step-label">Recebimento<br>na UE</div>
+          <div class="step-count" id="count-etapa1">0</div>
+        </div>
+        <div class="step" onclick="mostrarEtapa(2)" id="step-2">
+          <div class="step-circle"><span class="material-icons">folder_open</span></div>
+          <div class="step-label">Consolidação<br>Documental</div>
+          <div class="step-count" id="count-etapa2">0</div>
+        </div>
+        <div class="step" onclick="mostrarEtapa(3)" id="step-3">
+          <div class="step-circle"><span class="material-icons">groups</span></div>
+          <div class="step-label">Análise<br>Comissão</div>
+          <div class="step-count" id="count-etapa3">0</div>
+        </div>
+        <div class="step" onclick="mostrarEtapa(4)" id="step-4">
+          <div class="step-circle"><span class="material-icons">task_alt</span></div>
+          <div class="step-label">Atesto<br>Executor</div>
+          <div class="step-count" id="count-etapa4">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ações Rápidas -->
+    <section class="workflow-card">
+      <div class="section-header">
+        <div class="section-title"><span class="material-icons">bolt</span>Ações Rápidas</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="abrirModal('modal-novo')">
+          <span class="material-icons">add_circle</span> Novo Processo
+        </button>
+        <button class="btn btn-success" onclick="abrirModal('modal-recebimento')">
+          <span class="material-icons">inventory_2</span> Registrar Recebimento
+        </button>
+        <button class="btn btn-warning" onclick="abrirModal('modal-analise')">
+          <span class="material-icons">checklist</span> Análise Comissão
+        </button>
+        <button class="btn btn-outline" onclick="abrirModal('modal-checklist')">
+          <span class="material-icons">fact_check</span> Checklist Qualidade
+        </button>
+        <button class="btn btn-outline" onclick="gerarRelatorioSEI()">
+          <span class="material-icons">description</span> Gerar Despacho SEI
+        </button>
+      </div>
+    </section>
+
+    <!-- Lista de Processos -->
+    <section class="workflow-card">
+      <div class="section-header">
+        <div class="section-title"><span class="material-icons">list_alt</span>Processos <span
+            id="filtro-ativo" style="font-weight:400;color:var(--gray-500);font-size:13px;"></span></div>
+        <div class="actions">
+          <input inputmode="text" type="text" class="form-control" placeholder="Buscar NF, fornecedor..." style="width:220px;margin:0;"
+            id="busca-processo" oninput="buscarProcessos()" autocomplete="name">
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nota Fiscal</th>
+              <th>Fornecedor</th>
+              <th>Valor</th>
+              <th>Etapa</th>
+              <th>Prazo</th>
+              <th>Status</th>
+              <th style="width:120px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-processos">
+            <tr>
+              <td colspan="7">
+                <div class="loading">
+                  <div class="spinner"></div>
+                  <div class="loading-text">Carregando processos...</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+
+  <!-- Modal: Novo Processo -->
+  <div class="modal-overlay" id="modal-novo">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><span class="material-icons">add_circle</span>Novo Processo de Atesto</h2>
+        <button class="close-btn" onclick="fecharModal('modal-novo')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <span class="material-icons">info</span>
+          <div>Cadastre a Nota Fiscal recebida do fornecedor. O prazo de 5 dias úteis para análise inicia após o
+            recebimento da documentação.</div>
+        </div>
+        <form id="form-novo">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Número da NF <span class="required">*</span></label>
+              <input inputmode="text" type="text" class="form-control" name="notaFiscal" required placeholder="Ex: 123456" autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label>Data de Emissão <span class="required">*</span></label>
+              <input type="date" class="form-control" name="dataEmissaoNF" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fornecedor <span class="required">*</span></label>
+              <input inputmode="text" type="text" class="form-control" name="fornecedor" required placeholder="Razão Social" autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label>CNPJ</label>
+              <input inputmode="text" type="text" class="form-control" name="cnpjFornecedor" placeholder="00.000.000/0000-00" autocomplete="name">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Valor Total (R$) <span class="required">*</span></label>
+              <input inputmode="decimal" type="number" class="form-control" name="valorTotal" step="0.01" required placeholder="0,00">
+            </div>
+            <div class="form-group">
+              <label>Tipo de Gênero <span class="required">*</span></label>
+              <select class="form-control" name="tipoGenero" required>
+                <option value="">Selecione...</option>
+                <option value="PERECIVEL">Perecível</option>
+                <option value="NAO_PERECIVEL">Não Perecível</option>
+                <option value="KIT">Kit Alimentação</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Contrato</label>
+              <input inputmode="text" type="text" class="form-control" name="contrato" placeholder="Nº do contrato" autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label>Nota de Empenho</label>
+              <input inputmode="text" type="text" class="form-control" name="notaEmpenho" placeholder="2024NE00123" autocomplete="name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Chave de Acesso NF-e (44 dígitos)</label>
+            <input inputmode="text" type="text" class="form-control" name="chaveAcessoNFe" maxlength="44"
+              placeholder="Opcional - para consulta SEFAZ" autocomplete="name">
+            <div class="form-hint">Permite validação automática da NF junto à SEFAZ</div>
+          </div>
+          <div class="form-group">
+            <label>Observações</label>
+            <textarea class="form-control" name="observacoes" rows="2" placeholder="Informações adicionais"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="fecharModal('modal-novo')">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarNovoProcesso()">
+          <span class="material-icons">save</span> Criar Processo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar Recebimento na UE -->
+  <div class="modal-overlay" id="modal-recebimento">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><span class="material-icons">inventory_2</span>Registrar Recebimento na UE</h2>
+        <button class="close-btn" onclick="fecharModal('modal-recebimento')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <span class="material-icons">gavel</span>
+          <div><strong>Atenção:</strong> O atesto só deve ser realizado APÓS conferência física completa. É proibido
+            assinar Termo em branco (Seção 2.2 do Manual).</div>
+        </div>
+        <form id="form-recebimento">
+          <div class="form-group">
+            <label>Processo <span class="required">*</span></label>
+            <select class="form-control" name="idProcesso" required id="select-processo-receb">
+              <option value="">Selecione o processo...</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Unidade Escolar <span class="required">*</span></label>
+              <input inputmode="text" type="text" class="form-control" name="unidadeEscolar" required placeholder="Nome da escola" autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label>Data da Entrega <span class="required">*</span></label>
+              <input type="date" class="form-control" name="dataEntrega" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Hora da Entrega</label>
+              <input type="time" class="form-control" name="horaEntrega">
+              <div class="form-hint">Horário contratual: 8h-12h e 14h-18h</div>
+            </div>
+            <div class="form-group">
+              <label>Temperatura Aferida (°C)</label>
+              <input inputmode="decimal" type="number" class="form-control" name="temperaturaAferida" step="0.1"
+                placeholder="Para refrigerados/congelados">
+              <div class="form-hint">Congelados: ≤-12°C | Resfriados: ≤+7°C</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Responsável pelo Recebimento <span class="required">*</span></label>
+              <input inputmode="text" type="text" class="form-control" name="responsavel" required placeholder="Nome completo" autocomplete="name">
+            </div>
+            <div class="form-group">
+              <label>Matrícula <span class="required">*</span></label>
+              <input inputmode="text" type="text" class="form-control" name="matriculaResponsavel" required
+                placeholder="Matrícula funcional" autocomplete="name">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Conferência Quantitativa</label>
+              <select class="form-control" name="quantitativaOk">
+                <option value="true">✓ Conforme</option>
+                <option value="false">✗ Divergente</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Conferência Qualitativa</label>
+              <select class="form-control" name="qualitativaOk">
+                <option value="true">✓ Conforme</option>
+                <option value="false">✗ Problemas identificados</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Termo Assinado?</label>
+              <select class="form-control" name="assinatura">
+                <option value="true">Sim</option>
+                <option value="false">Não</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Identificação Digital da UE?</label>
+              <select class="form-control" name="carimboUE">
+                <option value="true">Sim</option>
+                <option value="false">Não</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Observações / Recusas</label>
+            <textarea class="form-control" name="observacoes" rows="3"
+              placeholder="Registrar produtos recusados, motivos e quantidades (obrigatório em caso de recusa)"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="fecharModal('modal-recebimento')">Cancelar</button>
+        <button class="btn btn-success" onclick="salvarRecebimento()">
+          <span class="material-icons">check</span> Registrar Recebimento
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Análise da Comissão -->
+  <div class="modal-overlay" id="modal-analise">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><span class="material-icons">groups</span>Análise da Comissão de Recebimento</h2>
+        <button class="close-btn" onclick="fecharModal('modal-analise')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <span class="material-icons">gavel</span>
+          <div><strong>Base Legal:</strong> Resolução CD/FNDE nº 06/2020 - Mínimo 3 membros. Prazo: 5 dias úteis (Seção
+            2.3 do Manual).</div>
+        </div>
+        <form id="form-analise">
+          <div class="form-group">
+            <label>Processo <span class="required">*</span></label>
+            <select class="form-control" name="idProcesso" required id="select-processo-analise">
+              <option value="">Selecione o processo...</option>
+            </select>
+          </div>
+
+          <div class="checklist">
+            <div class="checklist-title">Verificações Obrigatórias</div>
+            <div class="checklist-item">
+              <input type="checkbox" id="check-soma" name="somaVerificada">
+              <label for="check-soma">Soma dos quantitativos dos Termos = Quantidade da NF</label>
+            </div>
+            <div class="checklist-item">
+              <input type="checkbox" id="check-atesto" name="atestoVerificado">
+              <label for="check-atesto">Todos os Termos possuem: assinatura digital, matrícula, data e identificação
+                UE</label>
+            </div>
+            <div class="checklist-item">
+              <input type="checkbox" id="check-nf" name="nfConferida">
+              <label for="check-nf">Dados da NF conferem com o contrato (CNPJ, preços, descrição)</label>
+            </div>
+            <div class="checklist-item">
+              <input type="checkbox" id="check-sefaz" name="sefazConsultada">
+              <label for="check-sefaz">NF-e consultada na SEFAZ (status: Autorizada)</label>
+            </div>
+            <div class="checklist-item">
+              <input type="checkbox" id="check-obs" name="observacoesAnalisadas">
+              <label for="check-obs">Campo "Observações" dos Termos analisado (recusas/ocorrências)</label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:16px;">
+            <label>Membros Presentes (mínimo 3) <span class="required">*</span></label>
+            <textarea class="form-control" name="membrosPresentes" rows="3" required
+              placeholder="Nome - Matrícula (um por linha)&#10;Ex: João Silva - 123456&#10;Maria Santos - 654321&#10;Pedro Souza - 789012"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Resultado da Análise <span class="required">*</span></label>
+              <select class="form-control" name="resultado" required>
+                <option value="">Selecione...</option>
+                <option value="APROVADO">✓ Aprovado - Apto para Atesto</option>
+                <option value="PENDENTE"><i class="material-icons cdx-mi" aria-hidden="true">hourglass_empty</i> Pendente - Aguardando Correções</option>
+                <option value="REJEITADO">✗ Rejeitado - Não Conforme</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nº Despacho SEI</label>
+              <input inputmode="text" type="text" class="form-control" name="numeroDespacho" placeholder="Ex: 12345678" autocomplete="name">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Processo SEI</label>
+            <input inputmode="text" type="text" class="form-control" name="processoSEI" placeholder="00080-00012345/2024-00" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label>Observações da Análise</label>
+            <textarea class="form-control" name="observacoes" rows="2"
+              placeholder="Pendências identificadas, justificativas..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="fecharModal('modal-analise')">Cancelar</button>
+        <button class="btn btn-warning" onclick="salvarAnalise()">
+          <span class="material-icons">gavel</span> Registrar Análise
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Checklist de Qualidade -->
+  <div class="modal-overlay" id="modal-checklist">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><span class="material-icons">fact_check</span>Checklist de Qualidade no Recebimento</h2>
+        <button class="close-btn" onclick="fecharModal('modal-checklist')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <span class="material-icons">info</span>
+          <div>Baseado na Tabela 1 do Manual - Seção 3.1. Use este checklist antes de atestar qualquer Termo de
+            Recebimento.</div>
+        </div>
+        <div class="checklist">
+          <div class="checklist-title">1. Documentação</div>
+          <div class="checklist-item"><input type="checkbox" id="q1"><label for="q1">Produtos listados correspondem aos
+              entregues fisicamente</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q2"><label for="q2">Quantidade, unidade de medida e
+              marca corretas</label></div>
+        </div>
+        <div class="checklist" style="margin-top:12px;">
+          <div class="checklist-title">2. Transporte</div>
+          <div class="checklist-item"><input type="checkbox" id="q3"><label for="q3">Veículo baú fechado, limpo e em bom
+              estado</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q4"><label for="q4">Refrigeração ativa (para produtos
+              que exigem)</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q5"><label for="q5">Entregador com uniforme limpo e
+              boas práticas de higiene</label></div>
+        </div>
+        <div class="checklist" style="margin-top:12px;">
+          <div class="checklist-title">3. Embalagens</div>
+          <div class="checklist-item"><input type="checkbox" id="q6"><label for="q6">Embalagens íntegras, limpas, secas,
+              sem violação</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q7"><label for="q7">Sem amassados, ferrugem (latas) ou
+              estufamento</label></div>
+        </div>
+        <div class="checklist" style="margin-top:12px;">
+          <div class="checklist-title">4. Rotulagem</div>
+          <div class="checklist-item"><input type="checkbox" id="q8"><label for="q8">Rótulo legível com validade, lote e
+              fabricante</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q9"><label for="q9">Produto dentro do prazo de
+              validade</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q10"><label for="q10">Inscrição "PRODUTO INSTITUCIONAL
+              - PROIBIDA A VENDA"</label></div>
+        </div>
+        <div class="checklist" style="margin-top:12px;">
+          <div class="checklist-title">5. Características Sensoriais</div>
+          <div class="checklist-item"><input type="checkbox" id="q11"><label for="q11">Aparência, cor, odor e textura
+              próprios do produto</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q12"><label for="q12">Ausência de mofo, manchas ou
+              deterioração</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q13"><label for="q13">Hortifrúti frescos, íntegros,
+              maturação adequada</label></div>
+        </div>
+        <div class="checklist" style="margin-top:12px;">
+          <div class="checklist-title">6. Temperatura (CRÍTICO)</div>
+          <div class="checklist-item"><input type="checkbox" id="q14"><label for="q14">Congelados: ≤ -12°C</label></div>
+          <div class="checklist-item"><input type="checkbox" id="q15"><label for="q15">Carnes resfriadas: ≤ +7°C</label>
+          </div>
+          <div class="checklist-item"><input type="checkbox" id="q16"><label for="q16">Pescado resfriado: ≤ +3°C</label>
+          </div>
+          <div class="checklist-item"><input type="checkbox" id="q17"><label for="q17">Outros refrigerados: ≤
+              +10°C</label></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="fecharModal('modal-checklist')">Fechar</button>
+        <button class="btn btn-primary" onclick="imprimirChecklist()">
+          <span class="material-icons">print</span> Imprimir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Detalhes do Processo -->
+  <div class="modal-overlay" id="modal-detalhes">
+    <div class="modal" style="max-width:800px;">
+      <div class="modal-header">
+        <h2><span class="material-icons">info</span>Detalhes do Processo</h2>
+        <button class="close-btn" onclick="fecharModal('modal-detalhes')">&times;</button>
+      </div>
+      <div class="modal-body" id="detalhes-content">
+        <div class="loading">
+          <div class="spinner"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="fecharModal('modal-detalhes')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    // ============================================================================
+    // ESTADO DA APLICAÇÃO
+    // ============================================================================
+    let processos = [];
+    let filtroAtual = 'todos';
+
+    // ============================================================================
+    // INICIALIZAÇÃO
+    // ============================================================================
+    document.addEventListener('DOMContentLoaded', function () {
+      carregarDados();
+      // Definir data atual nos campos de data
+      const hoje = new Date().toISOString().split('T')[0];
+      document.querySelectorAll('input[type="date"]').forEach(el => {
+        if (!el.value) el.value = hoje;
+      });
+    });
+
+    // ============================================================================
+    // CARREGAR DADOS
+    // ============================================================================
+    function carregarDados() {
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(onDadosCarregados)
+          .withFailureHandler(onErro)
+          .listarProcessosAtesto({});
+      } else {
+        // Dados de demonstração para preview
+        onDadosCarregados({
+          success: true,
+          data: gerarDadosDemo()
+        });
+      }
+    }
+
+    function onDadosCarregados(result) {
+      if (result && result.success) {
+        processos = result.data || [];
+        atualizarEstatisticas();
+        atualizarTabela();
+        atualizarSelectsProcessos();
+        atualizarWorkflow();
+      } else {
+        mostrarToast('error', 'Erro', result?.error || 'Falha ao carregar dados');
+      }
+    }
+
+    function onErro(error) {
+      console.error('Erro:', error);
+      mostrarToast('error', 'Erro', error.message || 'Erro de comunicação');
+    }
+
+    // ============================================================================
+    // ESTATÍSTICAS
+    // ============================================================================
+    function atualizarEstatisticas() {
+      const total = processos.length;
+      const pendentes = processos.filter(p => ['EM_ANALISE', 'AGUARDANDO_DOCS', 'PENDENCIA_DOCUMENTAL'].includes(p.status)).length;
+      const atestados = processos.filter(p => ['ATESTO_COMISSAO', 'ATESTADO_EXECUTOR', 'LIQUIDADO', 'PAGO'].includes(p.status)).length;
+      const alertas = processos.filter(p => calcularDiasRestantes(p) <= 1 && !['LIQUIDADO', 'PAGO'].includes(p.status)).length;
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-pendentes').textContent = pendentes;
+      document.getElementById('stat-atestados').textContent = atestados;
+      document.getElementById('stat-alertas').textContent = alertas;
+    }
+
+    function atualizarWorkflow() {
+      const etapas = {
+        1: processos.filter(p => p.etapaAtual === 'ETAPA_1_RECEBIMENTO_UE').length,
+        2: processos.filter(p => p.etapaAtual === 'ETAPA_2_CONSOLIDACAO').length,
+        3: processos.filter(p => p.etapaAtual === 'ETAPA_3_ANALISE_COMISSAO').length,
+        4: processos.filter(p => ['ETAPA_4_ATESTO_EXECUTOR', 'LIQUIDADO', 'PAGO'].includes(p.etapaAtual)).length
+      };
+
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`count-etapa${i}`).textContent = etapas[i];
+      }
+    }
+
+
+    // ============================================================================
+    // TABELA DE PROCESSOS
+    // ============================================================================
+    function atualizarTabela() {
+      const tbody = document.getElementById('tabela-processos');
+      const busca = document.getElementById('busca-processo').value.toLowerCase();
+
+      let lista = processos;
+
+      // Aplicar filtro
+      if (filtroAtual === 'pendente') {
+        lista = lista.filter(p => ['EM_ANALISE', 'AGUARDANDO_DOCS', 'PENDENCIA_DOCUMENTAL'].includes(p.status));
+      } else if (filtroAtual === 'atestado') {
+        lista = lista.filter(p => ['ATESTO_COMISSAO', 'ATESTADO_EXECUTOR', 'LIQUIDADO', 'PAGO'].includes(p.status));
+      } else if (filtroAtual === 'alerta') {
+        lista = lista.filter(p => calcularDiasRestantes(p) <= 1 && !['LIQUIDADO', 'PAGO'].includes(p.status));
+      }
+
+      // Aplicar busca
+      if (busca) {
+        lista = lista.filter(p =>
+          (p.notaFiscal || '').toLowerCase().includes(busca) ||
+          (p.fornecedor || '').toLowerCase().includes(busca)
+        );
+      }
+
+      if (lista.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="7">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div class="empty-state-title">Nenhum processo encontrado</div>
+              <div class="empty-state-text">Ajuste os filtros ou crie um novo processo</div>
+            </div>
+          </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = lista.slice(0, 50).map(p => {
+        const diasRestantes = calcularDiasRestantes(p);
+        const prazoClass = diasRestantes > 2 ? 'ok' : diasRestantes > 0 ? 'atencao' : 'vencido';
+        const prazoIcon = diasRestantes > 2 ? 'schedule' : diasRestantes > 0 ? 'warning' : 'error';
+
+        return `
+          <tr>
+            <td><strong>${p.notaFiscal || '-'}</strong></td>
+            <td>${p.fornecedor || '-'}</td>
+            <td>R$ ${Number(p.valorTotal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+            <td>${formatarEtapa(p.etapaAtual)}</td>
+            <td>
+              <div class="prazo-indicator ${prazoClass}">
+                <span class="material-icons" style="font-size:16px;">${prazoIcon}</span>
+                ${diasRestantes > 0 ? diasRestantes + ' dias' : diasRestantes === 0 ? 'Hoje' : 'Vencido'}
+              </div>
+            </td>
+            <td><span class="badge ${getBadgeClass(p.status)}">${formatarStatus(p.status)}</span></td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-outline btn-sm btn-icon" onclick="verDetalhes('${p.id}')" title="Ver detalhes">
+                  <span class="material-icons">visibility</span>
+                </button>
+                <button class="btn btn-outline btn-sm btn-icon" onclick="avancarEtapa('${p.id}')" title="Avançar etapa">
+                  <span class="material-icons">arrow_forward</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function getBadgeClass(status) {
+      const map = {
+        'RECEBIDO_CONFORME': 'badge-success', 'ATESTO_COMISSAO': 'badge-success',
+        'ATESTADO_EXECUTOR': 'badge-success', 'LIQUIDADO': 'badge-success', 'PAGO': 'badge-success',
+        'AGUARDANDO_ENTREGA': 'badge-info', 'AGUARDANDO_DOCS': 'badge-info', 'EM_ANALISE': 'badge-info',
+        'PENDENCIA_DOCUMENTAL': 'badge-warning', 'RECEBIDO_PARCIAL': 'badge-warning',
+        'RECUSADO_TOTAL': 'badge-danger'
+      };
+      return map[status] || 'badge-gray';
+    }
+
+    function formatarStatus(status) {
+      const map = {
+        'AGUARDANDO_ENTREGA': 'Aguardando', 'RECEBIDO_CONFORME': 'Recebido',
+        'RECEBIDO_PARCIAL': 'Parcial', 'AGUARDANDO_DOCS': 'Aguard. Docs',
+        'EM_ANALISE': 'Em Análise', 'PENDENCIA_DOCUMENTAL': 'Pendência',
+        'ATESTO_COMISSAO': 'Atestado', 'ATESTADO_EXECUTOR': 'Executor OK',
+        'LIQUIDADO': 'Liquidado', 'PAGO': 'Pago', 'RECUSADO_TOTAL': 'Recusado'
+      };
+      return map[status] || status;
+    }
+
+    function formatarEtapa(etapa) {
+      const map = {
+        'ETAPA_1_RECEBIMENTO_UE': '1. Recebimento',
+        'ETAPA_2_CONSOLIDACAO': '2. Consolidação',
+        'ETAPA_3_ANALISE_COMISSAO': '3. Comissão',
+        'ETAPA_4_ATESTO_EXECUTOR': '4. Executor'
+      };
+      return map[etapa] || etapa || '-';
+    }
+
+    function calcularDiasRestantes(processo) {
+      if (!processo.dataRecebimentoUNIAE) return 5;
+      const dataReceb = new Date(processo.dataRecebimentoUNIAE);
+      const prazo = new Date(dataReceb);
+      prazo.setDate(prazo.getDate() + 5); // 5 dias úteis simplificado
+      const hoje = new Date();
+      const diff = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
+      return diff;
+    }
+
+
+    // ============================================================================
+    // FILTROS E BUSCA
+    // ============================================================================
+    function filtrarProcessos(filtro) {
+      filtroAtual = filtro;
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+      document.getElementById(`card-${filtro === 'todos' ? 'total' : filtro === 'pendente' ? 'pendentes' : filtro === 'atestado' ? 'atestados' : 'alertas'}`).classList.add('active');
+
+      const labels = { todos: '', pendente: '• Pendentes', atestado: '• Atestados', alerta: '• Prazo Crítico' };
+      document.getElementById('filtro-ativo').textContent = labels[filtro];
+      atualizarTabela();
+    }
+
+    function buscarProcessos() {
+      atualizarTabela();
+    }
+
+    function mostrarEtapa(etapa) {
+      const etapas = ['', 'ETAPA_1_RECEBIMENTO_UE', 'ETAPA_2_CONSOLIDACAO', 'ETAPA_3_ANALISE_COMISSAO', 'ETAPA_4_ATESTO_EXECUTOR'];
+      document.querySelectorAll('.step').forEach((s, i) => {
+        s.classList.remove('active', 'completed');
+        if (i + 1 < etapa) s.classList.add('completed');
+        if (i + 1 === etapa) s.classList.add('active');
+      });
+    }
+
+    // ============================================================================
+    // MODAIS
+    // ============================================================================
+    function abrirModal(id) {
+      document.getElementById(id).classList.add('active');
+      atualizarSelectsProcessos();
+    }
+
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // Fechar modal ao clicar fora
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function (e) {
+        if (e.target === this) fecharModal(this.id);
+      });
+    });
+
+    function atualizarSelectsProcessos() {
+      const options = processos.map(p =>
+        `<option value="${p.id}">${p.notaFiscal} - ${(p.fornecedor || '').substring(0, 30)}</option>`
+      ).join('');
+
+      ['select-processo-receb', 'select-processo-analise'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<option value="">Selecione...</option>' + options;
+      });
+    }
+
+    // ============================================================================
+    // SALVAR NOVO PROCESSO
+    // ============================================================================
+    function salvarNovoProcesso() {
+      const form = document.getElementById('form-novo');
+      const dados = Object.fromEntries(new FormData(form).entries());
+
+      if (!dados.notaFiscal || !dados.fornecedor || !dados.valorTotal || !dados.tipoGenero) {
+        mostrarToast('warning', 'Atenção', 'Preencha todos os campos obrigatórios');
+        return;
+      }
+
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(result => {
+            if (result?.success) {
+              mostrarToast('success', 'Sucesso', 'Processo criado com sucesso!');
+              fecharModal('modal-novo');
+              form.reset();
+              carregarDados();
+            } else {
+              mostrarToast('error', 'Erro', result?.error || 'Falha ao criar processo');
+            }
+          })
+          .withFailureHandler(onErro)
+          .iniciarProcessoAtesto(dados);
+      } else {
+        mostrarToast('success', 'Demo', 'Processo seria criado (modo demonstração)');
+        fecharModal('modal-novo');
+      }
+    }
+
+    // ============================================================================
+    // SALVAR RECEBIMENTO
+    // ============================================================================
+    function salvarRecebimento() {
+      const form = document.getElementById('form-recebimento');
+      const formData = new FormData(form);
+      const dados = Object.fromEntries(formData.entries());
+      const idProcesso = dados.idProcesso;
+      delete dados.idProcesso;
+
+      if (!idProcesso || !dados.unidadeEscolar || !dados.responsavel || !dados.matriculaResponsavel) {
+        mostrarToast('warning', 'Atenção', 'Preencha todos os campos obrigatórios');
+        return;
+      }
+
+      // Converter strings para boolean
+      ['quantitativaOk', 'qualitativaOk', 'assinatura', 'carimboUE'].forEach(k => {
+        dados[k] = dados[k] === 'true';
+      });
+
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(result => {
+            if (result?.success) {
+              mostrarToast('success', 'Sucesso', 'Recebimento registrado!');
+              fecharModal('modal-recebimento');
+              form.reset();
+              carregarDados();
+            } else {
+              mostrarToast('error', 'Erro', result?.error || 'Falha ao registrar');
+            }
+          })
+          .withFailureHandler(onErro)
+          .registrarRecebimentoUE(idProcesso, dados);
+      } else {
+        mostrarToast('success', 'Demo', 'Recebimento seria registrado (modo demonstração)');
+        fecharModal('modal-recebimento');
+      }
+    }
+
+
+    // ============================================================================
+    // SALVAR ANÁLISE DA COMISSÃO
+    // ============================================================================
+    function salvarAnalise() {
+      const form = document.getElementById('form-analise');
+      const formData = new FormData(form);
+      const dados = Object.fromEntries(formData.entries());
+      const idProcesso = dados.idProcesso;
+      delete dados.idProcesso;
+
+      if (!idProcesso || !dados.membrosPresentes || !dados.resultado) {
+        mostrarToast('warning', 'Atenção', 'Preencha todos os campos obrigatórios');
+        return;
+      }
+
+      // Converter membros para array
+      const membros = dados.membrosPresentes.split('\n').filter(m => m.trim());
+      if (membros.length < 3) {
+        mostrarToast('warning', 'Atenção', 'É necessário no mínimo 3 membros da Comissão (Resolução FNDE 06/2020)');
+        return;
+      }
+      dados.membrosPresentes = membros;
+
+      // Converter checkboxes
+      ['somaVerificada', 'atestoVerificado', 'nfConferida', 'sefazConsultada', 'observacoesAnalisadas'].forEach(k => {
+        dados[k] = document.getElementById(`check-${k.replace('Verificada', 'soma').replace('Verificado', 'atesto').replace('Conferida', 'nf').replace('Consultada', 'sefaz').replace('Analisadas', 'obs')}`)?.checked || false;
+      });
+      dados.somaConforme = dados.somaVerificada;
+      dados.atestoConforme = dados.atestoVerificado;
+
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(result => {
+            if (result?.success) {
+              mostrarToast('success', 'Sucesso', 'Análise registrada com sucesso!');
+              fecharModal('modal-analise');
+              form.reset();
+              carregarDados();
+            } else {
+              mostrarToast('error', 'Erro', result?.error || 'Falha ao registrar análise');
+            }
+          })
+          .withFailureHandler(onErro)
+          .registrarAnaliseComissaoUNIAE(idProcesso, dados);
+      } else {
+        mostrarToast('success', 'Demo', 'Análise seria registrada (modo demonstração)');
+        fecharModal('modal-analise');
+      }
+    }
+
+    // ============================================================================
+    // VER DETALHES
+    // ============================================================================
+    function verDetalhes(id) {
+      const p = processos.find(proc => proc.id === id);
+      if (!p) {
+        mostrarToast('error', 'Erro', 'Processo não encontrado');
+        return;
+      }
+
+      const diasRestantes = calcularDiasRestantes(p);
+      const content = document.getElementById('detalhes-content');
+
+      content.innerHTML = `
+        <div style="display:grid;gap:20px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+            <div>
+              <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;">Nota Fiscal</div>
+              <div style="font-size:18px;font-weight:600;">${p.notaFiscal || '-'}</div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;">Valor Total</div>
+              <div style="font-size:18px;font-weight:600;">R$ ${Number(p.valorTotal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;">Status</div>
+              <span class="badge ${getBadgeClass(p.status)}">${formatarStatus(p.status)}</span>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;">Prazo</div>
+              <div class="prazo-indicator ${diasRestantes > 2 ? 'ok' : diasRestantes > 0 ? 'atencao' : 'vencido'}">
+                <span class="material-icons" style="font-size:16px;">${diasRestantes > 2 ? 'schedule' : diasRestantes > 0 ? 'warning' : 'error'}</span>
+                ${diasRestantes > 0 ? diasRestantes + ' dias restantes' : diasRestantes === 0 ? 'Vence hoje' : 'Prazo vencido'}
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--gray-200);padding-top:16px;">
+            <div style="font-weight:600;margin-bottom:12px;">Informações do Fornecedor</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+              <div><span style="color:var(--gray-500);">Razão Social:</span> ${p.fornecedor || '-'}</div>
+              <div><span style="color:var(--gray-500);">CNPJ:</span> ${p.cnpjFornecedor || '-'}</div>
+              <div><span style="color:var(--gray-500);">Contrato:</span> ${p.contrato || '-'}</div>
+              <div><span style="color:var(--gray-500);">Tipo:</span> ${p.tipoGenero || '-'}</div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--gray-200);padding-top:16px;">
+            <div style="font-weight:600;margin-bottom:12px;">Histórico de Entregas</div>
+            ${p.entregas && p.entregas.length > 0 ?
+          p.entregas.map(e => `
+                <div style="background:var(--gray-50);padding:12px;border-radius:8px;margin-bottom:8px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong>${e.unidadeEscolar || 'UE não informada'}</strong>
+                    <span class="badge ${e.quantitativaOk && e.qualitativaOk ? 'badge-success' : 'badge-warning'}">${e.quantitativaOk && e.qualitativaOk ? 'Conforme' : 'Pendências'}</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--gray-500);margin-top:4px;">
+                    ${e.dataEntrega || '-'} • Resp: ${e.responsavel || '-'} (${e.matriculaResponsavel || '-'})
+                  </div>
+                </div>
+              `).join('') : '<div style="color:var(--gray-500);font-size:14px;">Nenhuma entrega registrada</div>'
+        }
+          </div>
+
+          ${p.observacoes ? `
+            <div style="border-top:1px solid var(--gray-200);padding-top:16px;">
+              <div style="font-weight:600;margin-bottom:8px;">Observações</div>
+              <div style="background:var(--warning-light);padding:12px;border-radius:8px;font-size:14px;">${p.observacoes}</div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      abrirModal('modal-detalhes');
+    }
+
+    function avancarEtapa(id) {
+      mostrarToast('info', 'Info', 'Use os botões de ação específicos para avançar cada etapa');
+    }
+
+
+    // ============================================================================
+    // GERAR RELATÓRIO SEI
+    // ============================================================================
+    function gerarRelatorioSEI() {
+      const id = prompt('Digite o número da Nota Fiscal para gerar o Despacho SEI:');
+      if (!id) return;
+
+      const processo = processos.find(p => p.notaFiscal === id || p.id === id);
+      if (!processo) {
+        mostrarToast('warning', 'Atenção', 'Processo não encontrado');
+        return;
+      }
+
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(result => {
+            if (result?.success) {
+              const win = window.open('', '_blank');
+              win.document.write(`
+                <html><head><title>Despacho SEI - NF ${processo.notaFiscal}</title>
+                <style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.8;}
+                h1{font-size:16px;text-align:center;}pre{white-space:pre-wrap;}</style></head>
+                <body><h1>DESPACHO SEI - NF ${processo.notaFiscal}</h1><pre>${result.despacho || result.data || ''}</pre></body></html>
+              `);
+            } else {
+              mostrarToast('error', 'Erro', result?.error || 'Falha ao gerar relatório');
+            }
+          })
+          .withFailureHandler(onErro)
+          .gerarRelatorioProcessoSEI(processo.id);
+      } else {
+        // Gerar modelo de despacho para demonstração
+        const texto = gerarModeloDespacho(processo);
+        const win = window.open('', '_blank');
+        win.document.write(`
+          <html><head><title>Despacho SEI - NF ${processo.notaFiscal}</title>
+          <style>body{font-family:'Inter', system-ui, sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.8;font-size:14px;}
+          h1{font-size:14px;text-align:center;font-weight:bold;}
+          .header{text-align:center;margin-bottom:30px;}
+          .content{text-align:justify;}</style></head>
+          <body>${texto}</body></html>
+        `);
+      }
+    }
+
+    function gerarModeloDespacho(p) {
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      return `
+        <div class="header">
+          <p>GOVERNO DO DISTRITO FEDERAL<br>
+          SECRETARIA DE ESTADO DE EDUCAÇÃO<br>
+          COORDENAÇÃO REGIONAL DE ENSINO DE PLANALTINA<br>
+          UNIDADE REGIONAL DE INFRAESTRUTURA E APOIO EDUCACIONAL</p>
+        </div>
+        <h1>DESPACHO DE ATESTO</h1>
+        <div class="content">
+          <p><strong>Processo SEI:</strong> ${p.processoSEI || '00080-00000000/2024-00'}</p>
+          <p><strong>Assunto:</strong> Atesto de Recebimento de Gêneros Alimentícios</p>
+          <p><strong>Nota Fiscal:</strong> ${p.notaFiscal}</p>
+          <p><strong>Fornecedor:</strong> ${p.fornecedor}</p>
+          <p><strong>CNPJ:</strong> ${p.cnpjFornecedor || '-'}</p>
+          <p><strong>Valor:</strong> R$ ${Number(p.valorTotal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+          <br>
+          <p>A Comissão Regional de Recebimento de Gêneros Alimentícios da UNIAE/CRE-PP, no uso de suas atribuições legais, com fundamento na Lei nº 4.320/64 (Arts. 62 e 63), Lei nº 14.133/2021 e Resolução CD/FNDE nº 06/2020, após análise da documentação comprobatória, ATESTA que:</p>
+          <br>
+          <p>1. Os Termos de Recebimento foram devidamente conferidos e apresentam assinatura digital, matrícula, data e identificação das Unidades Escolares;</p>
+          <p>2. A soma dos quantitativos dos Termos de Recebimento corresponde ao quantitativo faturado na Nota Fiscal;</p>
+          <p>3. Os dados da Nota Fiscal estão em conformidade com o contrato vigente;</p>
+          <p>4. A documentação está apta a instruir o processo de liquidação da despesa.</p>
+          <br>
+          <p>Encaminha-se ao Executor do Contrato para ciência e providências.</p>
+          <br>
+          <p style="text-align:right;">Planaltina-DF, ${hoje}</p>
+          <br>
+          <p style="text-align:center;">_______________________________<br>
+          Membro 1 - Matrícula<br><br>
+          _______________________________<br>
+          Membro 2 - Matrícula<br><br>
+          _______________________________<br>
+          Membro 3 - Matrícula</p>
+        </div>
+      `;
+    }
+
+    function imprimirChecklist() {
+      window.print();
+    }
+
+    // ============================================================================
+    // TOAST NOTIFICATIONS
+    // ============================================================================
+    function mostrarToast(tipo, titulo, mensagem) {
+      const container = document.getElementById('toast-container');
+      const icons = { success: 'check_circle', error: 'error', warning: 'warning', info: 'info' };
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${tipo}`;
+      toast.innerHTML = `
+        <span class="material-icons">${icons[tipo]}</span>
+        <div class="toast-content">
+          <div class="toast-title">${titulo}</div>
+          <div class="toast-message">${mensagem}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+          <span class="material-icons">close</span>
+        </button>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'toastIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+
+    // ============================================================================
+    // DADOS DE DEMONSTRAÇÃO
+    // ============================================================================
+    function gerarDadosDemo() {
+      return [
+        { id: '1', notaFiscal: '12345', fornecedor: 'Distribuidora ABC Ltda', valorTotal: 15420.50, status: 'EM_ANALISE', etapaAtual: 'ETAPA_3_ANALISE_COMISSAO', tipoGenero: 'PERECIVEL', dataRecebimentoUNIAE: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), entregas: [{ unidadeEscolar: 'EC 01 Planaltina', dataEntrega: '2024-01-15', responsavel: 'Maria Silva', matriculaResponsavel: '123456', quantitativaOk: true, qualitativaOk: true }] },
+        { id: '2', notaFiscal: '12346', fornecedor: 'Alimentos XYZ S.A.', valorTotal: 8750.00, status: 'AGUARDANDO_DOCS', etapaAtual: 'ETAPA_2_CONSOLIDACAO', tipoGenero: 'NAO_PERECIVEL', dataRecebimentoUNIAE: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), entregas: [] },
+        { id: '3', notaFiscal: '12347', fornecedor: 'Hortifruti Regional', valorTotal: 5230.75, status: 'ATESTO_COMISSAO', etapaAtual: 'ETAPA_4_ATESTO_EXECUTOR', tipoGenero: 'PERECIVEL', dataRecebimentoUNIAE: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), entregas: [{ unidadeEscolar: 'CED 02', dataEntrega: '2024-01-14', responsavel: 'João Santos', matriculaResponsavel: '654321', quantitativaOk: true, qualitativaOk: true }] },
+        { id: '4', notaFiscal: '12348', fornecedor: 'Laticínios Bom Sabor', valorTotal: 12100.00, status: 'PENDENCIA_DOCUMENTAL', etapaAtual: 'ETAPA_3_ANALISE_COMISSAO', tipoGenero: 'PERECIVEL', dataRecebimentoUNIAE: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), observacoes: 'Falta identificação digital da UE no Termo de Recebimento da EC 03', entregas: [{ unidadeEscolar: 'EC 03', dataEntrega: '2024-01-13', responsavel: 'Ana Costa', matriculaResponsavel: '789012', quantitativaOk: true, qualitativaOk: false }] },
+        { id: '5', notaFiscal: '12349', fornecedor: 'Carnes Premium', valorTotal: 22500.00, status: 'RECEBIDO_CONFORME', etapaAtual: 'ETAPA_1_RECEBIMENTO_UE', tipoGenero: 'PERECIVEL', entregas: [] }
+      ];
+    }
+  </script>
+</body>
+
+</html>
+
+
+
+
+

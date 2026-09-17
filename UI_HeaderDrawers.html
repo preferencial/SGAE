@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Header Drawers - Alimentação Escolar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <style>
+    /* ========================================
+       HEADER DRAWERS - DESIGN SYSTEM
+       ======================================== */
+    :root {
+      --ae-primary: #2E7D32;
+      --ae-primary-light: #4CAF50;
+      --ae-primary-dark: #1B5E20;
+      --ae-secondary: #EF6C00;
+      --ae-secondary-light: #FF9800;
+      --ae-accent: #C62828;
+      --ae-info: #1565C0;
+      --ae-warning: #F9A825;
+      --ae-bg-main: #F1F8E9;
+      --ae-bg-card: #FFFFFF;
+      --ae-bg-overlay: rgba(0, 0, 0, 0.5);
+      --ae-text-primary: #263238;
+      --ae-text-secondary: #546E7A;
+      --ae-text-light: #FFFFFF;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--ae-bg-main);
+      color: var(--ae-text-primary);
+    }
+
+    /* ========================================
+       DRAWER BASE STYLES
+       ======================================== */
+    .ae-drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--ae-bg-overlay);
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+      z-index: 2000;
+    }
+
+    .ae-drawer-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .ae-header-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 90%;
+      max-width: 400px;
+      height: 100%;
+      background: var(--ae-bg-card);
+      transform: translateX(100%);
+      transition: transform var(--transition-normal);
+      z-index: 2001;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ae-header-drawer.active {
+      transform: translateX(0);
+    }
+
+    .ae-header-drawer.from-left {
+      left: 0;
+      right: auto;
+      transform: translateX(-100%);
+    }
+
+    .ae-header-drawer.from-left.active {
+      transform: translateX(0);
+    }
+
+    /* Drawer Header */
+    .ae-drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #E0E0E0;
+      background: var(--ae-bg-card);
+    }
+
+    .ae-drawer-head h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ae-drawer-head h2 .material-icons {
+      color: var(--ae-primary);
+    }
+
+    .ae-drawer-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ae-text-secondary);
+      transition: var(--transition-fast);
+    }
+
+    .ae-drawer-close:hover {
+      background: var(--ae-bg-main);
+      color: var(--ae-text-primary);
+    }
+
+    /* Drawer Body */
+    .ae-drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    /* ========================================
+       1. DRAWER DE NOTIFICAÇÕES
+       ======================================== */
+    .ae-notif-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .ae-notif-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: var(--ae-bg-main);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-notif-tab.active {
+      background: var(--ae-primary);
+      color: white;
+    }
+
+    .ae-notif-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: var(--ae-bg-card);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #E8E8E8;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-notif-item:hover {
+      border-color: var(--ae-primary-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ae-notif-item.unread {
+      background: #E8F5E9;
+      border-color: var(--ae-primary-light);
+    }
+
+    .ae-notif-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ae-notif-icon.nf { background: #FFF3E0; color: var(--ae-secondary); }
+    .ae-notif-icon.cardapio { background: #E8F5E9; color: var(--ae-primary); }
+    .ae-notif-icon.alerta { background: #FFEBEE; color: var(--ae-accent); }
+    .ae-notif-icon.info { background: #E3F2FD; color: var(--ae-info); }
+
+    .ae-notif-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ae-notif-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: var(--ae-text-primary);
+    }
+
+    .ae-notif-desc {
+      font-size: 0.75rem;
+      color: var(--ae-text-secondary);
+      line-height: 1.4;
+    }
+
+    .ae-notif-time {
+      font-size: 0.65rem;
+      color: var(--ae-text-secondary);
+      margin-top: 6px;
+    }
+
+    .ae-notif-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-notif-empty .material-icons {
+      font-size: 48px;
+      opacity: 0.5;
+      margin-bottom: 12px;
+    }
+
+    /* ========================================
+       2. DRAWER DE BUSCA GLOBAL
+       ======================================== */
+    .ae-search-input-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .ae-search-input {
+      width: 100%;
+      padding: 14px 14px 14px 48px;
+      border: 2px solid #E0E0E0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: var(--transition-fast);
+    }
+
+    .ae-search-input:focus {
+      outline: none;
+      border-color: var(--ae-primary);
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+
+    .ae-search-input-wrap .material-icons {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-search-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .ae-search-filter {
+      padding: 8px 14px;
+      border: 1px solid #E0E0E0;
+      background: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-search-filter.active {
+      background: var(--ae-primary);
+      color: white;
+      border-color: var(--ae-primary);
+    }
+
+    .ae-search-results {
+      margin-top: 16px;
+    }
+
+    .ae-search-result {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-search-result:hover {
+      background: var(--ae-bg-main);
+    }
+
+    .ae-search-result-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--ae-bg-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ae-primary);
+    }
+
+    .ae-search-result-info h4 {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .ae-search-result-info p {
+      font-size: 0.7rem;
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-search-recent {
+      margin-top: 24px;
+    }
+
+    .ae-search-recent h3 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ae-text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ========================================
+       3. DRAWER DE CALENDÁRIO
+       ======================================== */
+    .ae-calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .ae-calendar-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ae-calendar-nav-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--ae-bg-main);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+    }
+
+    .ae-calendar-nav-btn:hover {
+      background: var(--ae-primary-light);
+      color: white;
+    }
+
+    .ae-calendar-month {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .ae-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .ae-calendar-weekday {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--ae-text-secondary);
+      padding: 8px 0;
+    }
+
+    .ae-calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      position: relative;
+    }
+
+    .ae-calendar-day:hover {
+      background: var(--ae-bg-main);
+    }
+
+    .ae-calendar-day.today {
+      background: var(--ae-primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    .ae-calendar-day.has-event::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--ae-secondary);
+    }
+
+    .ae-calendar-day.other-month {
+      color: #BDBDBD;
+    }
+
+    .ae-calendar-events {
+      margin-top: 16px;
+    }
+
+    .ae-calendar-events h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-calendar-event {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: var(--ae-bg-main);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--ae-primary);
+    }
+
+    .ae-calendar-event.entrega {
+      border-left-color: var(--ae-secondary);
+    }
+
+    .ae-calendar-event-time {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--ae-primary);
+      min-width: 50px;
+    }
+
+    .ae-calendar-event-info h4 {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .ae-calendar-event-info p {
+      font-size: 0.7rem;
+      color: var(--ae-text-secondary);
+    }
+
+    /* ========================================
+       4. DRAWER DE STATUS DE ENTREGAS
+       ======================================== */
+    .ae-delivery-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .ae-delivery-stat {
+      text-align: center;
+      padding: 14px 8px;
+      background: var(--ae-bg-main);
+      border-radius: 10px;
+    }
+
+    .ae-delivery-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ae-primary);
+    }
+
+    .ae-delivery-stat-value.pending { color: var(--ae-warning); }
+    .ae-delivery-stat-value.problem { color: var(--ae-accent); }
+
+    .ae-delivery-stat-label {
+      font-size: 0.65rem;
+      color: var(--ae-text-secondary);
+      margin-top: 4px;
+    }
+
+    .ae-delivery-list {
+      margin-top: 16px;
+    }
+
+    .ae-delivery-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--ae-bg-card);
+      border: 1px solid #E8E8E8;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .ae-delivery-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .ae-delivery-status.entregue { background: var(--ae-primary); }
+    .ae-delivery-status.em-transito { background: var(--ae-info); animation: pulse 1.5s infinite; }
+    .ae-delivery-status.pendente { background: var(--ae-warning); }
+    .ae-delivery-status.problema { background: var(--ae-accent); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .ae-delivery-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ae-delivery-info h4 {
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ae-delivery-info p {
+      font-size: 0.7rem;
+      color: var(--ae-text-secondary);
+    }
+
+    .ae-delivery-time {
+      font-size: 0.7rem;
+      color: var(--ae-text-secondary);
+      text-align: right;
+    }
+
+    /* ========================================
+       5. DRAWER DE AJUDA RÁPIDA
+       ======================================== */
+    .ae-help-search {
+      margin-bottom: 20px;
+    }
+
+    .ae-help-categories {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .ae-help-category {
+      padding: 16px;
+      background: var(--ae-bg-main);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      border: 2px solid transparent;
+    }
+
+    .ae-help-category:hover {
+      border-color: var(--ae-primary-light);
+    }
+
+    .ae-help-category .material-icons {
+      font-size: 28px;
+      color: var(--ae-primary);
+      margin-bottom: 8px;
+    }
+
+    .ae-help-category span {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .ae-help-faq {
+      margin-top: 20px;
+    }
+
+    .ae-help-faq h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ae-text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .ae-help-faq-item {
+      padding: 14px;
+      background: var(--ae-bg-card);
+      border: 1px solid #E8E8E8;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-help-faq-item:hover {
+      border-color: var(--ae-primary-light);
+    }
+
+    .ae-help-faq-item h4 {
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ae-help-faq-item p {
+      font-size: 0.75rem;
+      color: var(--ae-text-secondary);
+      margin-top: 8px;
+      display: none;
+    }
+
+    .ae-help-faq-item.expanded p {
+      display: block;
+    }
+
+    .ae-help-contact {
+      margin-top: 24px;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--ae-primary) 0%, var(--ae-primary-dark) 100%);
+      border-radius: 12px;
+      color: white;
+      text-align: center;
+    }
+
+    .ae-help-contact h4 {
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .ae-help-contact p {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .ae-help-contact-btn {
+      padding: 10px 20px;
+      background: white;
+      color: var(--ae-primary);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .ae-help-contact-btn:hover {
+      transform: scale(1.02);
+    }
+  
+
+
+/* codex-school-community-ux: ajustes finos para uso recorrente por comunidade escolar */
+:root {
+  --codex-school-focus: #ffd166;
+  --codex-school-touch: 44px;
+  --codex-school-radius: 8px;
+  --codex-school-field-radius: 7px;
+  --codex-school-form-gap: 14px;
+  --codex-school-field-border: rgba(120, 132, 156, 0.45);
+  --codex-school-field-bg: rgba(255, 255, 255, 0.96);
+  --codex-school-field-text: #1f2937;
+  --codex-school-muted-text: #64748b;
+  --codex-school-soft-surface: rgba(248, 250, 252, 0.82);
+  --codex-school-safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+:where(html) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+:where(body) {
+  overscroll-behavior-y: contain;
+}
+
+:where(p, li, dd, dt, blockquote, figcaption, label, td, th) {
+  line-height: 1.5;
+}
+
+:where(main, .main, .content, .page, .app, .app-shell, .container, .dashboard, .workspace) {
+  padding-bottom: var(--codex-school-safe-bottom);
+}
+
+:where(a, button, .btn, .button, [role="button"], input, select, textarea, summary) {
+  min-height: var(--codex-school-touch);
+  touch-action: manipulation;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="submit"], input[type="button"]) {
+  border-radius: var(--codex-school-radius) !important;
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--codex-school-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+  font-weight: 700;
+}
+
+:where(form) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(fieldset) {
+  border-radius: var(--codex-school-radius) !important;
+  border-color: var(--codex-school-field-border);
+}
+
+:where(legend) {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+:where(.form-group, .input-field, .field, .form-field, .control-group) {
+  margin-bottom: var(--codex-school-form-gap);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: min(100%, 100%);
+  border-radius: var(--codex-school-field-radius) !important;
+  border-color: var(--codex-school-field-border) !important;
+  background-color: var(--input-bg, var(--field-bg, var(--codex-school-field-bg)));
+  color: var(--input-text, var(--text-color, var(--codex-school-field-text)));
+  font-size: 16px !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--placeholder-color, #94a3b8);
+  opacity: 1;
+}
+
+:where(input[required], select[required], textarea[required]) {
+  border-left: 3px solid var(--codex-gentle-primary-strong, #aecbfa) !important;
+}
+
+:where(input:disabled, select:disabled, textarea:disabled, button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed !important;
+  opacity: 0.68;
+}
+
+:where(.help, .hint, .help-text, .form-help, small) {
+  line-height: 1.45;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+}
+
+:where(.actions, .form-actions, .button-row, .toolbar, .topbar, nav, [role="toolbar"]) {
+  gap: 8px;
+}
+
+:where(.actions, .form-actions, .button-row) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+:where(.actions, .form-actions, .button-row) > :where(button, .btn, .button, [role="button"]) {
+  flex: 1 1 148px;
+}
+
+:where(.card, .panel, .box, .tile, .item, .list-item, .action-card) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.section, .surface, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.filters, .search-panel, .form-section) {
+  border-radius: var(--codex-school-radius) !important;
+  background: var(--codex-school-soft-surface);
+}
+
+:where(table) {
+  border-collapse: collapse;
+}
+
+:where(table, .table, .data-table) {
+  max-width: 100%;
+}
+
+:where(.table-wrap, .table-wrapper, .table-container, .responsive-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(th, td) {
+  vertical-align: top;
+}
+
+:where(.toast, .alert, .notice, .snackbar, [role="status"], [role="alert"]) {
+  border-radius: var(--codex-school-radius) !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+  :where(body) {
+    font-size: 16px;
+  }
+
+  :where(h1) {
+    font-size: clamp(1.55rem, 1.35rem + 1vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  :where(h2) {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  :where(.toolbar, .topbar, nav, [role="toolbar"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  :where(.hide-mobile, .desktop-only) {
+    display: none !important;
+  }
+}
+</style>
+  <style id="codex-mobile-a11y">
+  /* Mobile-first accessibility baseline for Chrome and Google-style readability. */
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  :where(body) {
+    min-width: 0;
+    overflow-x: hidden;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption, label, td, th, input, select, textarea, button) {
+    line-height: 1.5;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption) {
+    max-width: 72ch;
+  }
+
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+
+  :where(button, [role="button"], input:not([type="hidden"]), select, textarea) {
+    font: inherit;
+    min-height: 44px;
+  }
+
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid #1a73e8;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+  }
+
+  :where(img, video, canvas, svg, iframe) {
+    max-width: 100%;
+  }
+
+  :where(img, video, canvas, svg) {
+    height: auto;
+  }
+
+  :where(table) {
+    max-width: 100%;
+  }
+
+  :where(.table-responsive, .table-wrapper, .data-table, .table-container, .responsive-table) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :where(.container, .content, .main, .page, .page-content, .app-content, main) {
+    min-width: 0;
+  }
+
+  :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+    min-width: 0;
+  }
+
+  @media (max-width: 640px) {
+    :where(body) {
+      font-size: 16px;
+    }
+
+    :where(.container, .content, .page-content, .app-content, main) {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+      flex-wrap: wrap;
+    }
+
+    :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea, button) {
+      max-width: 100%;
+    }
+
+    :where(.hide-on-mobile) {
+      display: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+<style>
+/* codex-s20-mobile-first: Samsung S20 / Chrome mobile baseline (360x800 CSS px) */
+@media screen {
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+  :where(body) {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  :where(main, .app, .page, .container, .content, .main-content, .dashboard, .view) {
+    max-width: 100%;
+  }
+  :where(img, video, canvas, svg) {
+    max-width: 100%;
+    height: auto;
+  }
+  :where(p, li, td, th, label, legend, button, a, h1, h2, h3, h4, h5, h6) {
+    overflow-wrap: anywhere;
+  }
+  :where(input, select, textarea, button) {
+    font: inherit;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    font-size: max(16px, 1rem);
+  }
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+  :where(.table-wrap, .table-wrapper, .table-responsive, .table-container, .responsive-table, .data-table-wrapper) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 480px) {
+  :where(body) {
+    font-size: 16px;
+  }
+  :where(.grid, .cards, .dashboard-grid, .stats-grid, .form-grid, .filters-grid) {
+    grid-template-columns: 1fr !important;
+  }
+  :where(.toolbar, .actions, .button-row, .filters, .form-actions, .modal-actions, .header-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(.btn, button, input, select, textarea) {
+    min-height: 44px;
+  }
+  :where(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :where(th, td) {
+    white-space: nowrap;
+  }
+  :where(.card, .panel, .modal, .dialog, .drawer) {
+    max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 360px) {
+  :where(body) {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  :where(.card, .panel, .section, .modal-content, .dialog-content) {
+    padding: 12px;
+  }
+  :where(h1) {
+    font-size: clamp(1.45rem, 1.2rem + 2vw, 2rem);
+  }
+  :where(h2) {
+    font-size: clamp(1.2rem, 1rem + 1.4vw, 1.55rem);
+  }
+}
+</style>
+<style>
+/* codex-design-system: shared contrast, button sizing and minimal button icon styling */
+:root {
+  --codex-ds-primary: var(--primary, var(--color-primary, var(--theme-primary, #1a73e8)));
+  --codex-ds-primary-strong: var(--primary-dark, var(--color-primary-strong, var(--theme-primary-dark, #1558d6)));
+  --codex-ds-text: var(--text, var(--color-ink, var(--text-primary, #202124)));
+  --codex-ds-muted: var(--muted, var(--color-muted, var(--text-secondary, #5f6368)));
+  --codex-ds-surface: var(--surface, var(--color-surface, var(--bg-surface, #ffffff)));
+  --codex-ds-border: var(--border, var(--color-border, var(--line, #dadce0)));
+  --codex-ds-focus: #1a73e8;
+  --codex-ds-radius: 8px;
+}
+
+:where(body) {
+  color: var(--codex-ds-text);
+}
+
+:where(.text-muted, .muted, .secondary, small, figcaption, caption) {
+  color: var(--codex-ds-muted);
+}
+
+:where(a) {
+  color: var(--codex-ds-primary);
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--codex-ds-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: var(--codex-ds-primary);
+  color: #ffffff;
+}
+
+:where(.btn:hover, .button:hover, button:hover, [role="button"]:hover) {
+  filter: none;
+}
+
+:where(.btn-primary:hover, .button-primary:hover, button[type="submit"]:hover, input[type="submit"]:hover) {
+  background: var(--codex-ds-primary-strong);
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: var(--codex-ds-surface);
+  color: var(--codex-ds-text);
+  border-color: var(--codex-ds-border);
+}
+
+:where(.btn-small, .btn.sm, .button-small, .button.sm) {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+:where(.icon-button, .btn-icon, button.icon, button[aria-label]:not([aria-label=""])) {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: var(--codex-ds-radius);
+}
+
+:where(button svg, .btn svg, .button svg, [role="button"] svg, button .material-icons, .btn .material-icons, .button .material-icons, button .icon, .btn .icon, .button .icon) {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  stroke-width: 2;
+  flex: 0 0 auto;
+}
+
+:where(button .material-icons, .btn .material-icons, .button .material-icons) {
+  font-feature-settings: "liga";
+  vertical-align: middle;
+}
+
+:where(button:focus-visible, .btn:focus-visible, .button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 3px solid var(--codex-ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--codex-ds-surface) 80%, transparent);
+}
+
+:where(button:disabled, .btn:disabled, .button:disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  :where(.btn, .button, button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    width: auto;
+  }
+  :where(.form-actions > .btn, .form-actions > .button, .form-actions > button, .actions > .btn, .actions > .button, .actions > button) {
+    width: 100%;
+  }
+}
+</style>
+<style>
+/* codex-gentle-dark-theme: default graphite theme with soft, kind UI accents */
+:root {
+  color-scheme: dark;
+  --codex-gentle-bg: #15171c;
+  --codex-gentle-bg-soft: #1a1d23;
+  --codex-gentle-surface: #20242b;
+  --codex-gentle-surface-2: #272b33;
+  --codex-gentle-border: #343941;
+  --codex-gentle-text: #eef1f5;
+  --codex-gentle-muted: #c8ced8;
+  --codex-gentle-dim: #9aa4b2;
+  --codex-gentle-primary: #8ab4f8;
+  --codex-gentle-primary-strong: #aecbfa;
+  --codex-gentle-accent: #8fa0b8;
+  --codex-gentle-success: #9be7c1;
+  --bg: var(--codex-gentle-bg);
+  --background: var(--codex-gentle-bg);
+  --surface: var(--codex-gentle-surface);
+  --panel: var(--codex-gentle-surface);
+  --card: var(--codex-gentle-surface);
+  --text: var(--codex-gentle-text);
+  --text-main: var(--codex-gentle-text);
+  --text-primary: var(--codex-gentle-text);
+  --text-muted: var(--codex-gentle-muted);
+  --muted: var(--codex-gentle-muted);
+  --border: var(--codex-gentle-border);
+  --line: var(--codex-gentle-border);
+  --primary: var(--codex-gentle-primary);
+  --primary-dark: #6ea0ef;
+  --codex-ds-primary: var(--codex-gentle-primary);
+  --codex-ds-primary-strong: var(--codex-gentle-primary-strong);
+  --codex-ds-text: var(--codex-gentle-text);
+  --codex-ds-muted: var(--codex-gentle-muted);
+  --codex-ds-surface: var(--codex-gentle-surface);
+  --codex-ds-border: var(--codex-gentle-border);
+}
+
+:where(html, body) {
+  background: var(--codex-gentle-bg) !important;
+  color: var(--codex-gentle-text) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(main, .app, .page, .layout, .content, .main-content, .app-content, .container, .dashboard, .view) {
+  background-color: transparent !important;
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(.card, .panel, .section, .surface, .box, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu, .table-wrapper, .table-wrap, .table-container, form) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+              var(--codex-gentle-surface) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+}
+
+:where(header, nav, aside, footer, .navbar, .sidebar, .topbar, .app-header, .app-footer) {
+  background: rgba(12, 15, 21, 0.92) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, label, span, strong, td, th, legend, small, caption) {
+  color: inherit;
+}
+
+:where(h1, .page-title, .view-title) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(h1:not(.no-emoji), .page-title:not(.no-emoji), .view-title:not(.no-emoji))::after {
+  content: "";
+  font-size: 0.82em;
+}
+
+:where(.empty-state, .empty, .no-data, .no-results, .loading, .placeholder)::before {
+  content: "";
+}
+
+:where(.text-muted, .muted, .secondary, .subtitle, .description, .help-text, .hint, small, figcaption, caption) {
+  color: var(--codex-gentle-muted) !important;
+}
+
+:where(a) {
+  color: var(--codex-gentle-primary-strong) !important;
+}
+
+:where(input, select, textarea) {
+  background: var(--codex-gentle-bg-soft) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--codex-gentle-dim) !important;
+}
+
+:where(table) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(th) {
+  color: var(--codex-gentle-muted) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:where(td) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  background: var(--codex-gentle-surface-2) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: none !important;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: linear-gradient(180deg, rgba(174, 203, 250, 0.24), rgba(138, 180, 248, 0.16)),
+              #182235 !important;
+  color: #f8fbff !important;
+  border-color: rgba(174, 203, 250, 0.45) !important;
+}
+
+:where(button[type="submit"]:not(.icon-button):not(.btn-icon), input[type="submit"])::after {
+  content: "";
+  font-size: 0.9em;
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(.badge, .tag, .chip, .pill, .status) {
+  background: rgba(248, 199, 220, 0.12) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: rgba(248, 199, 220, 0.26) !important;
+}
+
+:where(hr) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(svg, canvas, img) {
+  color: inherit;
+}
+</style>
+
+
+<style id="up-oracular-design-system">
+:root {
+  color-scheme: dark;
+  --uo-bg: #15171c;
+  --uo-panel: #20242b;
+  --uo-text: #e9ecf1;
+  --uo-muted: #b2b9c4;
+  --uo-border: #343941;
+  --uo-accent: #7aa2d6;
+  --uo-radius-group: 10px;
+  --uo-radius-control: 8px;
+}
+
+html, body {
+  background: var(--uo-bg) !important;
+  color: var(--uo-text) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body, input, select, textarea, button {
+  color: var(--uo-text);
+}
+
+.card, .panel, .modal, .dialog, dialog, .container,
+.box, .widget, .section, .sidebar, .drawer, .popover,
+[role="dialog"], [class*="card"], [class*="panel"] {
+  background-color: var(--uo-panel) !important;
+  border-color: var(--uo-border) !important;
+  border-radius: var(--uo-radius-group) !important;
+}
+
+button, input, select, textarea, .btn, .button,
+[role="button"], [role="menuitem"], .dropdown-item,
+.menu-item, [class*="button"], [class*="dropdown-item"] {
+  border-radius: var(--uo-radius-control) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  background-color: var(--uo-panel) !important;
+  border: 1px solid var(--uo-border) !important;
+  padding: 8px !important;
+  box-sizing: border-box;
+}
+
+label, .form-label, [class*="form-label"] {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--uo-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.uo-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.uo-feedback-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  min-width: 220px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--uo-border);
+  border-radius: var(--uo-radius-group);
+  background: var(--uo-panel);
+  color: var(--uo-text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.uo-feedback-box.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.uo-feedback-box[data-kind="ok"] {
+  border-color: #8fc2a6;
+  color: #8fc2a6;
+}
+
+.uo-feedback-box[data-kind="err"] {
+  border-color: #d98b93;
+  color: #d98b93;
+}
+
+form[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+form[aria-busy="true"] :is(button, input[type="submit"], input[type="button"]) {
+  pointer-events: none;
+}
+
+button, .btn-primary, .button-primary,
+[class*="primary"][role="button"] {
+  background-color: var(--uo-accent) !important;
+}
+
+p, small, .muted, .secondary, .subtitle,
+[class*="muted"], [class*="secondary"] {
+  color: var(--uo-muted) !important;
+}
+
+hr, table, th, td, fieldset {
+  border-color: var(--uo-border) !important;
+}
+
+a {
+  color: var(--uo-accent);
+}
+
+/* Geometrias funcionais permanecem circulares. */
+.avatar, .spinner, .loading-ring, .dot, .status-dot,
+[class*="avatar"], [class*="spinner"], [class*="loading-ring"] {
+  border-radius: 50% !important;
+}
+</style>
+<script id="up-oracular-form-feedback">
+(function () {
+  'use strict';
+  if (window.UpOracularFeedback) return;
+
+  var timer = null;
+  function notify(kind, message) {
+    var box = document.getElementById('uo-feedback-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'uo-feedback-box';
+      box.className = 'uo-feedback-box';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      document.body.appendChild(box);
+    }
+    box.dataset.kind = kind === 'err' ? 'err' : 'ok';
+    box.textContent = String(message || (kind === 'err' ? 'Nao foi possivel concluir.' : 'Operacao concluida.'));
+    box.classList.add('is-visible');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      box.classList.remove('is-visible');
+    }, 1000);
+  }
+
+  function connectLabels(form) {
+    form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field, index) {
+      var id = field.id || ('uo-field-' + index + '-' + Math.random().toString(36).slice(2, 7));
+      field.id = id;
+      var label = form.querySelector('label[for="' + id + '"]');
+      if (!label) {
+        var sibling = field.previousElementSibling;
+        if (sibling && sibling.tagName === 'LABEL') {
+          sibling.htmlFor = id;
+          label = sibling;
+        }
+      }
+      if (label && field.parentElement && !field.parentElement.classList.contains('uo-field')) {
+        field.parentElement.classList.add('uo-field');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(connectLabels);
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    form.setAttribute('aria-busy', 'true');
+    notify('ok', 'Enviando...');
+    window.setTimeout(function () {
+      if (form.getAttribute('aria-busy') === 'true') {
+        form.removeAttribute('aria-busy');
+      }
+    }, 10000);
+  }, true);
+
+  window.UpOracularFeedback = {
+    ok: function (message) { notify('ok', message); },
+    err: function (message) { notify('err', message); },
+    done: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('ok', message);
+    },
+    fail: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('err', message);
+    }
+  };
+}());
+</script>
+
+  <style id="cdx-border-to-color">
+/* Padronização de borders → cores complementares (FROTA-20) */
+input:not([type="hidden"]),
+textarea,
+select,
+[class*="input"],
+[class*="field"],
+[class*="form"],
+.card,
+.panel,
+.box,
+.container,
+.modal,
+[class*="modal"],
+[class*="dialog"],
+dialog {
+  border: none !important;
+  border-width: 0 !important;
+}
+
+input:not([type="hidden"]),
+textarea,
+select {
+  background-color: #20242b !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 2px #e9ecf1 !important;
+}
+  </style>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style id="fleet-mobile-wcag-aa">
+    /* Contrato FROTA: ergonomia S20 e WCAG 2.1 AA. */
+    html, body { max-width: 100%; overflow-x: hidden; }
+    :is(button, [role="button"], input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+      min-width: 48px !important;
+      min-height: 48px !important;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+    <main>
+
+  <!-- Overlay compartilhado -->
+  <div class="ae-drawer-overlay" id="headerDrawerOverlay"></div>
+
+  <!-- ========================================
+       1. DRAWER DE NOTIFICAÇÕES
+       ======================================== -->
+  <aside class="ae-header-drawer" id="notificationsDrawer">
+    <div class="ae-drawer-head">
+      <h2><span class="material-icons">notifications</span> Notificações</h2>
+      <button class="ae-drawer-close" onclick="HeaderDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-drawer-body">
+      <div class="ae-notif-tabs">
+        <button class="ae-notif-tab active" data-tab="todas">Todas</button>
+        <button class="ae-notif-tab" data-tab="nf">Notas Fiscais</button>
+        <button class="ae-notif-tab" data-tab="cardapio">Cardápios</button>
+      </div>
+      <div class="ae-notif-list" id="notifList">
+        <!-- Notificações serão inseridas via JS -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================
+       2. DRAWER DE BUSCA GLOBAL
+       ======================================== -->
+  <aside class="ae-header-drawer" id="searchDrawer">
+    <div class="ae-drawer-head">
+      <h2><span class="material-icons">search</span> Busca Global</h2>
+      <button class="ae-drawer-close" onclick="HeaderDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-drawer-body">
+      <div class="ae-search-input-wrap">
+        <span class="material-icons">search</span>
+        <input inputmode="text" type="text" class="ae-search-input" id="globalSearchInput" 
+               placeholder="Buscar NF, fornecedor, escola..." autocomplete="off">
+      </div>
+      <div class="ae-search-filters">
+        <button class="ae-search-filter active" data-filter="todos">Todos</button>
+        <button class="ae-search-filter" data-filter="nf">Notas Fiscais</button>
+        <button class="ae-search-filter" data-filter="fornecedor">Fornecedores</button>
+        <button class="ae-search-filter" data-filter="escola">Escolas</button>
+        <button class="ae-search-filter" data-filter="cardapio">Cardápios</button>
+      </div>
+      <div class="ae-search-results" id="searchResults"></div>
+      <div class="ae-search-recent" id="searchRecent">
+        <h3>Buscas Recentes</h3>
+        <div id="recentSearchList"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================
+       3. DRAWER DE CALENDÁRIO
+       ======================================== -->
+  <aside class="ae-header-drawer" id="calendarDrawer">
+    <div class="ae-drawer-head">
+      <h2><span class="material-icons">calendar_month</span> Calendário</h2>
+      <button class="ae-drawer-close" onclick="HeaderDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-drawer-body">
+      <div class="ae-calendar-header">
+        <span class="ae-calendar-month" id="calendarMonth">Dezembro 2024</span>
+        <div class="ae-calendar-nav">
+          <button class="ae-calendar-nav-btn" onclick="HeaderDrawers.calendar.prevMonth()">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          <button class="ae-calendar-nav-btn" onclick="HeaderDrawers.calendar.nextMonth()">
+            <span class="material-icons">chevron_right</span>
+          </button>
+        </div>
+      </div>
+      <div class="ae-calendar-grid" id="calendarGrid"></div>
+      <div class="ae-calendar-events">
+        <h3>Eventos do Dia</h3>
+        <div id="calendarEvents"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================
+       4. DRAWER DE STATUS DE ENTREGAS
+       ======================================== -->
+  <aside class="ae-header-drawer" id="deliveryDrawer">
+    <div class="ae-drawer-head">
+      <h2><span class="material-icons">local_shipping</span> Status de Entregas</h2>
+      <button class="ae-drawer-close" onclick="HeaderDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-drawer-body">
+      <div class="ae-delivery-summary">
+        <div class="ae-delivery-stat">
+          <div class="ae-delivery-stat-value" id="deliveryDone">12</div>
+          <div class="ae-delivery-stat-label">Entregues</div>
+        </div>
+        <div class="ae-delivery-stat">
+          <div class="ae-delivery-stat-value pending" id="deliveryPending">5</div>
+          <div class="ae-delivery-stat-label">Pendentes</div>
+        </div>
+        <div class="ae-delivery-stat">
+          <div class="ae-delivery-stat-value problem" id="deliveryProblem">1</div>
+          <div class="ae-delivery-stat-label">Problemas</div>
+        </div>
+      </div>
+      <div class="ae-delivery-list" id="deliveryList">
+        <!-- Lista de entregas via JS -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================
+       5. DRAWER DE AJUDA RÁPIDA
+       ======================================== -->
+  <aside class="ae-header-drawer" id="helpDrawer">
+    <div class="ae-drawer-head">
+      <h2><span class="material-icons">help</span> Ajuda Rápida</h2>
+      <button class="ae-drawer-close" onclick="HeaderDrawers.close()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="ae-drawer-body">
+      <div class="ae-help-search">
+        <div class="ae-search-input-wrap">
+          <span class="material-icons">search</span>
+          <input inputmode="text" type="text" class="ae-search-input" placeholder="Como posso ajudar?" autocomplete="name">
+        </div>
+      </div>
+      
+      <div class="ae-help-categories">
+        <div class="ae-help-category" onclick="HeaderDrawers.help.openCategory('cardapios')">
+          <span class="material-icons">restaurant_menu</span>
+          <span>Cardápios</span>
+        </div>
+        <div class="ae-help-category" onclick="HeaderDrawers.help.openCategory('nf')">
+          <span class="material-icons">receipt_long</span>
+          <span>Notas Fiscais</span>
+        </div>
+        <div class="ae-help-category" onclick="HeaderDrawers.help.openCategory('entregas')">
+          <span class="material-icons">local_shipping</span>
+          <span>Entregas</span>
+        </div>
+        <div class="ae-help-category" onclick="HeaderDrawers.help.openCategory('pagamentos')">
+          <span class="material-icons">payments</span>
+          <span>Pagamentos</span>
+        </div>
+      </div>
+      
+      <div class="ae-help-faq">
+        <h3>Perguntas Frequentes</h3>
+        <div class="ae-help-faq-item" onclick="HeaderDrawers.help.toggleFaq(this)">
+          <h4>Como lançar uma Nota Fiscal? <span class="material-icons">expand_more</span></h4>
+          <p>Acesse o menu "Notas Fiscais", clique em "Nova NF" e preencha os dados ou importe o XML.</p>
+        </div>
+        <div class="ae-help-faq-item" onclick="HeaderDrawers.help.toggleFaq(this)">
+          <h4>Como registrar uma entrega? <span class="material-icons">expand_more</span></h4>
+          <p>No menu "Recebimento UE", selecione a NF e preencha o checklist de conferência.</p>
+        </div>
+        <div class="ae-help-faq-item" onclick="HeaderDrawers.help.toggleFaq(this)">
+          <h4>Como aprovar um cardápio? <span class="material-icons">expand_more</span></h4>
+          <p>Acesse "Cardápios Semanais", selecione o cardápio pendente e clique em "Aprovar".</p>
+        </div>
+      </div>
+      
+      <div class="ae-help-contact">
+        <h4>Precisa de mais ajuda?</h4>
+        <p>Nossa equipe está disponível para auxiliar</p>
+        <button class="ae-help-contact-btn" onclick="HeaderDrawers.help.openSupport()">
+          Falar com Suporte
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    /**
+     * ========================================
+     * HEADER DRAWERS - ALIMENTAÇÃO ESCOLAR
+     * 5 Drawers: Notificações, Busca, Calendário, Entregas, Ajuda
+     * ========================================
+     */
+    const HeaderDrawers = {
+      // Estado
+      state: {
+        activeDrawer: null,
+        notifications: [],
+        searchResults: [],
+        recentSearches: [],
+        deliveries: [],
+        currentMonth: new Date(),
+        events: []
+      },
+
+      // Elementos
+      elements: {
+        overlay: null,
+        drawers: {}
+      },
+
+      // Inicialização
+      init() {
+        this.cacheElements();
+        this.bindEvents();
+        this.loadData();
+        this.calendar.render();
+      },
+
+      cacheElements() {
+        this.elements.overlay = document.getElementById('headerDrawerOverlay');
+        this.elements.drawers = {
+          notifications: document.getElementById('notificationsDrawer'),
+          search: document.getElementById('searchDrawer'),
+          calendar: document.getElementById('calendarDrawer'),
+          delivery: document.getElementById('deliveryDrawer'),
+          help: document.getElementById('helpDrawer')
+        };
+      },
+
+      bindEvents() {
+        // Overlay fecha drawer
+        this.elements.overlay?.addEventListener('click', () => this.close());
+        
+        // ESC fecha drawer
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') this.close();
+        });
+
+        // Tabs de notificação
+        document.querySelectorAll('.ae-notif-tab').forEach(tab => {
+          tab.addEventListener('click', (e) => this.notifications.filterByTab(e.target.dataset.tab));
+        });
+
+        // Filtros de busca
+        document.querySelectorAll('.ae-search-filter').forEach(filter => {
+          filter.addEventListener('click', (e) => this.search.setFilter(e.target.dataset.filter));
+        });
+
+        // Input de busca
+        const searchInput = document.getElementById('globalSearchInput');
+        searchInput?.addEventListener('input', (e) => this.search.query(e.target.value));
+      },
+
+      // Abrir drawer
+      open(drawerName) {
+        this.close(); // Fecha qualquer drawer aberto
+        
+        const drawer = this.elements.drawers[drawerName];
+        if (!drawer) return;
+
+        this.state.activeDrawer = drawerName;
+        drawer.classList.add('active');
+        this.elements.overlay?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Foco no input de busca se for o drawer de busca
+        if (drawerName === 'search') {
+          setTimeout(() => document.getElementById('globalSearchInput')?.focus(), 300);
+        }
+      },
+
+      // Fechar drawer
+      close() {
+        if (!this.state.activeDrawer) return;
+
+        const drawer = this.elements.drawers[this.state.activeDrawer];
+        drawer?.classList.remove('active');
+        this.elements.overlay?.classList.remove('active');
+        document.body.style.overflow = '';
+        this.state.activeDrawer = null;
+      },
+
+      // Carregar dados
+      loadData() {
+        this.notifications.load();
+        this.delivery.load();
+        this.search.loadRecent();
+      },
+
+      // ========================================
+      // MÓDULO: NOTIFICAÇÕES
+      // ========================================
+      notifications: {
+        load() {
+          // Dados de exemplo (substituir por chamada ao backend)
+          HeaderDrawers.state.notifications = [
+            { id: 1, type: 'nf', title: 'NF Pendente de Atesto', desc: 'NF 12345 do Fornecedor ABC aguarda conferência', time: '5 min', unread: true },
+            { id: 2, type: 'cardapio', title: 'Cardápio Aprovado', desc: 'Cardápio da semana 51 foi aprovado pela supervisão', time: '1h', unread: true },
+            { id: 3, type: 'alerta', title: 'Certidão Vencendo', desc: 'CND do Fornecedor XYZ vence em 5 dias', time: '2h', unread: true },
+            { id: 4, type: 'info', title: 'Entrega Confirmada', desc: 'EC 304 Sul confirmou recebimento da entrega', time: '3h', unread: false },
+            { id: 5, type: 'nf', title: 'Pagamento Liberado', desc: 'NF 12340 teve pagamento autorizado', time: '1d', unread: false }
+          ];
+          this.render();
+        },
+
+        render(filter = 'todas') {
+          const list = document.getElementById('notifList');
+          if (!list) return;
+
+          let notifs = HeaderDrawers.state.notifications;
+          if (filter !== 'todas') {
+            notifs = notifs.filter(n => n.type === filter);
+          }
+
+          if (notifs.length === 0) {
+            list.innerHTML = `
+              <div class="ae-notif-empty">
+                <span class="material-icons">notifications_off</span>
+                <p>Nenhuma notificação</p>
+              </div>`;
+            return;
+          }
+
+          list.innerHTML = notifs.map(n => `
+            <div class="ae-notif-item ${n.unread ? 'unread' : ''}" onclick="HeaderDrawers.notifications.open(${n.id})">
+              <div class="ae-notif-icon ${n.type}">
+                <span class="material-icons">${this.getIcon(n.type)}</span>
+              </div>
+              <div class="ae-notif-content">
+                <div class="ae-notif-title">${n.title}</div>
+                <div class="ae-notif-desc">${n.desc}</div>
+                <div class="ae-notif-time">${n.time} atrás</div>
+              </div>
+            </div>
+          `).join('');
+        },
+
+        getIcon(type) {
+          const icons = { nf: 'receipt_long', cardapio: 'restaurant_menu', alerta: 'warning', info: 'info' };
+          return icons[type] || 'notifications';
+        },
+
+        filterByTab(tab) {
+          document.querySelectorAll('.ae-notif-tab').forEach(t => t.classList.remove('active'));
+          document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+          this.render(tab);
+        },
+
+        open(id) {
+          const notif = HeaderDrawers.state.notifications.find(n => n.id === id);
+          if (notif) {
+            notif.unread = false;
+            this.render();
+            console.log('Abrindo notificação:', notif);
+          }
+        }
+      },
+
+      // ========================================
+      // MÓDULO: BUSCA GLOBAL
+      // ========================================
+      search: {
+        currentFilter: 'todos',
+        debounceTimer: null,
+
+        query(term) {
+          clearTimeout(this.debounceTimer);
+          this.debounceTimer = setTimeout(() => this.execute(term), 300);
+        },
+
+        execute(term) {
+          if (!term || term.length < 2) {
+            document.getElementById('searchResults').innerHTML = '';
+            return;
+          }
+
+          // Simula busca (substituir por chamada ao backend)
+          const results = [
+            { type: 'nf', title: `NF ${term}123`, subtitle: 'Fornecedor ABC • R$ 5.430,00' },
+            { type: 'fornecedor', title: `Fornecedor ${term}`, subtitle: 'CNPJ: 12.345.678/0001-90' },
+            { type: 'escola', title: `EC ${term} Sul`, subtitle: 'Plano Piloto • 450 alunos' }
+          ];
+
+          this.renderResults(results);
+          this.saveRecent(term);
+        },
+
+        renderResults(results) {
+          const container = document.getElementById('searchResults');
+          if (!container) return;
+
+          container.innerHTML = results.map(r => `
+            <div class="ae-search-result" onclick="HeaderDrawers.search.openResult('${r.type}', '${r.title}')">
+              <div class="ae-search-result-icon">
+                <span class="material-icons">${this.getIcon(r.type)}</span>
+              </div>
+              <div class="ae-search-result-info">
+                <h4>${r.title}</h4>
+                <p>${r.subtitle}</p>
+              </div>
+            </div>
+          `).join('');
+        },
+
+        getIcon(type) {
+          const icons = { nf: 'receipt_long', fornecedor: 'storefront', escola: 'school', cardapio: 'restaurant_menu' };
+          return icons[type] || 'search';
+        },
+
+        setFilter(filter) {
+          this.currentFilter = filter;
+          document.querySelectorAll('.ae-search-filter').forEach(f => f.classList.remove('active'));
+          document.querySelector(`[data-filter="${filter}"]`)?.classList.add('active');
+        },
+
+        loadRecent() {
+          const recent = JSON.parse(localStorage.getItem('ae_recent_searches') || '[]');
+          HeaderDrawers.state.recentSearches = recent.slice(0, 5);
+          this.renderRecent();
+        },
+
+        saveRecent(term) {
+          let recent = HeaderDrawers.state.recentSearches;
+          recent = [term, ...recent.filter(t => t !== term)].slice(0, 5);
+          HeaderDrawers.state.recentSearches = recent;
+          localStorage.setItem('ae_recent_searches', JSON.stringify(recent));
+          this.renderRecent();
+        },
+
+        renderRecent() {
+          const container = document.getElementById('recentSearchList');
+          if (!container) return;
+
+          container.innerHTML = HeaderDrawers.state.recentSearches.map(term => `
+            <div class="ae-search-result" onclick="document.getElementById('globalSearchInput').value='${term}'; HeaderDrawers.search.execute('${term}')">
+              <div class="ae-search-result-icon">
+                <span class="material-icons">history</span>
+              </div>
+              <div class="ae-search-result-info">
+                <h4>${term}</h4>
+              </div>
+            </div>
+          `).join('');
+        },
+
+        openResult(type, title) {
+          console.log('Abrindo resultado:', type, title);
+          HeaderDrawers.close();
+        }
+      },
+
+      // ========================================
+      // MÓDULO: CALENDÁRIO
+      // ========================================
+      calendar: {
+        render() {
+          const date = HeaderDrawers.state.currentMonth;
+          const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+          
+          document.getElementById('calendarMonth').textContent = 
+            `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+
+          this.renderGrid();
+          this.renderEvents();
+        },
+
+        renderGrid() {
+          const grid = document.getElementById('calendarGrid');
+          if (!grid) return;
+
+          const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+          let html = weekdays.map(d => `<div class="ae-calendar-weekday">${d}</div>`).join('');
+
+          const date = HeaderDrawers.state.currentMonth;
+          const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+          const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+          const today = new Date();
+
+          // Dias do mês anterior
+          for (let i = 0; i < firstDay.getDay(); i++) {
+            const d = new Date(firstDay);
+            d.setDate(d.getDate() - (firstDay.getDay() - i));
+            html += `<div class="ae-calendar-day other-month">${d.getDate()}</div>`;
+          }
+
+          // Dias do mês atual
+          for (let i = 1; i <= lastDay.getDate(); i++) {
+            const isToday = today.getDate() === i && 
+                           today.getMonth() === date.getMonth() && 
+                           today.getFullYear() === date.getFullYear();
+            const hasEvent = [5, 12, 15, 20, 25].includes(i); // Exemplo
+            html += `<div class="ae-calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''}" 
+                         onclick="HeaderDrawers.calendar.selectDay(${i})">${i}</div>`;
+          }
+
+          grid.innerHTML = html;
+        },
+
+        renderEvents() {
+          const container = document.getElementById('calendarEvents');
+          if (!container) return;
+
+          // Eventos de exemplo
+          const events = [
+            { time: '08:00', title: 'Entrega - Fornecedor ABC', type: 'entrega', local: 'EC 304 Sul' },
+            { time: '10:30', title: 'Revisão de Cardápio', type: 'cardapio', local: 'UNIAE' },
+            { time: '14:00', title: 'Entrega - Fornecedor XYZ', type: 'entrega', local: 'EC 102 Norte' }
+          ];
+
+          container.innerHTML = events.map(e => `
+            <div class="ae-calendar-event ${e.type}">
+              <div class="ae-calendar-event-time">${e.time}</div>
+              <div class="ae-calendar-event-info">
+                <h4>${e.title}</h4>
+                <p>${e.local}</p>
+              </div>
+            </div>
+          `).join('');
+        },
+
+        prevMonth() {
+          HeaderDrawers.state.currentMonth.setMonth(HeaderDrawers.state.currentMonth.getMonth() - 1);
+          this.render();
+        },
+
+        nextMonth() {
+          HeaderDrawers.state.currentMonth.setMonth(HeaderDrawers.state.currentMonth.getMonth() + 1);
+          this.render();
+        },
+
+        selectDay(day) {
+          console.log('Dia selecionado:', day);
+          // Carregar eventos do dia
+        }
+      },
+
+      // ========================================
+      // MÓDULO: STATUS DE ENTREGAS
+      // ========================================
+      delivery: {
+        load() {
+          // Dados de exemplo
+          HeaderDrawers.state.deliveries = [
+            { id: 1, escola: 'EC 304 Sul', fornecedor: 'Fornecedor ABC', status: 'entregue', hora: '08:45' },
+            { id: 2, escola: 'EC 102 Norte', fornecedor: 'Fornecedor XYZ', status: 'em-transito', hora: '10:30' },
+            { id: 3, escola: 'EC 405 Sul', fornecedor: 'Fornecedor ABC', status: 'pendente', hora: '11:00' },
+            { id: 4, escola: 'CEF 01 Lago Sul', fornecedor: 'Fornecedor DEF', status: 'problema', hora: '09:15' },
+            { id: 5, escola: 'EC 316 Norte', fornecedor: 'Fornecedor XYZ', status: 'entregue', hora: '07:30' }
+          ];
+          this.render();
+        },
+
+        render() {
+          const list = document.getElementById('deliveryList');
+          if (!list) return;
+
+          const deliveries = HeaderDrawers.state.deliveries;
+          
+          // Atualiza contadores
+          document.getElementById('deliveryDone').textContent = deliveries.filter(d => d.status === 'entregue').length;
+          document.getElementById('deliveryPending').textContent = deliveries.filter(d => d.status === 'pendente' || d.status === 'em-transito').length;
+          document.getElementById('deliveryProblem').textContent = deliveries.filter(d => d.status === 'problema').length;
+
+          list.innerHTML = deliveries.map(d => `
+            <div class="ae-delivery-item" onclick="HeaderDrawers.delivery.open(${d.id})">
+              <div class="ae-delivery-status ${d.status}"></div>
+              <div class="ae-delivery-info">
+                <h4>${d.escola}</h4>
+                <p>${d.fornecedor}</p>
+              </div>
+              <div class="ae-delivery-time">${d.hora}</div>
+            </div>
+          `).join('');
+        },
+
+        open(id) {
+          console.log('Abrindo entrega:', id);
+          HeaderDrawers.close();
+        }
+      },
+
+      // ========================================
+      // MÓDULO: AJUDA RÁPIDA
+      // ========================================
+      help: {
+        toggleFaq(element) {
+          element.classList.toggle('expanded');
+          const icon = element.querySelector('.material-icons ');
+          if (icon) {
+            icon.textContent = element.classList.contains('expanded') ? 'expand_less' : 'expand_more';
+          }
+        },
+
+        openCategory(category) {
+          console.log('Abrindo categoria de ajuda:', category);
+        },
+
+        openSupport() {
+          console.log('Abrindo suporte');
+          // Integrar com sistema de suporte
+        }
+      }
+    };
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => HeaderDrawers.init());
+
+    // Expor globalmente
+    window.HeaderDrawers = HeaderDrawers;
+  </script>
+
+<script>
+/* codex-school-community-ux-script: pequenos ajustes de contexto escolar */
+(function() {
+  if (window.__codexSchoolCommunityUx) return;
+  window.__codexSchoolCommunityUx = true;
+
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  }
+
+  ready(function() {
+    document.documentElement.setAttribute('data-community-context', 'school');
+
+    document.querySelectorAll('form').forEach(function(form) {
+      if (!form.getAttribute('aria-label') && !form.getAttribute('aria-labelledby')) {
+        form.setAttribute('aria-label', 'Formulario da comunidade escolar');
+      }
+    });
+
+    document.querySelectorAll('input, select, textarea').forEach(function(field) {
+      if (!field.id && field.name) field.id = 'field-' + String(field.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      if (field.required && !field.getAttribute('aria-required')) field.setAttribute('aria-required', 'true');
+      if (!field.getAttribute('autocomplete')) {
+        var type = (field.getAttribute('type') || '').toLowerCase();
+        var name = (field.getAttribute('name') || field.id || '').toLowerCase();
+        if (type === 'email' || name.indexOf('email') >= 0) field.setAttribute('autocomplete', 'email');
+        else if (name.indexOf('nome') >= 0 || name.indexOf('name') >= 0) field.setAttribute('autocomplete', 'name');
+        else if (name.indexOf('senha') >= 0 || name.indexOf('password') >= 0) field.setAttribute('autocomplete', 'current-password');
+      }
+    });
+
+    document.querySelectorAll('button:not([type])').forEach(function(button) {
+      button.setAttribute('type', 'button');
+    });
+  });
+})();
+</script>
+
+<script>
+/* codex-project-behavior-standardization: microcomportamentos compartilhados */
+(function() {
+  if (window.__codexProjectBehaviorStandardization) return;
+  window.__codexProjectBehaviorStandardization = true;
+
+  var SUBMIT_LOCK_MS = 2500;
+  var invalidFocusPending = false;
+
+  function isElement(value) {
+    return value && value.nodeType === 1;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function unlockForm(form, button) {
+    if (isElement(form)) {
+      delete form.dataset.codexSubmitting;
+      if (form.getAttribute('aria-busy') === 'true') form.setAttribute('aria-busy', 'false');
+    }
+
+    if (isElement(button) && button.dataset.codexSubmitLocked === 'true') {
+      delete button.dataset.codexSubmitLocked;
+      button.disabled = false;
+      button.removeAttribute('aria-disabled');
+    }
+  }
+
+  function restoreSubmitLocks(scope) {
+    var root = scope && scope.querySelectorAll ? scope : document;
+
+    root.querySelectorAll('form[data-codex-submitting="true"]').forEach(function(form) {
+      unlockForm(form);
+    });
+
+    root.querySelectorAll('[data-codex-submit-locked="true"]').forEach(function(button) {
+      unlockForm(null, button);
+    });
+  }
+
+  document.addEventListener('submit', function(event) {
+    var form = event.target;
+    if (!isElement(form) || String(form.tagName).toLowerCase() !== 'form') return;
+    if (form.hasAttribute('data-no-submit-lock')) return;
+
+    if (form.dataset.codexSubmitting === 'true') {
+      event.preventDefault();
+      return;
+    }
+
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+    form.dataset.codexSubmitting = 'true';
+    form.setAttribute('aria-busy', 'true');
+
+    var button = event.submitter || form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+    if (isElement(button) && !button.disabled && !button.hasAttribute('data-no-submit-lock')) {
+      button.dataset.codexSubmitLocked = 'true';
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    }
+
+    window.setTimeout(function() {
+      unlockForm(form, button);
+    }, SUBMIT_LOCK_MS);
+  }, true);
+
+  document.addEventListener('invalid', function(event) {
+    var field = event.target;
+    if (!isElement(field) || invalidFocusPending) return;
+    invalidFocusPending = true;
+
+    window.setTimeout(function() {
+      invalidFocusPending = false;
+      if (!document.documentElement.contains(field)) return;
+      try {
+        field.scrollIntoView({ block: 'center', inline: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        field.focus({ preventScroll: true });
+      } catch (error) {
+        field.focus();
+      }
+    }, 0);
+  }, true);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key !== 'Escape') return;
+    var closedSomething = false;
+
+    var dialogs = Array.prototype.slice.call(document.querySelectorAll('dialog[open]'));
+    var dialog = dialogs[dialogs.length - 1];
+    if (dialog && typeof dialog.close === 'function') {
+      dialog.close();
+      closedSomething = true;
+    }
+
+    if (!closedSomething) {
+      var details = Array.prototype.slice.call(document.querySelectorAll('details[open]'));
+      var detail = details[details.length - 1];
+      if (detail) {
+        detail.removeAttribute('open');
+        closedSomething = true;
+      }
+    }
+
+    document.querySelectorAll('[aria-expanded="true"]').forEach(function(toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      closedSomething = true;
+    });
+
+    if (closedSomething) event.preventDefault();
+  }, true);
+
+  window.addEventListener('pageshow', function() {
+    restoreSubmitLocks(document);
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') restoreSubmitLocks(document);
+  });
+})();
+</script>
+
+    </main>
+</body>
+</html>
+
+
+
+
+
+

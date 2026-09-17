@@ -1,0 +1,1999 @@
+<style id="up-oracular-design-system">
+:root {
+  color-scheme: dark;
+  --uo-bg: #15171c;
+  --uo-panel: #20242b;
+  --uo-text: #e9ecf1;
+  --uo-muted: #b2b9c4;
+  --uo-border: #343941;
+  --uo-accent: #7aa2d6;
+  --uo-radius-group: 10px;
+  --uo-radius-control: 8px;
+}
+
+html, body {
+  background: var(--uo-bg) !important;
+  color: var(--uo-text) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body, input, select, textarea, button {
+  color: var(--uo-text);
+}
+
+.card, .panel, .modal, .dialog, dialog, .container,
+.box, .widget, .section, .sidebar, .drawer, .popover,
+[role="dialog"], [class*="card"], [class*="panel"] {
+  background-color: var(--uo-panel) !important;
+  border-color: var(--uo-border) !important;
+  border-radius: var(--uo-radius-group) !important;
+}
+
+button, input, select, textarea, .btn, .button,
+[role="button"], [role="menuitem"], .dropdown-item,
+.menu-item, [class*="button"], [class*="dropdown-item"] {
+  border-radius: var(--uo-radius-control) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  background-color: var(--uo-panel) !important;
+  border: 1px solid var(--uo-border) !important;
+  padding: 8px !important;
+  box-sizing: border-box;
+}
+
+label, .form-label, [class*="form-label"] {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--uo-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.uo-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.uo-feedback-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  min-width: 220px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--uo-border);
+  border-radius: var(--uo-radius-group);
+  background: var(--uo-panel);
+  color: var(--uo-text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.uo-feedback-box.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.uo-feedback-box[data-kind="ok"] {
+  border-color: #8fc2a6;
+  color: #8fc2a6;
+}
+
+.uo-feedback-box[data-kind="err"] {
+  border-color: #d98b93;
+  color: #d98b93;
+}
+
+form[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+form[aria-busy="true"] :is(button, input[type="submit"], input[type="button"]) {
+  pointer-events: none;
+}
+
+button, .btn-primary, .button-primary,
+[class*="primary"][role="button"] {
+  background-color: var(--uo-accent) !important;
+}
+
+p, small, .muted, .secondary, .subtitle,
+[class*="muted"], [class*="secondary"] {
+  color: var(--uo-muted) !important;
+}
+
+hr, table, th, td, fieldset {
+  border-color: var(--uo-border) !important;
+}
+
+a {
+  color: var(--uo-accent);
+}
+
+/* Geometrias funcionais permanecem circulares. */
+.avatar, .spinner, .loading-ring, .dot, .status-dot,
+[class*="avatar"], [class*="spinner"], [class*="loading-ring"] {
+  border-radius: 50% !important;
+}
+</style>
+<script id="up-oracular-form-feedback">
+(function () {
+  'use strict';
+  if (window.UpOracularFeedback) return;
+
+  var timer = null;
+  function notify(kind, message) {
+    var box = document.getElementById('uo-feedback-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'uo-feedback-box';
+      box.className = 'uo-feedback-box';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      document.body.appendChild(box);
+    }
+    box.dataset.kind = kind === 'err' ? 'err' : 'ok';
+    box.textContent = String(message || (kind === 'err' ? 'Nao foi possivel concluir.' : 'Operacao concluida.'));
+    box.classList.add('is-visible');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      box.classList.remove('is-visible');
+    }, 1000);
+  }
+
+  function connectLabels(form) {
+    form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field, index) {
+      var id = field.id || ('uo-field-' + index + '-' + Math.random().toString(36).slice(2, 7));
+      field.id = id;
+      var label = form.querySelector('label[for="' + id + '"]');
+      if (!label) {
+        var sibling = field.previousElementSibling;
+        if (sibling && sibling.tagName === 'LABEL') {
+          sibling.htmlFor = id;
+          label = sibling;
+        }
+      }
+      if (label && field.parentElement && !field.parentElement.classList.contains('uo-field')) {
+        field.parentElement.classList.add('uo-field');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(connectLabels);
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    form.setAttribute('aria-busy', 'true');
+    notify('ok', 'Enviando...');
+    window.setTimeout(function () {
+      if (form.getAttribute('aria-busy') === 'true') {
+        form.removeAttribute('aria-busy');
+      }
+    }, 10000);
+  }, true);
+
+  window.UpOracularFeedback = {
+    ok: function (message) { notify('ok', message); },
+    err: function (message) { notify('err', message); },
+    done: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('ok', message);
+    },
+    fail: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('err', message);
+    }
+  };
+}());
+</script>
+
+<style>
+/* codex-s20-mobile-first: Samsung S20 / Chrome mobile baseline (360x800 CSS px) */
+@media screen {
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+  :where(body) {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  :where(main, .app, .page, .container, .content, .main-content, .dashboard, .view) {
+    max-width: 100%;
+  }
+  :where(img, video, canvas, svg) {
+    max-width: 100%;
+    height: auto;
+  }
+  :where(p, li, td, th, label, legend, button, a, h1, h2, h3, h4, h5, h6) {
+    overflow-wrap: anywhere;
+  }
+  :where(input, select, textarea, button) {
+    font: inherit;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    font-size: max(16px, 1rem);
+  }
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+  :where(.table-wrap, .table-wrapper, .table-responsive, .table-container, .responsive-table, .data-table-wrapper) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 480px) {
+  :where(body) {
+    font-size: 16px;
+  }
+  :where(.grid, .cards, .dashboard-grid, .stats-grid, .form-grid, .filters-grid) {
+    grid-template-columns: 1fr !important;
+  }
+  :where(.toolbar, .actions, .button-row, .filters, .form-actions, .modal-actions, .header-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(.btn, button, input, select, textarea) {
+    min-height: 44px;
+  }
+  :where(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :where(th, td) {
+    white-space: nowrap;
+  }
+  :where(.card, .panel, .modal, .dialog, .drawer) {
+    max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 360px) {
+  :where(body) {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  :where(.card, .panel, .section, .modal-content, .dialog-content) {
+    padding: 12px;
+  }
+  :where(h1) {
+    font-size: clamp(1.45rem, 1.2rem + 2vw, 2rem);
+  }
+  :where(h2) {
+    font-size: clamp(1.2rem, 1rem + 1.4vw, 1.55rem);
+  }
+}
+
+
+
+/* codex-school-community-ux: ajustes finos para uso recorrente por comunidade escolar */
+:root {
+  --codex-school-focus: #ffd166;
+  --codex-school-touch: 44px;
+  --codex-school-radius: 8px;
+  --codex-school-field-radius: 7px;
+  --codex-school-form-gap: 14px;
+  --codex-school-field-border: rgba(120, 132, 156, 0.45);
+  --codex-school-field-bg: rgba(255, 255, 255, 0.96);
+  --codex-school-field-text: #1f2937;
+  --codex-school-muted-text: #64748b;
+  --codex-school-soft-surface: rgba(248, 250, 252, 0.82);
+  --codex-school-safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+:where(html) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+:where(body) {
+  overscroll-behavior-y: contain;
+}
+
+:where(p, li, dd, dt, blockquote, figcaption, label, td, th) {
+  line-height: 1.5;
+}
+
+:where(main, .main, .content, .page, .app, .app-shell, .container, .dashboard, .workspace) {
+  padding-bottom: var(--codex-school-safe-bottom);
+}
+
+:where(a, button, .btn, .button, [role="button"], input, select, textarea, summary) {
+  min-height: var(--codex-school-touch);
+  touch-action: manipulation;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="submit"], input[type="button"]) {
+  border-radius: var(--codex-school-radius) !important;
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--codex-school-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+  font-weight: 700;
+}
+
+:where(form) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(fieldset) {
+  border-radius: var(--codex-school-radius) !important;
+  border-color: var(--codex-school-field-border);
+}
+
+:where(legend) {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+:where(.form-group, .input-field, .field, .form-field, .control-group) {
+  margin-bottom: var(--codex-school-form-gap);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: min(100%, 100%);
+  border-radius: var(--codex-school-field-radius) !important;
+  border-color: var(--codex-school-field-border) !important;
+  background-color: var(--input-bg, var(--field-bg, var(--codex-school-field-bg)));
+  color: var(--input-text, var(--text-color, var(--codex-school-field-text)));
+  font-size: 16px !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--placeholder-color, #94a3b8);
+  opacity: 1;
+}
+
+:where(input[required], select[required], textarea[required]) {
+  border-left: 3px solid var(--codex-gentle-primary-strong, #aecbfa) !important;
+}
+
+:where(input:disabled, select:disabled, textarea:disabled, button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed !important;
+  opacity: 0.68;
+}
+
+:where(.help, .hint, .help-text, .form-help, small) {
+  line-height: 1.45;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+}
+
+:where(.actions, .form-actions, .button-row, .toolbar, .topbar, nav, [role="toolbar"]) {
+  gap: 8px;
+}
+
+:where(.actions, .form-actions, .button-row) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+:where(.actions, .form-actions, .button-row) > :where(button, .btn, .button, [role="button"]) {
+  flex: 1 1 148px;
+}
+
+:where(.card, .panel, .box, .tile, .item, .list-item, .action-card) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.section, .surface, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.filters, .search-panel, .form-section) {
+  border-radius: var(--codex-school-radius) !important;
+  background: var(--codex-school-soft-surface);
+}
+
+:where(table) {
+  border-collapse: collapse;
+}
+
+:where(table, .table, .data-table) {
+  max-width: 100%;
+}
+
+:where(.table-wrap, .table-wrapper, .table-container, .responsive-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(th, td) {
+  vertical-align: top;
+}
+
+:where(.toast, .alert, .notice, .snackbar, [role="status"], [role="alert"]) {
+  border-radius: var(--codex-school-radius) !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+  :where(body) {
+    font-size: 16px;
+  }
+
+  :where(h1) {
+    font-size: clamp(1.55rem, 1.35rem + 1vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  :where(h2) {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  :where(.toolbar, .topbar, nav, [role="toolbar"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  :where(.hide-mobile, .desktop-only) {
+    display: none !important;
+  }
+}
+</style>
+<style>
+/* codex-design-system: shared contrast, button sizing and minimal button icon styling */
+:root {
+  --codex-ds-primary: var(--primary, var(--color-primary, var(--theme-primary, #1a73e8)));
+  --codex-ds-primary-strong: var(--primary-dark, var(--color-primary-strong, var(--theme-primary-dark, #1558d6)));
+  --codex-ds-text: var(--text, var(--color-ink, var(--text-primary, #202124)));
+  --codex-ds-muted: var(--muted, var(--color-muted, var(--text-secondary, #5f6368)));
+  --codex-ds-surface: var(--surface, var(--color-surface, var(--bg-surface, #ffffff)));
+  --codex-ds-border: var(--border, var(--color-border, var(--line, #dadce0)));
+  --codex-ds-focus: #1a73e8;
+  --codex-ds-radius: 8px;
+}
+
+:where(body) {
+  color: var(--codex-ds-text);
+}
+
+:where(.text-muted, .muted, .secondary, small, figcaption, caption) {
+  color: var(--codex-ds-muted);
+}
+
+:where(a) {
+  color: var(--codex-ds-primary);
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--codex-ds-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: var(--codex-ds-primary);
+  color: #ffffff;
+}
+
+:where(.btn:hover, .button:hover, button:hover, [role="button"]:hover) {
+  filter: none;
+}
+
+:where(.btn-primary:hover, .button-primary:hover, button[type="submit"]:hover, input[type="submit"]:hover) {
+  background: var(--codex-ds-primary-strong);
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: var(--codex-ds-surface);
+  color: var(--codex-ds-text);
+  border-color: var(--codex-ds-border);
+}
+
+:where(.btn-small, .btn.sm, .button-small, .button.sm) {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+:where(.icon-button, .btn-icon, button.icon, button[aria-label]:not([aria-label=""])) {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: var(--codex-ds-radius);
+}
+
+:where(button svg, .btn svg, .button svg, [role="button"] svg, button .material-icons, .btn .material-icons, .button .material-icons, button .icon, .btn .icon, .button .icon) {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  stroke-width: 2;
+  flex: 0 0 auto;
+}
+
+:where(button .material-icons, .btn .material-icons, .button .material-icons) {
+  font-feature-settings: "liga";
+  vertical-align: middle;
+}
+
+:where(button:focus-visible, .btn:focus-visible, .button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 3px solid var(--codex-ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--codex-ds-surface) 80%, transparent);
+}
+
+:where(button:disabled, .btn:disabled, .button:disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  :where(.btn, .button, button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    width: auto;
+  }
+  :where(.form-actions > .btn, .form-actions > .button, .form-actions > button, .actions > .btn, .actions > .button, .actions > button) {
+    width: 100%;
+  }
+}
+</style>
+<style>
+/* codex-gentle-dark-theme: default graphite theme with soft, kind UI accents */
+:root {
+  color-scheme: dark;
+  --codex-gentle-bg: #15171c;
+  --codex-gentle-bg-soft: #1a1d23;
+  --codex-gentle-surface: #20242b;
+  --codex-gentle-surface-2: #272b33;
+  --codex-gentle-border: #343941;
+  --codex-gentle-text: #eef1f5;
+  --codex-gentle-muted: #c8ced8;
+  --codex-gentle-dim: #9aa4b2;
+  --codex-gentle-primary: #8ab4f8;
+  --codex-gentle-primary-strong: #aecbfa;
+  --codex-gentle-accent: #8fa0b8;
+  --codex-gentle-success: #9be7c1;
+  --bg: var(--codex-gentle-bg);
+  --background: var(--codex-gentle-bg);
+  --surface: var(--codex-gentle-surface);
+  --panel: var(--codex-gentle-surface);
+  --card: var(--codex-gentle-surface);
+  --text: var(--codex-gentle-text);
+  --text-main: var(--codex-gentle-text);
+  --text-primary: var(--codex-gentle-text);
+  --text-muted: var(--codex-gentle-muted);
+  --muted: var(--codex-gentle-muted);
+  --border: var(--codex-gentle-border);
+  --line: var(--codex-gentle-border);
+  --primary: var(--codex-gentle-primary);
+  --primary-dark: #6ea0ef;
+  --codex-ds-primary: var(--codex-gentle-primary);
+  --codex-ds-primary-strong: var(--codex-gentle-primary-strong);
+  --codex-ds-text: var(--codex-gentle-text);
+  --codex-ds-muted: var(--codex-gentle-muted);
+  --codex-ds-surface: var(--codex-gentle-surface);
+  --codex-ds-border: var(--codex-gentle-border);
+}
+
+:where(html, body) {
+  background: var(--codex-gentle-bg) !important;
+  color: var(--codex-gentle-text) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(main, .app, .page, .layout, .content, .main-content, .app-content, .container, .dashboard, .view) {
+  background-color: transparent !important;
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(.card, .panel, .section, .surface, .box, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu, .table-wrapper, .table-wrap, .table-container, form) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+              var(--codex-gentle-surface) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+}
+
+:where(header, nav, aside, footer, .navbar, .sidebar, .topbar, .app-header, .app-footer) {
+  background: rgba(12, 15, 21, 0.92) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, label, span, strong, td, th, legend, small, caption) {
+  color: inherit;
+}
+
+:where(h1, .page-title, .view-title) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(h1:not(.no-emoji), .page-title:not(.no-emoji), .view-title:not(.no-emoji))::after {
+  content: "";
+  font-size: 0.82em;
+}
+
+:where(.empty-state, .empty, .no-data, .no-results, .loading, .placeholder)::before {
+  content: "";
+}
+
+:where(.text-muted, .muted, .secondary, .subtitle, .description, .help-text, .hint, small, figcaption, caption) {
+  color: var(--codex-gentle-muted) !important;
+}
+
+:where(a) {
+  color: var(--codex-gentle-primary-strong) !important;
+}
+
+:where(input, select, textarea) {
+  background: var(--codex-gentle-bg-soft) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--codex-gentle-dim) !important;
+}
+
+:where(table) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(th) {
+  color: var(--codex-gentle-muted) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:where(td) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  background: var(--codex-gentle-surface-2) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: none !important;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: linear-gradient(180deg, rgba(174, 203, 250, 0.24), rgba(138, 180, 248, 0.16)),
+              #182235 !important;
+  color: #f8fbff !important;
+  border-color: rgba(174, 203, 250, 0.45) !important;
+}
+
+:where(button[type="submit"]:not(.icon-button):not(.btn-icon), input[type="submit"])::after {
+  content: "";
+  font-size: 0.9em;
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(.badge, .tag, .chip, .pill, .status) {
+  background: rgba(248, 199, 220, 0.12) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: rgba(248, 199, 220, 0.26) !important;
+}
+
+:where(hr) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(svg, canvas, img) {
+  color: inherit;
+}
+</style>
+<!--
+  ========================================
+  DATA TABLE COMPONENT - ALIMENTAÇÃO ESCOLAR
+  Tabela responsiva que se transforma em cards em mobile
+  ========================================
+  
+  Uso: <?!= include('UI_DataTable'); ?>
+-->
+
+<style>
+/* ========================================
+   DATA TABLE - DESIGN SYSTEM
+   ======================================== */
+.ae-datatable-container {
+  background: var(--ae-bg-card, #FFFFFF);
+  border-radius: var(--ae-radius-lg, 12px);
+  box-shadow: var(--ae-shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+  overflow: hidden;
+}
+
+/* Toolbar */
+.ae-datatable-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-datatable-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ae-text-primary, #263238);
+  flex: 1;
+}
+
+.ae-datatable-search {
+  position: relative;
+  min-width: 200px;
+}
+
+.ae-datatable-search input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid var(--ae-gray-300, #E0E0E0);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  min-height: 44px;
+}
+
+.ae-datatable-search input:focus {
+  outline: none;
+  border-color: var(--ae-primary, #2E7D32);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.ae-datatable-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ae-text-hint, #78909C);
+  font-size: 20px;
+}
+
+.ae-datatable-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ae-datatable-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--ae-bg-main, #F1F8E9);
+  border: none;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ae-text-primary, #263238);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  min-height: 44px;
+}
+
+.ae-datatable-btn:hover {
+  background: var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-datatable-btn-primary {
+  background: var(--ae-primary, #2E7D32);
+  color: white;
+}
+
+.ae-datatable-btn-primary:hover {
+  background: var(--ae-primary-700, #388E3C);
+}
+
+/* Filtros */
+.ae-datatable-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--ae-gray-50, #FAFAFA);
+  border-bottom: 1px solid var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid var(--ae-gray-300, #E0E0E0);
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  min-height: 40px;
+}
+
+.ae-filter-chip:hover {
+  border-color: var(--ae-primary, #2E7D32);
+}
+
+.ae-filter-chip.active {
+  background: var(--ae-primary, #2E7D32);
+  color: white;
+  border-color: var(--ae-primary, #2E7D32);
+}
+
+.ae-filter-chip .ae-chip-remove {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.1);
+  border-radius: 9999px;
+  font-size: 12px;
+}
+
+/* ========================================
+   TABELA DESKTOP
+   ======================================== */
+.ae-datatable-wrapper {
+  overflow-x: auto;
+}
+
+.ae-datatable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ae-datatable th,
+.ae-datatable td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-datatable th {
+  background: var(--ae-gray-50, #FAFAFA);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ae-text-secondary, #546E7A);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.ae-datatable th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.ae-datatable th.sortable:hover {
+  background: var(--ae-gray-100, #F5F5F5);
+}
+
+.ae-datatable th .ae-sort-icon {
+  margin-left: 4px;
+  opacity: 0.3;
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+.ae-datatable th.sorted-asc .ae-sort-icon,
+.ae-datatable th.sorted-desc .ae-sort-icon {
+  opacity: 1;
+  color: var(--ae-primary, #2E7D32);
+}
+
+.ae-datatable td {
+  font-size: 0.875rem;
+  color: var(--ae-text-primary, #263238);
+  vertical-align: middle;
+}
+
+.ae-datatable tbody tr {
+  transition: background 0.15s;
+}
+
+.ae-datatable tbody tr:hover {
+  background: var(--ae-primary-50, #E8F5E9);
+}
+
+.ae-datatable tbody tr.selected {
+  background: var(--ae-primary-100, #C8E6C9);
+}
+
+/* Checkbox de seleção */
+.ae-datatable-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ae-primary, #2E7D32);
+  cursor: pointer;
+}
+
+/* Célula com ações */
+.ae-datatable-cell-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.ae-datatable-action-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-xs, 6px);
+  color: var(--ae-text-secondary, #546E7A);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.ae-datatable-action-btn:hover {
+  background: var(--ae-gray-100, #F5F5F5);
+  color: var(--ae-primary, #2E7D32);
+}
+
+.ae-datatable-action-btn.danger:hover {
+  background: var(--ae-error-light, #FFEBEE);
+  color: var(--ae-accent, #C62828);
+}
+
+/* Status badges */
+.ae-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-lg, 12px);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.ae-status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ae-status-success { background: #E8F5E9; color: #2E7D32; }
+.ae-status-warning { background: #FFF8E1; color: #F9A825; }
+.ae-status-error { background: #FFEBEE; color: #C62828; }
+.ae-status-info { background: #E3F2FD; color: #1565C0; }
+.ae-status-neutral { background: #F5F5F5; color: #757575; }
+
+/* ========================================
+   CARDS MOBILE (< 768px)
+   ======================================== */
+.ae-datatable-cards {
+  display: none;
+  padding: 12px;
+  gap: 12px;
+}
+
+.ae-datatable-card {
+  background: white;
+  border: 1px solid var(--ae-gray-200, #EEEEEE);
+  border-radius: var(--radius-lg, 12px);
+  padding: 16px;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.ae-datatable-card:hover {
+  border-color: var(--ae-primary-light, #4CAF50);
+  box-shadow: var(--ae-shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+}
+
+.ae-datatable-card.selected {
+  border-color: var(--ae-primary, #2E7D32);
+  background: var(--ae-primary-50, #E8F5E9);
+}
+
+.ae-datatable-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ae-datatable-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ae-text-primary, #263238);
+}
+
+.ae-datatable-card-subtitle {
+  font-size: 0.75rem;
+  color: var(--ae-text-secondary, #546E7A);
+  margin-top: 2px;
+}
+
+.ae-datatable-card-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.ae-datatable-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ae-datatable-card-field.full-width {
+  grid-column: span 2;
+}
+
+.ae-datatable-card-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--ae-text-hint, #78909C);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ae-datatable-card-value {
+  font-size: 0.85rem;
+  color: var(--ae-text-primary, #263238);
+}
+
+.ae-datatable-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-datatable-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ae-card-action-btn {
+  padding: 8px 14px;
+  background: var(--ae-bg-main, #F1F8E9);
+  border: none;
+  border-radius: var(--radius-xs, 6px);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ae-text-primary, #263238);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  min-height: 44px;
+}
+
+.ae-card-action-btn:hover {
+  background: var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-card-action-btn.primary {
+  background: var(--ae-primary, #2E7D32);
+  color: white;
+}
+
+/* Responsividade: Mostrar cards em mobile */
+@media (max-width: 767px) {
+  .ae-datatable-wrapper {
+    display: none;
+  }
+  
+  .ae-datatable-cards {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .ae-datatable-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ae-datatable-search {
+    width: 100%;
+  }
+  
+  .ae-datatable-actions {
+    justify-content: flex-end;
+  }
+}
+
+/* ========================================
+   PAGINAÇÃO
+   ======================================== */
+.ae-datatable-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--ae-gray-200, #EEEEEE);
+  background: var(--ae-gray-50, #FAFAFA);
+}
+
+.ae-datatable-info {
+  font-size: 0.8rem;
+  color: var(--ae-text-secondary, #546E7A);
+}
+
+.ae-datatable-pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ae-pagination-btn {
+  min-width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--ae-gray-300, #E0E0E0);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.85rem;
+  color: var(--ae-text-primary, #263238);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.ae-pagination-btn:hover:not(:disabled) {
+  background: var(--ae-gray-100, #F5F5F5);
+  border-color: var(--ae-primary, #2E7D32);
+}
+
+.ae-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ae-pagination-btn.active {
+  background: var(--ae-primary, #2E7D32);
+  border-color: var(--ae-primary, #2E7D32);
+  color: white;
+}
+
+.ae-pagination-ellipsis {
+  padding: 0 8px;
+  color: var(--ae-text-hint, #78909C);
+}
+
+.ae-page-size-select {
+  padding: 8px 12px;
+  border: 1px solid var(--ae-gray-300, #E0E0E0);
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.8rem;
+  font-family: inherit;
+  background: white;
+  cursor: pointer;
+}
+
+/* ========================================
+   ESTADOS VAZIOS E LOADING
+   ======================================== */
+.ae-datatable-empty {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.ae-datatable-empty-icon {
+  font-size: 64px;
+  color: var(--ae-gray-300, #E0E0E0);
+  margin-bottom: 16px;
+}
+
+.ae-datatable-empty-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ae-text-primary, #263238);
+  margin-bottom: 8px;
+}
+
+.ae-datatable-empty-desc {
+  font-size: 0.875rem;
+  color: var(--ae-text-secondary, #546E7A);
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.ae-datatable-loading {
+  padding: 40px;
+  text-align: center;
+}
+
+.ae-datatable-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ae-gray-200, #EEEEEE);
+  border-top-color: var(--ae-primary, #2E7D32);
+  border-radius: 50%;
+  animation: ae-spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes ae-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Skeleton loading */
+.ae-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: ae-skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes ae-skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ae-skeleton-row {
+  display: flex;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-skeleton-cell {
+  height: 20px;
+  flex: 1;
+}
+
+.ae-skeleton-cell.small { max-width: 80px; }
+.ae-skeleton-cell.medium { max-width: 150px; }
+</style>
+
+<!-- Exemplo de estrutura HTML -->
+<template id="dataTableTemplate">
+  <div class="ae-datatable-container">
+    <!-- Toolbar -->
+    <div class="ae-datatable-toolbar">
+      <h3 class="ae-datatable-title">Título da Tabela</h3>
+      <div class="ae-datatable-search">
+        <span class="material-icons">search</span>
+        <input inputmode="text" type="text" placeholder="Buscar..." data-search autocomplete="name">
+      </div>
+      <div class="ae-datatable-actions">
+        <button class="ae-datatable-btn" data-action="filter">
+          <span class="material-icons">filter_list</span>
+          Filtros
+        </button>
+        <button class="ae-datatable-btn" data-action="export">
+          <span class="material-icons">download</span>
+          Exportar
+        </button>
+        <button class="ae-datatable-btn ae-datatable-btn-primary" data-action="add">
+          <span class="material-icons">add</span>
+          Novo
+        </button>
+      </div>
+    </div>
+    
+    <!-- Filtros ativos -->
+    <div class="ae-datatable-filters" data-filters style="display:none;">
+      <!-- Chips de filtro dinâmicos -->
+    </div>
+    
+    <!-- Tabela Desktop -->
+    <div class="ae-datatable-wrapper">
+      <table class="ae-datatable">
+        <thead>
+          <tr data-header></tr>
+        </thead>
+        <tbody data-body></tbody>
+      </table>
+    </div>
+    
+    <!-- Cards Mobile -->
+    <div class="ae-datatable-cards" data-cards></div>
+    
+    <!-- Footer com paginação -->
+    <div class="ae-datatable-footer">
+      <div class="ae-datatable-info" data-info>
+        Mostrando 1-10 de 100 registros
+      </div>
+      <div class="ae-datatable-pagination" data-pagination></div>
+    </div>
+  </div>
+</template>
+
+<script>
+/**
+ * ========================================
+ * AE DATA TABLE COMPONENT
+ * Tabela responsiva com ordenação, filtros e paginação
+ * ========================================
+ */
+class AEDataTable {
+  constructor(container, options = {}) {
+    this.container = typeof container === 'string' 
+      ? document.querySelector(container) 
+      : container;
+    
+    this.options = {
+      columns: [],
+      data: [],
+      pageSize: 10,
+      pageSizes: [10, 25, 50, 100],
+      searchable: true,
+      sortable: true,
+      selectable: false,
+      actions: [],
+      emptyMessage: 'Nenhum registro encontrado',
+      cardTitleField: null,
+      cardSubtitleField: null,
+      onRowClick: null,
+      onSelectionChange: null,
+      ...options
+    };
+    
+    this.state = {
+      filteredData: [],
+      currentPage: 1,
+      sortColumn: null,
+      sortDirection: 'asc',
+      searchTerm: '',
+      selectedRows: new Set(),
+      filters: {}
+    };
+    
+    this.init();
+  }
+  
+  init() {
+    this.render();
+    this.bindEvents();
+    this.setData(this.options.data);
+  }
+  
+  render() {
+    this.container.innerHTML = `
+      <div class="ae-datatable-container">
+        <div class="ae-datatable-toolbar">
+          <h3 class="ae-datatable-title">${this.options.title || ''}</h3>
+          ${this.options.searchable ? `
+            <div class="ae-datatable-search">
+              <span class="material-icons">search</span>
+              <input inputmode="text" type="text" placeholder="Buscar..." data-search autocomplete="name">
+            </div>
+          ` : ''}
+          <div class="ae-datatable-actions">
+            ${this.options.actions.map(a => `
+              <button class="ae-datatable-btn ${a.primary ? 'ae-datatable-btn-primary' : ''}" data-action="${a.id}">
+                <span class="material-icons">${a.icon}</span>
+                ${a.label}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        <div class="ae-datatable-filters" data-filters style="display:none;"></div>
+        <div class="ae-datatable-wrapper">
+          <table class="ae-datatable">
+            <thead><tr data-header></tr></thead>
+            <tbody data-body></tbody>
+          </table>
+        </div>
+        <div class="ae-datatable-cards" data-cards></div>
+        <div class="ae-datatable-footer">
+          <div class="ae-datatable-info" data-info></div>
+          <div class="ae-datatable-pagination" data-pagination></div>
+        </div>
+      </div>
+    `;
+    
+    this.elements = {
+      search: this.container.querySelector('[data-search]'),
+      header: this.container.querySelector('[data-header]'),
+      body: this.container.querySelector('[data-body]'),
+      cards: this.container.querySelector('[data-cards]'),
+      info: this.container.querySelector('[data-info]'),
+      pagination: this.container.querySelector('[data-pagination]'),
+      filters: this.container.querySelector('[data-filters]')
+    };
+    
+    this.renderHeader();
+  }
+
+  renderHeader() {
+    const { columns, selectable, sortable } = this.options;
+    
+    let html = '';
+    if (selectable) {
+      html += `<th style="width:40px"><input type="checkbox" class="ae-datatable-checkbox" data-select-all></th>`;
+    }
+    
+    columns.forEach(col => {
+      const sortClass = sortable && col.sortable !== false ? 'sortable' : '';
+      const sortedClass = this.state.sortColumn === col.field 
+        ? `sorted-${this.state.sortDirection}` 
+        : '';
+      
+      html += `
+        <th class="${sortClass} ${sortedClass}" data-field="${col.field}" style="${col.width ? `width:${col.width}` : ''}">
+          ${col.label}
+          ${sortable && col.sortable !== false ? `
+            <span class="material-icons">
+              ${this.state.sortColumn === col.field 
+                ? (this.state.sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward')
+                : 'unfold_more'}
+            </span>
+          ` : ''}
+        </th>
+      `;
+    });
+    
+    if (this.options.rowActions) {
+      html += `<th style="width:100px">Ações</th>`;
+    }
+    
+    this.elements.header.innerHTML = html;
+  }
+  
+  renderBody() {
+    const { columns, selectable, rowActions } = this.options;
+    const { filteredData, currentPage } = this.state;
+    const pageSize = this.options.pageSize;
+    
+    const start = (currentPage - 1) * pageSize;
+    const pageData = filteredData.slice(start, start + pageSize);
+    
+    if (pageData.length === 0) {
+      this.elements.body.innerHTML = `
+        <tr>
+          <td colspan="${columns.length + (selectable ? 1 : 0) + (rowActions ? 1 : 0)}">
+            <div class="ae-datatable-empty">
+              <div class="ae-datatable-empty-icon">
+                <span class="material-icons" style="font-size:inherit">search_off</span>
+              </div>
+              <div class="ae-datatable-empty-title">${this.options.emptyMessage}</div>
+              <div class="ae-datatable-empty-desc">Tente ajustar os filtros ou realizar uma nova busca</div>
+            </div>
+          </td>
+        </tr>
+      `;
+      this.elements.cards.innerHTML = '';
+      return;
+    }
+    
+    // Render table rows
+    this.elements.body.innerHTML = pageData.map((row, idx) => {
+      const rowId = row.id || start + idx;
+      const isSelected = this.state.selectedRows.has(rowId);
+      
+      let html = `<tr data-row-id="${rowId}" class="${isSelected ? 'selected' : ''}">`;
+      
+      if (selectable) {
+        html += `<td><input type="checkbox" class="ae-datatable-checkbox" data-select-row="${rowId}" ${isSelected ? 'checked' : ''}></td>`;
+      }
+      
+      columns.forEach(col => {
+        const value = this.getNestedValue(row, col.field);
+        const rendered = col.render ? col.render(value, row) : this.escapeHtml(value);
+        html += `<td>${rendered}</td>`;
+      });
+      
+      if (rowActions) {
+        html += `<td><div class="ae-datatable-cell-actions">`;
+        rowActions.forEach(action => {
+          html += `
+            <button class="ae-datatable-action-btn ${action.danger ? 'danger' : ''}" 
+                    data-row-action="${action.id}" data-row-id="${rowId}" title="${action.label}">
+              <span class="material-icons">${action.icon}</span>
+            </button>
+          `;
+        });
+        html += `</div></td>`;
+      }
+      
+      html += '</tr>';
+      return html;
+    }).join('');
+    
+    // Render cards for mobile
+    this.renderCards(pageData, start);
+  }
+  
+  renderCards(pageData, startIndex) {
+    const { columns, cardTitleField, cardSubtitleField, rowActions } = this.options;
+    
+    this.elements.cards.innerHTML = pageData.map((row, idx) => {
+      const rowId = row.id || startIndex + idx;
+      const isSelected = this.state.selectedRows.has(rowId);
+      
+      const titleField = cardTitleField || columns[0]?.field;
+      const subtitleField = cardSubtitleField || columns[1]?.field;
+      
+      return `
+        <div class="ae-datatable-card ${isSelected ? 'selected' : ''}" data-row-id="${rowId}">
+          <div class="ae-datatable-card-header">
+            <div>
+              <div class="ae-datatable-card-title">${this.escapeHtml(this.getNestedValue(row, titleField))}</div>
+              ${subtitleField ? `<div class="ae-datatable-card-subtitle">${this.escapeHtml(this.getNestedValue(row, subtitleField))}</div>` : ''}
+            </div>
+            ${columns.find(c => c.field === 'status') ? 
+              columns.find(c => c.field === 'status').render(row.status, row) : ''}
+          </div>
+          <div class="ae-datatable-card-body">
+            ${columns.slice(2).map(col => `
+              <div class="ae-datatable-card-field ${col.fullWidth ? 'full-width' : ''}">
+                <span class="ae-datatable-card-label">${col.label}</span>
+                <span class="ae-datatable-card-value">${col.render ? col.render(this.getNestedValue(row, col.field), row) : this.escapeHtml(this.getNestedValue(row, col.field))}</span>
+              </div>
+            `).join('')}
+          </div>
+          ${rowActions ? `
+            <div class="ae-datatable-card-footer">
+              <div></div>
+              <div class="ae-datatable-card-actions">
+                ${rowActions.map(action => `
+                  <button class="ae-card-action-btn ${action.primary ? 'primary' : ''}" 
+                          data-row-action="${action.id}" data-row-id="${rowId}">
+                    <span class="material-icons" style="font-size:16px">${action.icon}</span>
+                    ${action.label}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderPagination() {
+    const { filteredData, currentPage } = this.state;
+    const pageSize = this.options.pageSize;
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    const start = (currentPage - 1) * pageSize + 1;
+    const end = Math.min(currentPage * pageSize, filteredData.length);
+    
+    this.elements.info.textContent = filteredData.length > 0
+      ? `Mostrando ${start}-${end} de ${filteredData.length} registros`
+      : 'Nenhum registro';
+    
+    if (totalPages <= 1) {
+      this.elements.pagination.innerHTML = '';
+      return;
+    }
+    
+    let html = `
+      <button class="ae-pagination-btn" data-page="prev" ${currentPage === 1 ? 'disabled' : ''}>
+        <span class="material-icons">chevron_left</span>
+      </button>
+    `;
+    
+    const pages = this.getPageNumbers(currentPage, totalPages);
+    pages.forEach(page => {
+      if (page === '...') {
+        html += `<span class="ae-pagination-ellipsis">...</span>`;
+      } else {
+        html += `
+          <button class="ae-pagination-btn ${page === currentPage ? 'active' : ''}" data-page="${page}">
+            ${page}
+          </button>
+        `;
+      }
+    });
+    
+    html += `
+      <button class="ae-pagination-btn" data-page="next" ${currentPage === totalPages ? 'disabled' : ''}>
+        <span class="material-icons">chevron_right</span>
+      </button>
+    `;
+    
+    this.elements.pagination.innerHTML = html;
+  }
+  
+  getPageNumbers(current, total) {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    
+    if (current <= 3) return [1, 2, 3, 4, '...', total];
+    if (current >= total - 2) return [1, '...', total - 3, total - 2, total - 1, total];
+    
+    return [1, '...', current - 1, current, current + 1, '...', total];
+  }
+  
+  bindEvents() {
+    // Search
+    this.elements.search?.addEventListener('input', (e) => {
+      this.state.searchTerm = e.target.value.toLowerCase();
+      this.state.currentPage = 1;
+      this.applyFilters();
+    });
+    
+    // Sort
+    this.elements.header.addEventListener('click', (e) => {
+      const th = e.target.closest('th.sortable');
+      if (!th) return;
+      
+      const field = th.dataset.field;
+      if (this.state.sortColumn === field) {
+        this.state.sortDirection = this.state.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.state.sortColumn = field;
+        this.state.sortDirection = 'asc';
+      }
+      
+      this.renderHeader();
+      this.applyFilters();
+    });
+    
+    // Pagination
+    this.elements.pagination.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-page]');
+      if (!btn || btn.disabled) return;
+      
+      const page = btn.dataset.page;
+      const totalPages = Math.ceil(this.state.filteredData.length / this.options.pageSize);
+      
+      if (page === 'prev') this.state.currentPage--;
+      else if (page === 'next') this.state.currentPage++;
+      else this.state.currentPage = parseInt(page);
+      
+      this.state.currentPage = Math.max(1, Math.min(this.state.currentPage, totalPages));
+      this.renderBody();
+      this.renderPagination();
+    });
+    
+    // Row selection
+    this.container.addEventListener('change', (e) => {
+      if (e.target.matches('[data-select-all]')) {
+        this.toggleSelectAll(e.target.checked);
+      } else if (e.target.matches('[data-select-row]')) {
+        this.toggleSelectRow(e.target.dataset.selectRow, e.target.checked);
+      }
+    });
+    
+    // Row actions
+    this.container.addEventListener('click', (e) => {
+      const actionBtn = e.target.closest('[data-row-action]');
+      if (actionBtn) {
+        const action = actionBtn.dataset.rowAction;
+        const rowId = actionBtn.dataset.rowId;
+        const row = this.options.data.find(r => String(r.id) === rowId);
+        this.emit('rowAction', { action, row, rowId });
+      }
+      
+      // Row click
+      const tr = e.target.closest('tr[data-row-id], .ae-datatable-card[data-row-id]');
+      if (tr && !e.target.closest('button, input')) {
+        const rowId = tr.dataset.rowId;
+        const row = this.options.data.find(r => String(r.id) === rowId);
+        if (this.options.onRowClick) this.options.onRowClick(row);
+        this.emit('rowClick', { row, rowId });
+      }
+    });
+    
+    // Toolbar actions
+    this.container.addEventListener('click', (e) => {
+      const actionBtn = e.target.closest('[data-action]');
+      if (actionBtn) {
+        this.emit('action', { action: actionBtn.dataset.action });
+      }
+    });
+  }
+  
+  // Data methods
+  setData(data) {
+    this.options.data = data || [];
+    this.state.selectedRows.clear();
+    this.applyFilters();
+  }
+  
+  applyFilters() {
+    let data = [...this.options.data];
+    
+    // Search
+    if (this.state.searchTerm) {
+      const term = this.state.searchTerm;
+      data = data.filter(row => 
+        this.options.columns.some(col => {
+          const value = String(this.getNestedValue(row, col.field) || '').toLowerCase();
+          return value.includes(term);
+        })
+      );
+    }
+    
+    // Sort
+    if (this.state.sortColumn) {
+      const col = this.options.columns.find(c => c.field === this.state.sortColumn);
+      data.sort((a, b) => {
+        let aVal = this.getNestedValue(a, this.state.sortColumn);
+        let bVal = this.getNestedValue(b, this.state.sortColumn);
+        
+        if (col?.sortType === 'number') {
+          aVal = parseFloat(aVal) || 0;
+          bVal = parseFloat(bVal) || 0;
+        } else if (col?.sortType === 'date') {
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+        } else {
+          aVal = String(aVal || '').toLowerCase();
+          bVal = String(bVal || '').toLowerCase();
+        }
+        
+        if (aVal < bVal) return this.state.sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return this.state.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    
+    this.state.filteredData = data;
+    this.renderBody();
+    this.renderPagination();
+  }
+  
+  // Selection methods
+  toggleSelectAll(checked) {
+    const pageData = this.getCurrentPageData();
+    pageData.forEach(row => {
+      const id = row.id;
+      if (checked) this.state.selectedRows.add(id);
+      else this.state.selectedRows.delete(id);
+    });
+    this.renderBody();
+    this.emitSelectionChange();
+  }
+  
+  toggleSelectRow(rowId, checked) {
+    if (checked) this.state.selectedRows.add(rowId);
+    else this.state.selectedRows.delete(rowId);
+    this.renderBody();
+    this.emitSelectionChange();
+  }
+  
+  getSelectedRows() {
+    return this.options.data.filter(row => this.state.selectedRows.has(String(row.id)));
+  }
+  
+  getCurrentPageData() {
+    const start = (this.state.currentPage - 1) * this.options.pageSize;
+    return this.state.filteredData.slice(start, start + this.options.pageSize);
+  }
+  
+  // Utility methods
+  getNestedValue(obj, path) {
+    return path.split('.').reduce((o, k) => o?.[k], obj);
+  }
+  
+  escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[m]));
+  }
+  
+  // Event system
+  listeners = {};
+  on(event, callback) { (this.listeners[event] = this.listeners[event] || []).push(callback); }
+  emit(event, data) { (this.listeners[event] || []).forEach(cb => cb(data)); }
+  emitSelectionChange() { this.emit('selectionChange', { selected: this.getSelectedRows() }); }
+  
+  // Loading state
+  showLoading() {
+    this.elements.body.innerHTML = Array(5).fill(`
+      <tr class="ae-skeleton-row">
+        ${this.options.columns.map(() => '<td><div class="ae-skeleton ae-skeleton-cell"></div></td>').join('')}
+      </tr>
+    `).join('');
+  }
+  
+  refresh() { this.applyFilters(); }
+}
+
+// Expor globalmente
+window.AEDataTable = AEDataTable;
+</script>
+
+<script>
+/* codex-school-community-ux-script: pequenos ajustes de contexto escolar */
+(function() {
+  if (window.__codexSchoolCommunityUx) return;
+  window.__codexSchoolCommunityUx = true;
+
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  }
+
+  ready(function() {
+    document.documentElement.setAttribute('data-community-context', 'school');
+
+    document.querySelectorAll('form').forEach(function(form) {
+      if (!form.getAttribute('aria-label') && !form.getAttribute('aria-labelledby')) {
+        form.setAttribute('aria-label', 'Formulario da comunidade escolar');
+      }
+    });
+
+    document.querySelectorAll('input, select, textarea').forEach(function(field) {
+      if (!field.id && field.name) field.id = 'field-' + String(field.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      if (field.required && !field.getAttribute('aria-required')) field.setAttribute('aria-required', 'true');
+      if (!field.getAttribute('autocomplete')) {
+        var type = (field.getAttribute('type') || '').toLowerCase();
+        var name = (field.getAttribute('name') || field.id || '').toLowerCase();
+        if (type === 'email' || name.indexOf('email') >= 0) field.setAttribute('autocomplete', 'email');
+        else if (name.indexOf('nome') >= 0 || name.indexOf('name') >= 0) field.setAttribute('autocomplete', 'name');
+        else if (name.indexOf('senha') >= 0 || name.indexOf('password') >= 0) field.setAttribute('autocomplete', 'current-password');
+      }
+    });
+
+    document.querySelectorAll('button:not([type])').forEach(function(button) {
+      button.setAttribute('type', 'button');
+    });
+  });
+})();
+</script>
+
+<script>
+/* codex-project-behavior-standardization: microcomportamentos compartilhados */
+(function() {
+  if (window.__codexProjectBehaviorStandardization) return;
+  window.__codexProjectBehaviorStandardization = true;
+
+  var SUBMIT_LOCK_MS = 2500;
+  var invalidFocusPending = false;
+
+  function isElement(value) {
+    return value && value.nodeType === 1;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function unlockForm(form, button) {
+    if (isElement(form)) {
+      delete form.dataset.codexSubmitting;
+      if (form.getAttribute('aria-busy') === 'true') form.setAttribute('aria-busy', 'false');
+    }
+
+    if (isElement(button) && button.dataset.codexSubmitLocked === 'true') {
+      delete button.dataset.codexSubmitLocked;
+      button.disabled = false;
+      button.removeAttribute('aria-disabled');
+    }
+  }
+
+  function restoreSubmitLocks(scope) {
+    var root = scope && scope.querySelectorAll ? scope : document;
+
+    root.querySelectorAll('form[data-codex-submitting="true"]').forEach(function(form) {
+      unlockForm(form);
+    });
+
+    root.querySelectorAll('[data-codex-submit-locked="true"]').forEach(function(button) {
+      unlockForm(null, button);
+    });
+  }
+
+  document.addEventListener('submit', function(event) {
+    var form = event.target;
+    if (!isElement(form) || String(form.tagName).toLowerCase() !== 'form') return;
+    if (form.hasAttribute('data-no-submit-lock')) return;
+
+    if (form.dataset.codexSubmitting === 'true') {
+      event.preventDefault();
+      return;
+    }
+
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+    form.dataset.codexSubmitting = 'true';
+    form.setAttribute('aria-busy', 'true');
+
+    var button = event.submitter || form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+    if (isElement(button) && !button.disabled && !button.hasAttribute('data-no-submit-lock')) {
+      button.dataset.codexSubmitLocked = 'true';
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    }
+
+    window.setTimeout(function() {
+      unlockForm(form, button);
+    }, SUBMIT_LOCK_MS);
+  }, true);
+
+  document.addEventListener('invalid', function(event) {
+    var field = event.target;
+    if (!isElement(field) || invalidFocusPending) return;
+    invalidFocusPending = true;
+
+    window.setTimeout(function() {
+      invalidFocusPending = false;
+      if (!document.documentElement.contains(field)) return;
+      try {
+        field.scrollIntoView({ block: 'center', inline: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        field.focus({ preventScroll: true });
+      } catch (error) {
+        field.focus();
+      }
+    }, 0);
+  }, true);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key !== 'Escape') return;
+    var closedSomething = false;
+
+    var dialogs = Array.prototype.slice.call(document.querySelectorAll('dialog[open]'));
+    var dialog = dialogs[dialogs.length - 1];
+    if (dialog && typeof dialog.close === 'function') {
+      dialog.close();
+      closedSomething = true;
+    }
+
+    if (!closedSomething) {
+      var details = Array.prototype.slice.call(document.querySelectorAll('details[open]'));
+      var detail = details[details.length - 1];
+      if (detail) {
+        detail.removeAttribute('open');
+        closedSomething = true;
+      }
+    }
+
+    document.querySelectorAll('[aria-expanded="true"]').forEach(function(toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      closedSomething = true;
+    });
+
+    if (closedSomething) event.preventDefault();
+  }, true);
+
+  window.addEventListener('pageshow', function() {
+    restoreSubmitLocks(document);
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') restoreSubmitLocks(document);
+  });
+})();
+</script>
+
+
+

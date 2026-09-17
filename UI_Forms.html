@@ -1,0 +1,1940 @@
+<style id="up-oracular-design-system">
+:root {
+  color-scheme: dark;
+  --uo-bg: #15171c;
+  --uo-panel: #20242b;
+  --uo-text: #e9ecf1;
+  --uo-muted: #b2b9c4;
+  --uo-border: #343941;
+  --uo-accent: #7aa2d6;
+  --uo-radius-group: 10px;
+  --uo-radius-control: 8px;
+}
+
+html, body {
+  background: var(--uo-bg) !important;
+  color: var(--uo-text) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body, input, select, textarea, button {
+  color: var(--uo-text);
+}
+
+.card, .panel, .modal, .dialog, dialog, .container,
+.box, .widget, .section, .sidebar, .drawer, .popover,
+[role="dialog"], [class*="card"], [class*="panel"] {
+  background-color: var(--uo-panel) !important;
+  border-color: var(--uo-border) !important;
+  border-radius: var(--uo-radius-group) !important;
+}
+
+button, input, select, textarea, .btn, .button,
+[role="button"], [role="menuitem"], .dropdown-item,
+.menu-item, [class*="button"], [class*="dropdown-item"] {
+  border-radius: var(--uo-radius-control) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  background-color: var(--uo-panel) !important;
+  border: 1px solid var(--uo-border) !important;
+  padding: 8px !important;
+  box-sizing: border-box;
+}
+
+label, .form-label, [class*="form-label"] {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--uo-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.uo-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.uo-feedback-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  min-width: 220px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--uo-border);
+  border-radius: var(--uo-radius-group);
+  background: var(--uo-panel);
+  color: var(--uo-text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.uo-feedback-box.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.uo-feedback-box[data-kind="ok"] {
+  border-color: #8fc2a6;
+  color: #8fc2a6;
+}
+
+.uo-feedback-box[data-kind="err"] {
+  border-color: #d98b93;
+  color: #d98b93;
+}
+
+form[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+form[aria-busy="true"] :is(button, input[type="submit"], input[type="button"]) {
+  pointer-events: none;
+}
+
+button, .btn-primary, .button-primary,
+[class*="primary"][role="button"] {
+  background-color: var(--uo-accent) !important;
+}
+
+p, small, .muted, .secondary, .subtitle,
+[class*="muted"], [class*="secondary"] {
+  color: var(--uo-muted) !important;
+}
+
+hr, table, th, td, fieldset {
+  border-color: var(--uo-border) !important;
+}
+
+a {
+  color: var(--uo-accent);
+}
+
+/* Geometrias funcionais permanecem circulares. */
+.avatar, .spinner, .loading-ring, .dot, .status-dot,
+[class*="avatar"], [class*="spinner"], [class*="loading-ring"] {
+  border-radius: 50% !important;
+}
+</style>
+<script id="up-oracular-form-feedback">
+(function () {
+  'use strict';
+  if (window.UpOracularFeedback) return;
+
+  var timer = null;
+  function notify(kind, message) {
+    var box = document.getElementById('uo-feedback-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'uo-feedback-box';
+      box.className = 'uo-feedback-box';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      document.body.appendChild(box);
+    }
+    box.dataset.kind = kind === 'err' ? 'err' : 'ok';
+    box.textContent = String(message || (kind === 'err' ? 'Nao foi possivel concluir.' : 'Operacao concluida.'));
+    box.classList.add('is-visible');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      box.classList.remove('is-visible');
+    }, 1000);
+  }
+
+  function connectLabels(form) {
+    form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field, index) {
+      var id = field.id || ('uo-field-' + index + '-' + Math.random().toString(36).slice(2, 7));
+      field.id = id;
+      var label = form.querySelector('label[for="' + id + '"]');
+      if (!label) {
+        var sibling = field.previousElementSibling;
+        if (sibling && sibling.tagName === 'LABEL') {
+          sibling.htmlFor = id;
+          label = sibling;
+        }
+      }
+      if (label && field.parentElement && !field.parentElement.classList.contains('uo-field')) {
+        field.parentElement.classList.add('uo-field');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(connectLabels);
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    form.setAttribute('aria-busy', 'true');
+    notify('ok', 'Enviando...');
+    window.setTimeout(function () {
+      if (form.getAttribute('aria-busy') === 'true') {
+        form.removeAttribute('aria-busy');
+      }
+    }, 10000);
+  }, true);
+
+  window.UpOracularFeedback = {
+    ok: function (message) { notify('ok', message); },
+    err: function (message) { notify('err', message); },
+    done: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('ok', message);
+    },
+    fail: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('err', message);
+    }
+  };
+}());
+</script>
+
+<style>
+/* codex-s20-mobile-first: Samsung S20 / Chrome mobile baseline (360x800 CSS px) */
+@media screen {
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+  :where(body) {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  :where(main, .app, .page, .container, .content, .main-content, .dashboard, .view) {
+    max-width: 100%;
+  }
+  :where(img, video, canvas, svg) {
+    max-width: 100%;
+    height: auto;
+  }
+  :where(p, li, td, th, label, legend, button, a, h1, h2, h3, h4, h5, h6) {
+    overflow-wrap: anywhere;
+  }
+  :where(input, select, textarea, button) {
+    font: inherit;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    font-size: max(16px, 1rem);
+  }
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+  :where(.table-wrap, .table-wrapper, .table-responsive, .table-container, .responsive-table, .data-table-wrapper) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 480px) {
+  :where(body) {
+    font-size: 16px;
+  }
+  :where(.grid, .cards, .dashboard-grid, .stats-grid, .form-grid, .filters-grid) {
+    grid-template-columns: 1fr !important;
+  }
+  :where(.toolbar, .actions, .button-row, .filters, .form-actions, .modal-actions, .header-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(.btn, button, input, select, textarea) {
+    min-height: 44px;
+  }
+  :where(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :where(th, td) {
+    white-space: nowrap;
+  }
+  :where(.card, .panel, .modal, .dialog, .drawer) {
+    max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 360px) {
+  :where(body) {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  :where(.card, .panel, .section, .modal-content, .dialog-content) {
+    padding: 12px;
+  }
+  :where(h1) {
+    font-size: clamp(1.45rem, 1.2rem + 2vw, 2rem);
+  }
+  :where(h2) {
+    font-size: clamp(1.2rem, 1rem + 1.4vw, 1.55rem);
+  }
+}
+
+
+
+/* codex-school-community-ux: ajustes finos para uso recorrente por comunidade escolar */
+:root {
+  --codex-school-focus: #ffd166;
+  --codex-school-touch: 44px;
+  --codex-school-radius: 8px;
+  --codex-school-field-radius: 7px;
+  --codex-school-form-gap: 14px;
+  --codex-school-field-border: rgba(120, 132, 156, 0.45);
+  --codex-school-field-bg: rgba(255, 255, 255, 0.96);
+  --codex-school-field-text: #1f2937;
+  --codex-school-muted-text: #64748b;
+  --codex-school-soft-surface: rgba(248, 250, 252, 0.82);
+  --codex-school-safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+:where(html) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+:where(body) {
+  overscroll-behavior-y: contain;
+}
+
+:where(p, li, dd, dt, blockquote, figcaption, label, td, th) {
+  line-height: 1.5;
+}
+
+:where(main, .main, .content, .page, .app, .app-shell, .container, .dashboard, .workspace) {
+  padding-bottom: var(--codex-school-safe-bottom);
+}
+
+:where(a, button, .btn, .button, [role="button"], input, select, textarea, summary) {
+  min-height: var(--codex-school-touch);
+  touch-action: manipulation;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="submit"], input[type="button"]) {
+  border-radius: var(--codex-school-radius) !important;
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--codex-school-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+  font-weight: 700;
+}
+
+:where(form) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(fieldset) {
+  border-radius: var(--codex-school-radius) !important;
+  border-color: var(--codex-school-field-border);
+}
+
+:where(legend) {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+:where(.form-group, .input-field, .field, .form-field, .control-group) {
+  margin-bottom: var(--codex-school-form-gap);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: min(100%, 100%);
+  border-radius: var(--codex-school-field-radius) !important;
+  border-color: var(--codex-school-field-border) !important;
+  background-color: var(--input-bg, var(--field-bg, var(--codex-school-field-bg)));
+  color: var(--input-text, var(--text-color, var(--codex-school-field-text)));
+  font-size: 16px !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--placeholder-color, #94a3b8);
+  opacity: 1;
+}
+
+:where(input[required], select[required], textarea[required]) {
+  border-left: 3px solid var(--codex-gentle-primary-strong, #aecbfa) !important;
+}
+
+:where(input:disabled, select:disabled, textarea:disabled, button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed !important;
+  opacity: 0.68;
+}
+
+:where(.help, .hint, .help-text, .form-help, small) {
+  line-height: 1.45;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+}
+
+:where(.actions, .form-actions, .button-row, .toolbar, .topbar, nav, [role="toolbar"]) {
+  gap: 8px;
+}
+
+:where(.actions, .form-actions, .button-row) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+:where(.actions, .form-actions, .button-row) > :where(button, .btn, .button, [role="button"]) {
+  flex: 1 1 148px;
+}
+
+:where(.card, .panel, .box, .tile, .item, .list-item, .action-card) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.section, .surface, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.filters, .search-panel, .form-section) {
+  border-radius: var(--codex-school-radius) !important;
+  background: var(--codex-school-soft-surface);
+}
+
+:where(table) {
+  border-collapse: collapse;
+}
+
+:where(table, .table, .data-table) {
+  max-width: 100%;
+}
+
+:where(.table-wrap, .table-wrapper, .table-container, .responsive-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(th, td) {
+  vertical-align: top;
+}
+
+:where(.toast, .alert, .notice, .snackbar, [role="status"], [role="alert"]) {
+  border-radius: var(--codex-school-radius) !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+  :where(body) {
+    font-size: 16px;
+  }
+
+  :where(h1) {
+    font-size: clamp(1.55rem, 1.35rem + 1vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  :where(h2) {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  :where(.toolbar, .topbar, nav, [role="toolbar"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  :where(.hide-mobile, .desktop-only) {
+    display: none !important;
+  }
+}
+</style>
+<style>
+/* codex-design-system: shared contrast, button sizing and minimal button icon styling */
+:root {
+  --codex-ds-primary: var(--primary, var(--color-primary, var(--theme-primary, #1a73e8)));
+  --codex-ds-primary-strong: var(--primary-dark, var(--color-primary-strong, var(--theme-primary-dark, #1558d6)));
+  --codex-ds-text: var(--text, var(--color-ink, var(--text-primary, #202124)));
+  --codex-ds-muted: var(--muted, var(--color-muted, var(--text-secondary, #5f6368)));
+  --codex-ds-surface: var(--surface, var(--color-surface, var(--bg-surface, #ffffff)));
+  --codex-ds-border: var(--border, var(--color-border, var(--line, #dadce0)));
+  --codex-ds-focus: #1a73e8;
+  --codex-ds-radius: 8px;
+}
+
+:where(body) {
+  color: var(--codex-ds-text);
+}
+
+:where(.text-muted, .muted, .secondary, small, figcaption, caption) {
+  color: var(--codex-ds-muted);
+}
+
+:where(a) {
+  color: var(--codex-ds-primary);
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--codex-ds-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: var(--codex-ds-primary);
+  color: #ffffff;
+}
+
+:where(.btn:hover, .button:hover, button:hover, [role="button"]:hover) {
+  filter: none;
+}
+
+:where(.btn-primary:hover, .button-primary:hover, button[type="submit"]:hover, input[type="submit"]:hover) {
+  background: var(--codex-ds-primary-strong);
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: var(--codex-ds-surface);
+  color: var(--codex-ds-text);
+  border-color: var(--codex-ds-border);
+}
+
+:where(.btn-small, .btn.sm, .button-small, .button.sm) {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+:where(.icon-button, .btn-icon, button.icon, button[aria-label]:not([aria-label=""])) {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: var(--codex-ds-radius);
+}
+
+:where(button svg, .btn svg, .button svg, [role="button"] svg, button .material-icons, .btn .material-icons, .button .material-icons, button .icon, .btn .icon, .button .icon) {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  stroke-width: 2;
+  flex: 0 0 auto;
+}
+
+:where(button .material-icons, .btn .material-icons, .button .material-icons) {
+  font-feature-settings: "liga";
+  vertical-align: middle;
+}
+
+:where(button:focus-visible, .btn:focus-visible, .button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 3px solid var(--codex-ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--codex-ds-surface) 80%, transparent);
+}
+
+:where(button:disabled, .btn:disabled, .button:disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  :where(.btn, .button, button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    width: auto;
+  }
+  :where(.form-actions > .btn, .form-actions > .button, .form-actions > button, .actions > .btn, .actions > .button, .actions > button) {
+    width: 100%;
+  }
+}
+</style>
+<style>
+/* codex-gentle-dark-theme: default graphite theme with soft, kind UI accents */
+:root {
+  color-scheme: dark;
+  --codex-gentle-bg: #15171c;
+  --codex-gentle-bg-soft: #1a1d23;
+  --codex-gentle-surface: #20242b;
+  --codex-gentle-surface-2: #272b33;
+  --codex-gentle-border: #343941;
+  --codex-gentle-text: #eef1f5;
+  --codex-gentle-muted: #c8ced8;
+  --codex-gentle-dim: #9aa4b2;
+  --codex-gentle-primary: #8ab4f8;
+  --codex-gentle-primary-strong: #aecbfa;
+  --codex-gentle-accent: #8fa0b8;
+  --codex-gentle-success: #9be7c1;
+  --bg: var(--codex-gentle-bg);
+  --background: var(--codex-gentle-bg);
+  --surface: var(--codex-gentle-surface);
+  --panel: var(--codex-gentle-surface);
+  --card: var(--codex-gentle-surface);
+  --text: var(--codex-gentle-text);
+  --text-main: var(--codex-gentle-text);
+  --text-primary: var(--codex-gentle-text);
+  --text-muted: var(--codex-gentle-muted);
+  --muted: var(--codex-gentle-muted);
+  --border: var(--codex-gentle-border);
+  --line: var(--codex-gentle-border);
+  --primary: var(--codex-gentle-primary);
+  --primary-dark: #6ea0ef;
+  --codex-ds-primary: var(--codex-gentle-primary);
+  --codex-ds-primary-strong: var(--codex-gentle-primary-strong);
+  --codex-ds-text: var(--codex-gentle-text);
+  --codex-ds-muted: var(--codex-gentle-muted);
+  --codex-ds-surface: var(--codex-gentle-surface);
+  --codex-ds-border: var(--codex-gentle-border);
+}
+
+:where(html, body) {
+  background: var(--codex-gentle-bg) !important;
+  color: var(--codex-gentle-text) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(main, .app, .page, .layout, .content, .main-content, .app-content, .container, .dashboard, .view) {
+  background-color: transparent !important;
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(.card, .panel, .section, .surface, .box, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu, .table-wrapper, .table-wrap, .table-container, form) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+              var(--codex-gentle-surface) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+}
+
+:where(header, nav, aside, footer, .navbar, .sidebar, .topbar, .app-header, .app-footer) {
+  background: rgba(12, 15, 21, 0.92) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, label, span, strong, td, th, legend, small, caption) {
+  color: inherit;
+}
+
+:where(h1, .page-title, .view-title) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(h1:not(.no-emoji), .page-title:not(.no-emoji), .view-title:not(.no-emoji))::after {
+  content: "";
+  font-size: 0.82em;
+}
+
+:where(.empty-state, .empty, .no-data, .no-results, .loading, .placeholder)::before {
+  content: "";
+}
+
+:where(.text-muted, .muted, .secondary, .subtitle, .description, .help-text, .hint, small, figcaption, caption) {
+  color: var(--codex-gentle-muted) !important;
+}
+
+:where(a) {
+  color: var(--codex-gentle-primary-strong) !important;
+}
+
+:where(input, select, textarea) {
+  background: var(--codex-gentle-bg-soft) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--codex-gentle-dim) !important;
+}
+
+:where(table) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(th) {
+  color: var(--codex-gentle-muted) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:where(td) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  background: var(--codex-gentle-surface-2) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: none !important;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: linear-gradient(180deg, rgba(174, 203, 250, 0.24), rgba(138, 180, 248, 0.16)),
+              #182235 !important;
+  color: #f8fbff !important;
+  border-color: rgba(174, 203, 250, 0.45) !important;
+}
+
+:where(button[type="submit"]:not(.icon-button):not(.btn-icon), input[type="submit"])::after {
+  content: "";
+  font-size: 0.9em;
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(.badge, .tag, .chip, .pill, .status) {
+  background: rgba(248, 199, 220, 0.12) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: rgba(248, 199, 220, 0.26) !important;
+}
+
+:where(hr) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(svg, canvas, img) {
+  color: inherit;
+}
+</style>
+<!--
+  ========================================
+  FORMS COMPONENT - ALIMENTAÇÃO ESCOLAR
+  Formulários elegantes com labels flutuantes,
+  validação em tempo real e máscaras de entrada
+  ========================================
+  
+  Uso: <?!= include('UI_Forms'); ?>
+-->
+
+<style>
+/* ========================================
+   FORM BASE STYLES
+   ======================================== */
+.ae-form {
+  width: 100%;
+}
+
+.ae-form-section {
+  margin-bottom: 24px;
+}
+
+.ae-form-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ae-primary, #2E7D32);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ae-primary-100, #C8E6C9);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ae-form-section-title .material-icons {
+  font-size: 20px;
+}
+
+.ae-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 640px) {
+  .ae-form-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .ae-form-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .ae-form-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ========================================
+   FLOATING LABEL INPUT
+   ======================================== */
+.ae-field {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.ae-field-input {
+  width: 100%;
+  padding: 20px 16px 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--ae-text-primary, #263238);
+  background: var(--ae-bg-card, #FFFFFF);
+  border: 2px solid var(--ae-gray-300, #E0E0E0);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  min-height: 56px;
+}
+
+.ae-field-input:hover {
+  border-color: var(--ae-gray-400, #BDBDBD);
+}
+
+.ae-field-input:focus {
+  border-color: var(--ae-primary, #2E7D32);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.ae-field-input:disabled {
+  background: var(--ae-gray-100, #F5F5F5);
+  color: var(--ae-text-disabled, #9E9E9E);
+  cursor: not-allowed;
+}
+
+/* Floating Label */
+.ae-field-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--ae-text-hint, #78909C);
+  pointer-events: none;
+  transition: top 0.2s ease, transform 0.2s ease, font-size 0.2s ease, color 0.2s ease, left 0.2s ease, background-color 0.2s ease;
+  background: transparent;
+  padding: 0 4px;
+}
+
+.ae-field-input:focus ~ .ae-field-label,
+.ae-field-input:not(:placeholder-shown) ~ .ae-field-label,
+.ae-field-input.has-value ~ .ae-field-label {
+  top: 8px;
+  transform: translateY(0);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ae-primary, #2E7D32);
+  background: var(--ae-bg-card, #FFFFFF);
+  left: 12px;
+}
+
+.ae-field-input:not(:focus):not(:placeholder-shown) ~ .ae-field-label {
+  color: var(--ae-text-secondary, #546E7A);
+}
+
+/* Required indicator */
+.ae-field-label .ae-required {
+  color: var(--ae-accent, #C62828);
+  margin-left: 2px;
+}
+
+/* Input with icon */
+.ae-field.has-icon .ae-field-input {
+  padding-left: 48px;
+}
+
+.ae-field.has-icon .ae-field-label {
+  left: 48px;
+}
+
+.ae-field.has-icon .ae-field-input:focus ~ .ae-field-label,
+.ae-field.has-icon .ae-field-input:not(:placeholder-shown) ~ .ae-field-label {
+  left: 12px;
+}
+
+.ae-field-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ae-text-hint, #78909C);
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.ae-field-input:focus ~ .ae-field-icon {
+  color: var(--ae-primary, #2E7D32);
+}
+
+/* Input with suffix (ex: R$, %) */
+.ae-field.has-suffix .ae-field-input {
+  padding-right: 60px;
+}
+
+.ae-field-suffix {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  color: var(--ae-text-hint, #78909C);
+  pointer-events: none;
+}
+
+/* ========================================
+   VALIDATION STATES
+   ======================================== */
+/* Success state */
+.ae-field.success .ae-field-input {
+  border-color: var(--ae-success, #2E7D32);
+}
+
+.ae-field.success .ae-field-input:focus {
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+.ae-field.success .ae-field-label {
+  color: var(--ae-success, #2E7D32);
+}
+
+/* Error state */
+.ae-field.error .ae-field-input {
+  border-color: var(--ae-error, #C62828);
+  background: #FFFBFB;
+}
+
+.ae-field.error .ae-field-input:focus {
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+}
+
+.ae-field.error .ae-field-label {
+  color: var(--ae-error, #C62828);
+}
+
+.ae-field.error .ae-field-icon {
+  color: var(--ae-error, #C62828);
+}
+
+/* Helper text and error message */
+.ae-field-helper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--ae-text-hint, #78909C);
+  padding-left: 4px;
+}
+
+.ae-field-helper .material-icons {
+  font-size: 16px;
+}
+
+.ae-field-error {
+  display: none;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: var(--ae-error, #C62828);
+  padding-left: 4px;
+}
+
+.ae-field-error .material-icons {
+  font-size: 16px;
+}
+
+.ae-field.error .ae-field-error {
+  display: flex;
+}
+
+.ae-field.error .ae-field-helper {
+  display: none;
+}
+
+/* Character counter */
+.ae-field-counter {
+  position: absolute;
+  right: 16px;
+  bottom: -20px;
+  font-size: 0.7rem;
+  color: var(--ae-text-hint, #78909C);
+}
+
+.ae-field-counter.warning {
+  color: var(--ae-warning, #F9A825);
+}
+
+.ae-field-counter.error {
+  color: var(--ae-error, #C62828);
+}
+
+/* ========================================
+   SELECT DROPDOWN
+   ======================================== */
+.ae-field-select {
+  appearance: none;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.ae-field.select::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--ae-text-hint, #78909C);
+  pointer-events: none;
+  transition: transform 0.2s;
+}
+
+.ae-field.select:focus-within::after {
+  transform: translateY(-50%) rotate(180deg);
+  border-top-color: var(--ae-primary, #2E7D32);
+}
+
+/* ========================================
+   TEXTAREA
+   ======================================== */
+.ae-field-textarea {
+  min-height: 120px;
+  padding-top: 24px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.ae-field-textarea ~ .ae-field-label {
+  top: 24px;
+}
+
+.ae-field-textarea:focus ~ .ae-field-label,
+.ae-field-textarea:not(:placeholder-shown) ~ .ae-field-label {
+  top: 8px;
+}
+
+/* ========================================
+   CHECKBOX & RADIO
+   ======================================== */
+.ae-checkbox-group,
+.ae-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ae-checkbox-group.inline,
+.ae-radio-group.inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.ae-checkbox,
+.ae-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--ae-text-primary, #263238);
+}
+
+.ae-checkbox input,
+.ae-radio input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ae-checkbox-mark,
+.ae-radio-mark {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--ae-gray-400, #BDBDBD);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ae-checkbox-mark {
+  border-radius: 6px;
+}
+
+.ae-radio-mark {
+  border-radius: 9999px;
+}
+
+.ae-checkbox-mark .material-icons ,
+.ae-radio-mark::after {
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.ae-checkbox-mark .material-icons {
+  font-size: 18px;
+  color: white;
+}
+
+.ae-radio-mark::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--ae-primary, #2E7D32);
+}
+
+/* Checked state */
+.ae-checkbox input:checked + .ae-checkbox-mark {
+  background: var(--ae-primary, #2E7D32);
+  border-color: var(--ae-primary, #2E7D32);
+}
+
+.ae-checkbox input:checked + .ae-checkbox-mark .material-icons {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ae-radio input:checked + .ae-radio-mark {
+  border-color: var(--ae-primary, #2E7D32);
+}
+
+.ae-radio input:checked + .ae-radio-mark::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Focus state */
+.ae-checkbox input:focus-visible + .ae-checkbox-mark,
+.ae-radio input:focus-visible + .ae-radio-mark {
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+}
+
+/* Disabled state */
+.ae-checkbox input:disabled + .ae-checkbox-mark,
+.ae-radio input:disabled + .ae-radio-mark {
+  background: var(--ae-gray-100, #F5F5F5);
+  border-color: var(--ae-gray-300, #E0E0E0);
+  cursor: not-allowed;
+}
+
+.ae-checkbox input:disabled ~ span,
+.ae-radio input:disabled ~ span {
+  color: var(--ae-text-disabled, #9E9E9E);
+  cursor: not-allowed;
+}
+
+/* ========================================
+   SWITCH / TOGGLE
+   ======================================== */
+.ae-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.ae-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ae-switch-track {
+  width: 48px;
+  height: 26px;
+  background: var(--ae-gray-300, #E0E0E0);
+  border-radius: 13px;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.ae-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 9999px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.ae-switch input:checked + .ae-switch-track {
+  background: var(--ae-primary, #2E7D32);
+}
+
+.ae-switch input:checked + .ae-switch-track .ae-switch-thumb {
+  transform: translateX(22px);
+}
+
+.ae-switch input:focus-visible + .ae-switch-track {
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+}
+
+.ae-switch-label {
+  font-size: 0.9rem;
+  color: var(--ae-text-primary, #263238);
+}
+
+/* ========================================
+   FILE UPLOAD
+   ======================================== */
+.ae-file-upload {
+  position: relative;
+}
+
+.ae-file-dropzone {
+  border: 2px dashed var(--ae-gray-300, #E0E0E0);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  background: var(--ae-gray-50, #FAFAFA);
+}
+
+.ae-file-dropzone:hover {
+  border-color: var(--ae-primary, #2E7D32);
+  background: var(--ae-primary-50, #E8F5E9);
+}
+
+.ae-file-dropzone.dragover {
+  border-color: var(--ae-primary, #2E7D32);
+  background: var(--ae-primary-100, #C8E6C9);
+}
+
+.ae-file-dropzone input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ae-file-dropzone-icon {
+  font-size: 48px;
+  color: var(--ae-gray-400, #BDBDBD);
+  margin-bottom: 12px;
+}
+
+.ae-file-dropzone:hover .ae-file-dropzone-icon {
+  color: var(--ae-primary, #2E7D32);
+}
+
+.ae-file-dropzone-text {
+  font-size: 0.9rem;
+  color: var(--ae-text-secondary, #546E7A);
+  margin-bottom: 4px;
+}
+
+.ae-file-dropzone-hint {
+  font-size: 0.75rem;
+  color: var(--ae-text-hint, #78909C);
+}
+
+.ae-file-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ae-file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border: 1px solid var(--ae-gray-200, #EEEEEE);
+  border-radius: 8px;
+}
+
+.ae-file-item-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--ae-primary-50, #E8F5E9);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ae-primary, #2E7D32);
+}
+
+.ae-file-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ae-file-item-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ae-text-primary, #263238);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ae-file-item-size {
+  font-size: 0.7rem;
+  color: var(--ae-text-hint, #78909C);
+}
+
+.ae-file-item-remove {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ae-text-hint, #78909C);
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.ae-file-item-remove:hover {
+  background: var(--ae-error-light, #FFEBEE);
+  color: var(--ae-error, #C62828);
+}
+
+/* ========================================
+   DATE PICKER WRAPPER
+   ======================================== */
+.ae-field-date {
+  position: relative;
+}
+
+.ae-field-date input[type="date"] {
+  padding-right: 44px;
+}
+
+.ae-field-date::after {
+  content: 'calendar_today';
+  font-family: 'Material Symbols Outlined';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ae-text-hint, #78909C);
+  pointer-events: none;
+}
+
+/* ========================================
+   FORM ACTIONS
+   ======================================== */
+.ae-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 1px solid var(--ae-gray-200, #EEEEEE);
+}
+
+.ae-form-actions.sticky {
+  position: sticky;
+  bottom: 0;
+  background: var(--ae-bg-card, #FFFFFF);
+  padding: 16px;
+  margin: 0 -16px -16px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+@media (max-width: 480px) {
+  .ae-form-actions {
+    flex-direction: column;
+  }
+  
+  .ae-form-actions button {
+    width: 100%;
+  }
+}
+</style>
+
+<script>
+/**
+ * ========================================
+ * AE FORMS - VALIDAÇÃO E MÁSCARAS
+ * ========================================
+ */
+const AEForms = {
+  // Máscaras disponíveis
+  masks: {
+    cpf: { pattern: '###.###.###-##', placeholder: '000.000.000-00' },
+    cnpj: { pattern: '##.###.###/####-##', placeholder: '00.000.000/0000-00' },
+    phone: { pattern: '(##) #####-####', placeholder: '(00) 00000-0000' },
+    cep: { pattern: '#####-###', placeholder: '00000-000' },
+    date: { pattern: '##/##/####', placeholder: 'DD/MM/AAAA' },
+    currency: { prefix: 'R$ ', decimal: ',', thousands: '.', precision: 2 },
+    nfKey: { pattern: '#### #### #### #### #### #### #### #### #### #### ####', placeholder: '' }
+  },
+
+  // Validadores
+  validators: {
+    required: (value) => {
+      if (!value || (typeof value === 'string' && !value.trim())) {
+        return 'Este campo é obrigatório';
+      }
+      return null;
+    },
+    
+    email: (value) => {
+      if (!value) return null;
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(value) ? null : 'E-mail inválido';
+    },
+    
+    cpf: (value) => {
+      if (!value) return null;
+      const cpf = value.replace(/\D/g, '');
+      if (cpf.length !== 11) return 'CPF deve ter 11 dígitos';
+      if (/^(\d)\1+$/.test(cpf)) return 'CPF inválido';
+      
+      let sum = 0, rest;
+      for (let i = 1; i <= 9; i++) sum += parseInt(cpf[i-1]) * (11 - i);
+      rest = (sum * 10) % 11;
+      if (rest === 10 || rest === 11) rest = 0;
+      if (rest !== parseInt(cpf[9])) return 'CPF inválido';
+      
+      sum = 0;
+      for (let i = 1; i <= 10; i++) sum += parseInt(cpf[i-1]) * (12 - i);
+      rest = (sum * 10) % 11;
+      if (rest === 10 || rest === 11) rest = 0;
+      if (rest !== parseInt(cpf[10])) return 'CPF inválido';
+      
+      return null;
+    },
+    
+    cnpj: (value) => {
+      if (!value) return null;
+      const cnpj = value.replace(/\D/g, '');
+      if (cnpj.length !== 14) return 'CNPJ deve ter 14 dígitos';
+      if (/^(\d)\1+$/.test(cnpj)) return 'CNPJ inválido';
+      
+      let size = cnpj.length - 2;
+      let numbers = cnpj.substring(0, size);
+      let digits = cnpj.substring(size);
+      let sum = 0, pos = size - 7;
+      
+      for (let i = size; i >= 1; i--) {
+        sum += numbers.charAt(size - i) * pos--;
+        if (pos < 2) pos = 9;
+      }
+      let result = sum % 11 < 2 ? 0 : 11 - sum % 11;
+      if (result != digits.charAt(0)) return 'CNPJ inválido';
+      
+      size = size + 1;
+      numbers = cnpj.substring(0, size);
+      sum = 0;
+      pos = size - 7;
+      for (let i = size; i >= 1; i--) {
+        sum += numbers.charAt(size - i) * pos--;
+        if (pos < 2) pos = 9;
+      }
+      result = sum % 11 < 2 ? 0 : 11 - sum % 11;
+      if (result != digits.charAt(1)) return 'CNPJ inválido';
+      
+      return null;
+    },
+    
+    minLength: (min) => (value) => {
+      if (!value) return null;
+      return value.length >= min ? null : `Mínimo de ${min} caracteres`;
+    },
+    
+    maxLength: (max) => (value) => {
+      if (!value) return null;
+      return value.length <= max ? null : `Máximo de ${max} caracteres`;
+    },
+    
+    min: (minVal) => (value) => {
+      if (!value) return null;
+      const num = parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.'));
+      return num >= minVal ? null : `Valor mínimo: ${minVal}`;
+    },
+    
+    max: (maxVal) => (value) => {
+      if (!value) return null;
+      const num = parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.'));
+      return num <= maxVal ? null : `Valor máximo: ${maxVal}`;
+    },
+    
+    pattern: (regex, message) => (value) => {
+      if (!value) return null;
+      return regex.test(value) ? null : message;
+    }
+  },
+
+  // Aplicar máscara a um input
+  applyMask(input, maskType) {
+    const mask = this.masks[maskType];
+    if (!mask) return;
+
+    if (maskType === 'currency') {
+      this.applyCurrencyMask(input, mask);
+    } else {
+      this.applyPatternMask(input, mask.pattern);
+    }
+  },
+
+  applyPatternMask(input, pattern) {
+    input.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      let result = '';
+      let valueIndex = 0;
+
+      for (let i = 0; i < pattern.length && valueIndex < value.length; i++) {
+        if (pattern[i] === '#') {
+          result += value[valueIndex++];
+        } else {
+          result += pattern[i];
+          if (value[valueIndex] === pattern[i]) valueIndex++;
+        }
+      }
+
+      e.target.value = result;
+      this.updateFieldState(input);
+    });
+  },
+
+  applyCurrencyMask(input, config) {
+    input.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (!value) {
+        e.target.value = '';
+        return;
+      }
+
+      value = (parseInt(value) / Math.pow(10, config.precision)).toFixed(config.precision);
+      const parts = value.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, config.thousands);
+      
+      e.target.value = config.prefix + parts.join(config.decimal);
+      this.updateFieldState(input);
+    });
+  },
+
+  // Validar um campo
+  validateField(input, rules = []) {
+    const field = input.closest('.ae-field');
+    if (!field) return true;
+
+    const value = input.value;
+    let error = null;
+
+    for (const rule of rules) {
+      const validator = typeof rule === 'function' ? rule : this.validators[rule];
+      if (validator) {
+        error = validator(value);
+        if (error) break;
+      }
+    }
+
+    this.setFieldError(field, error);
+    return !error;
+  },
+
+  // Definir erro no campo
+  setFieldError(field, error) {
+    const errorEl = field.querySelector('.ae-field-error');
+    
+    if (error) {
+      field.classList.add('error');
+      field.classList.remove('success');
+      if (errorEl) {
+        errorEl.innerHTML = `<span class="material-icons">error</span>${error}`;
+      }
+    } else {
+      field.classList.remove('error');
+      if (field.querySelector('.ae-field-input')?.value) {
+        field.classList.add('success');
+      }
+      if (errorEl) errorEl.innerHTML = '';
+    }
+  },
+
+  // Atualizar estado do campo (has-value)
+  updateFieldState(input) {
+    if (input.value) {
+      input.classList.add('has-value');
+    } else {
+      input.classList.remove('has-value');
+    }
+  },
+
+  // Inicializar formulário
+  initForm(form, config = {}) {
+    const formEl = typeof form === 'string' ? document.querySelector(form) : form;
+    if (!formEl) return;
+
+    // Inicializar campos com máscaras
+    formEl.querySelectorAll('[data-mask]').forEach(input => {
+      this.applyMask(input, input.dataset.mask);
+    });
+
+    // Inicializar validação em tempo real
+    formEl.querySelectorAll('[data-validate]').forEach(input => {
+      const rules = input.dataset.validate.split(',').map(r => r.trim());
+      
+      input.addEventListener('blur', () => {
+        this.validateField(input, rules);
+      });
+
+      input.addEventListener('input', () => {
+        this.updateFieldState(input);
+        // Remove erro enquanto digita
+        const field = input.closest('.ae-field');
+        if (field?.classList.contains('error')) {
+          field.classList.remove('error');
+        }
+      });
+    });
+
+    // Inicializar contadores de caracteres
+    formEl.querySelectorAll('[data-maxlength]').forEach(input => {
+      const max = parseInt(input.dataset.maxlength);
+      const counter = document.createElement('span');
+      counter.className = 'ae-field-counter';
+      input.closest('.ae-field')?.appendChild(counter);
+
+      const updateCounter = () => {
+        const len = input.value.length;
+        counter.textContent = `${len}/${max}`;
+        counter.classList.toggle('warning', len > max * 0.8);
+        counter.classList.toggle('error', len > max);
+      };
+
+      input.addEventListener('input', updateCounter);
+      updateCounter();
+    });
+
+    // Inicializar file upload
+    formEl.querySelectorAll('.ae-file-dropzone').forEach(dropzone => {
+      this.initFileUpload(dropzone);
+    });
+
+    // Validação no submit
+    formEl.addEventListener('submit', (e) => {
+      let isValid = true;
+      
+      formEl.querySelectorAll('[data-validate]').forEach(input => {
+        const rules = input.dataset.validate.split(',').map(r => r.trim());
+        if (!this.validateField(input, rules)) {
+          isValid = false;
+        }
+      });
+
+      if (!isValid) {
+        e.preventDefault();
+        // Scroll para o primeiro erro
+        const firstError = formEl.querySelector('.ae-field.error');
+        firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      if (config.onSubmit) {
+        e.preventDefault();
+        if (isValid) {
+          const formData = new FormData(formEl);
+          const data = Object.fromEntries(formData.entries());
+          config.onSubmit(data);
+        }
+      }
+    });
+
+    return {
+      validate: () => {
+        let isValid = true;
+        formEl.querySelectorAll('[data-validate]').forEach(input => {
+          const rules = input.dataset.validate.split(',').map(r => r.trim());
+          if (!this.validateField(input, rules)) isValid = false;
+        });
+        return isValid;
+      },
+      getData: () => {
+        const formData = new FormData(formEl);
+        return Object.fromEntries(formData.entries());
+      },
+      reset: () => {
+        formEl.reset();
+        formEl.querySelectorAll('.ae-field').forEach(field => {
+          field.classList.remove('error', 'success');
+          field.querySelector('.ae-field-input')?.classList.remove('has-value');
+        });
+      },
+      setValues: (values) => {
+        Object.entries(values).forEach(([name, value]) => {
+          const input = formEl.querySelector(`[name="${name}"]`);
+          if (input) {
+            input.value = value;
+            this.updateFieldState(input);
+          }
+        });
+      }
+    };
+  },
+
+  // Inicializar file upload
+  initFileUpload(dropzone) {
+    const input = dropzone.querySelector('input[type="file"]');
+    const fileList = dropzone.parentElement.querySelector('.ae-file-list');
+
+    ['dragenter', 'dragover'].forEach(event => {
+      dropzone.addEventListener(event, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(event => {
+      dropzone.addEventListener(event, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      this.handleFiles(files, fileList, input);
+    });
+
+    input?.addEventListener('change', (e) => {
+      this.handleFiles(e.target.files, fileList, input);
+    });
+  },
+
+  handleFiles(files, fileList, input) {
+    if (!fileList) return;
+
+    Array.from(files).forEach(file => {
+      const item = document.createElement('div');
+      item.className = 'ae-file-item';
+      item.innerHTML = `
+        <div class="ae-file-item-icon">
+          <span class="material-icons">description</span>
+        </div>
+        <div class="ae-file-item-info">
+          <div class="ae-file-item-name">${file.name}</div>
+          <div class="ae-file-item-size">${this.formatFileSize(file.size)}</div>
+        </div>
+        <button type="button" class="ae-file-item-remove">
+          <span class="material-icons">close</span>
+        </button>
+      `;
+
+      item.querySelector('.ae-file-item-remove').addEventListener('click', () => {
+        item.remove();
+      });
+
+      fileList.appendChild(item);
+    });
+  },
+
+  formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+};
+
+// Expor globalmente
+window.AEForms = AEForms;
+
+// Auto-inicializar formulários com data-ae-form
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-ae-form]').forEach(form => {
+    AEForms.initForm(form);
+  });
+});
+</script>
+
+<script>
+/* codex-school-community-ux-script: pequenos ajustes de contexto escolar */
+(function() {
+  if (window.__codexSchoolCommunityUx) return;
+  window.__codexSchoolCommunityUx = true;
+
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  }
+
+  ready(function() {
+    document.documentElement.setAttribute('data-community-context', 'school');
+
+    document.querySelectorAll('form').forEach(function(form) {
+      if (!form.getAttribute('aria-label') && !form.getAttribute('aria-labelledby')) {
+        form.setAttribute('aria-label', 'Formulario da comunidade escolar');
+      }
+    });
+
+    document.querySelectorAll('input, select, textarea').forEach(function(field) {
+      if (!field.id && field.name) field.id = 'field-' + String(field.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      if (field.required && !field.getAttribute('aria-required')) field.setAttribute('aria-required', 'true');
+      if (!field.getAttribute('autocomplete')) {
+        var type = (field.getAttribute('type') || '').toLowerCase();
+        var name = (field.getAttribute('name') || field.id || '').toLowerCase();
+        if (type === 'email' || name.indexOf('email') >= 0) field.setAttribute('autocomplete', 'email');
+        else if (name.indexOf('nome') >= 0 || name.indexOf('name') >= 0) field.setAttribute('autocomplete', 'name');
+        else if (name.indexOf('senha') >= 0 || name.indexOf('password') >= 0) field.setAttribute('autocomplete', 'current-password');
+      }
+    });
+
+    document.querySelectorAll('button:not([type])').forEach(function(button) {
+      button.setAttribute('type', 'button');
+    });
+  });
+})();
+</script>
+
+<script>
+/* codex-project-behavior-standardization: microcomportamentos compartilhados */
+(function() {
+  if (window.__codexProjectBehaviorStandardization) return;
+  window.__codexProjectBehaviorStandardization = true;
+
+  var SUBMIT_LOCK_MS = 2500;
+  var invalidFocusPending = false;
+
+  function isElement(value) {
+    return value && value.nodeType === 1;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function unlockForm(form, button) {
+    if (isElement(form)) {
+      delete form.dataset.codexSubmitting;
+      if (form.getAttribute('aria-busy') === 'true') form.setAttribute('aria-busy', 'false');
+    }
+
+    if (isElement(button) && button.dataset.codexSubmitLocked === 'true') {
+      delete button.dataset.codexSubmitLocked;
+      button.disabled = false;
+      button.removeAttribute('aria-disabled');
+    }
+  }
+
+  function restoreSubmitLocks(scope) {
+    var root = scope && scope.querySelectorAll ? scope : document;
+
+    root.querySelectorAll('form[data-codex-submitting="true"]').forEach(function(form) {
+      unlockForm(form);
+    });
+
+    root.querySelectorAll('[data-codex-submit-locked="true"]').forEach(function(button) {
+      unlockForm(null, button);
+    });
+  }
+
+  document.addEventListener('submit', function(event) {
+    var form = event.target;
+    if (!isElement(form) || String(form.tagName).toLowerCase() !== 'form') return;
+    if (form.hasAttribute('data-no-submit-lock')) return;
+
+    if (form.dataset.codexSubmitting === 'true') {
+      event.preventDefault();
+      return;
+    }
+
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+    form.dataset.codexSubmitting = 'true';
+    form.setAttribute('aria-busy', 'true');
+
+    var button = event.submitter || form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+    if (isElement(button) && !button.disabled && !button.hasAttribute('data-no-submit-lock')) {
+      button.dataset.codexSubmitLocked = 'true';
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    }
+
+    window.setTimeout(function() {
+      unlockForm(form, button);
+    }, SUBMIT_LOCK_MS);
+  }, true);
+
+  document.addEventListener('invalid', function(event) {
+    var field = event.target;
+    if (!isElement(field) || invalidFocusPending) return;
+    invalidFocusPending = true;
+
+    window.setTimeout(function() {
+      invalidFocusPending = false;
+      if (!document.documentElement.contains(field)) return;
+      try {
+        field.scrollIntoView({ block: 'center', inline: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        field.focus({ preventScroll: true });
+      } catch (error) {
+        field.focus();
+      }
+    }, 0);
+  }, true);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key !== 'Escape') return;
+    var closedSomething = false;
+
+    var dialogs = Array.prototype.slice.call(document.querySelectorAll('dialog[open]'));
+    var dialog = dialogs[dialogs.length - 1];
+    if (dialog && typeof dialog.close === 'function') {
+      dialog.close();
+      closedSomething = true;
+    }
+
+    if (!closedSomething) {
+      var details = Array.prototype.slice.call(document.querySelectorAll('details[open]'));
+      var detail = details[details.length - 1];
+      if (detail) {
+        detail.removeAttribute('open');
+        closedSomething = true;
+      }
+    }
+
+    document.querySelectorAll('[aria-expanded="true"]').forEach(function(toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      closedSomething = true;
+    });
+
+    if (closedSomething) event.preventDefault();
+  }, true);
+
+  window.addEventListener('pageshow', function() {
+    restoreSubmitLocks(document);
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') restoreSubmitLocks(document);
+  });
+})();
+</script>
+
+
+

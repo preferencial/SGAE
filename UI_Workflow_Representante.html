@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d652d">
+  <title>Recebimento - Escola</title>
+  <style>
+    :root {
+      --primary: #0d652d; --primary-dark: #094d22; --primary-light: #e6f4ea;
+      --success: #0d652d; --success-light: #e6f4ea;
+      --error: #c5221f; --error-light: #fce8e6;
+      --warning: #e37400; --warning-light: #fef7e0;
+      --text: #e9ecf1; --text-secondary: #b2b9c4;
+      --bg: #15171c; --surface: #20242b; --border: #343941;
+      --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: calc(100px + var(--safe-bottom)); }
+    .header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: calc(16px + var(--safe-top)) 16px 16px; position: sticky; top: 0; z-index: 100; }
+    .header h1 { font-size: 18px; font-weight: 600; }
+    .header-sub { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+    .container { padding: 16px; max-width: 500px; margin: 0 auto; }
+    .card { background: var(--surface); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .card-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px; transition: all 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 16px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+    .step-indicator { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 12px; color: var(--text-secondary); }
+    .step-indicator .current { color: var(--primary); font-weight: 600; }
+
+
+
+/* codex-school-community-ux: ajustes finos para uso recorrente por comunidade escolar */
+:root {
+  --codex-school-focus: #ffd166;
+  --codex-school-touch: 44px;
+  --codex-school-radius: 8px;
+  --codex-school-field-radius: 7px;
+  --codex-school-form-gap: 14px;
+  --codex-school-field-border: rgba(120, 132, 156, 0.45);
+  --codex-school-field-bg: rgba(255, 255, 255, 0.96);
+  --codex-school-field-text: #1f2937;
+  --codex-school-muted-text: #64748b;
+  --codex-school-soft-surface: rgba(248, 250, 252, 0.82);
+  --codex-school-safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+:where(html) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+:where(body) {
+  overscroll-behavior-y: contain;
+}
+
+:where(p, li, dd, dt, blockquote, figcaption, label, td, th) {
+  line-height: 1.5;
+}
+
+:where(main, .main, .content, .page, .app, .app-shell, .container, .dashboard, .workspace) {
+  padding-bottom: var(--codex-school-safe-bottom);
+}
+
+:where(a, button, .btn, .button, [role="button"], input, select, textarea, summary) {
+  min-height: var(--codex-school-touch);
+  touch-action: manipulation;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="submit"], input[type="button"]) {
+  border-radius: var(--codex-school-radius) !important;
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--codex-school-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+  font-weight: 700;
+}
+
+:where(form) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(fieldset) {
+  border-radius: var(--codex-school-radius) !important;
+  border-color: var(--codex-school-field-border);
+}
+
+:where(legend) {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+:where(.form-group, .input-field, .field, .form-field, .control-group) {
+  margin-bottom: var(--codex-school-form-gap);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: min(100%, 100%);
+  border-radius: var(--codex-school-field-radius) !important;
+  border-color: var(--codex-school-field-border) !important;
+  background-color: var(--input-bg, var(--field-bg, var(--codex-school-field-bg)));
+  color: var(--input-text, var(--text-color, var(--codex-school-field-text)));
+  font-size: 16px !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--placeholder-color, #94a3b8);
+  opacity: 1;
+}
+
+:where(input[required], select[required], textarea[required]) {
+  border-left: 3px solid var(--codex-gentle-primary-strong, #aecbfa) !important;
+}
+
+:where(input:disabled, select:disabled, textarea:disabled, button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed !important;
+  opacity: 0.68;
+}
+
+:where(.help, .hint, .help-text, .form-help, small) {
+  line-height: 1.45;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+}
+
+:where(.actions, .form-actions, .button-row, .toolbar, .topbar, nav, [role="toolbar"]) {
+  gap: 8px;
+}
+
+:where(.actions, .form-actions, .button-row) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+:where(.actions, .form-actions, .button-row) > :where(button, .btn, .button, [role="button"]) {
+  flex: 1 1 148px;
+}
+
+:where(.card, .panel, .box, .tile, .item, .list-item, .action-card) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.section, .surface, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.filters, .search-panel, .form-section) {
+  border-radius: var(--codex-school-radius) !important;
+  background: var(--codex-school-soft-surface);
+}
+
+:where(table) {
+  border-collapse: collapse;
+}
+
+:where(table, .table, .data-table) {
+  max-width: 100%;
+}
+
+:where(.table-wrap, .table-wrapper, .table-container, .responsive-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(th, td) {
+  vertical-align: top;
+}
+
+:where(.toast, .alert, .notice, .snackbar, [role="status"], [role="alert"]) {
+  border-radius: var(--codex-school-radius) !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+  :where(body) {
+    font-size: 16px;
+  }
+
+  :where(h1) {
+    font-size: clamp(1.55rem, 1.35rem + 1vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  :where(h2) {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  :where(.toolbar, .topbar, nav, [role="toolbar"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  :where(.hide-mobile, .desktop-only) {
+    display: none !important;
+  }
+}
+</style>
+  <style id="codex-mobile-a11y">
+  /* Mobile-first accessibility baseline for Chrome and Google-style readability. */
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  :where(body) {
+    min-width: 0;
+    overflow-x: hidden;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption, label, td, th, input, select, textarea, button) {
+    line-height: 1.5;
+  }
+
+  :where(p, li, dd, dt, blockquote, figcaption) {
+    max-width: 72ch;
+  }
+
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+
+  :where(button, [role="button"], input:not([type="hidden"]), select, textarea) {
+    font: inherit;
+    min-height: 44px;
+  }
+
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid #1a73e8;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+  }
+
+  :where(img, video, canvas, svg, iframe) {
+    max-width: 100%;
+  }
+
+  :where(img, video, canvas, svg) {
+    height: auto;
+  }
+
+  :where(table) {
+    max-width: 100%;
+  }
+
+  :where(.table-responsive, .table-wrapper, .data-table, .table-container, .responsive-table) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :where(.container, .content, .main, .page, .page-content, .app-content, main) {
+    min-width: 0;
+  }
+
+  :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+    min-width: 0;
+  }
+
+  @media (max-width: 640px) {
+    :where(body) {
+      font-size: 16px;
+    }
+
+    :where(.container, .content, .page-content, .app-content, main) {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    :where(.row, .cards, .card-grid, .grid, .toolbar, .actions, .button-group, .form-row) {
+      flex-wrap: wrap;
+    }
+
+    :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea, button) {
+      max-width: 100%;
+    }
+
+    :where(.hide-on-mobile) {
+      display: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+<style>
+/* codex-s20-mobile-first: Samsung S20 / Chrome mobile baseline (360x800 CSS px) */
+@media screen {
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+  :where(body) {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  :where(main, .app, .page, .container, .content, .main-content, .dashboard, .view) {
+    max-width: 100%;
+  }
+  :where(img, video, canvas, svg) {
+    max-width: 100%;
+    height: auto;
+  }
+  :where(p, li, td, th, label, legend, button, a, h1, h2, h3, h4, h5, h6) {
+    overflow-wrap: anywhere;
+  }
+  :where(input, select, textarea, button) {
+    font: inherit;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    font-size: max(16px, 1rem);
+  }
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+  :where(.table-wrap, .table-wrapper, .table-responsive, .table-container, .responsive-table, .data-table-wrapper) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 480px) {
+  :where(body) {
+    font-size: 16px;
+  }
+  :where(.grid, .cards, .dashboard-grid, .stats-grid, .form-grid, .filters-grid) {
+    grid-template-columns: 1fr !important;
+  }
+  :where(.toolbar, .actions, .button-row, .filters, .form-actions, .modal-actions, .header-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(.btn, button, input, select, textarea) {
+    min-height: 44px;
+  }
+  :where(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :where(th, td) {
+    white-space: nowrap;
+  }
+  :where(.card, .panel, .modal, .dialog, .drawer) {
+    max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 360px) {
+  :where(body) {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  :where(.card, .panel, .section, .modal-content, .dialog-content) {
+    padding: 12px;
+  }
+  :where(h1) {
+    font-size: clamp(1.45rem, 1.2rem + 2vw, 2rem);
+  }
+  :where(h2) {
+    font-size: clamp(1.2rem, 1rem + 1.4vw, 1.55rem);
+  }
+}
+</style>
+<style>
+/* codex-design-system: shared contrast, button sizing and minimal button icon styling */
+:root {
+  --codex-ds-primary: var(--primary, var(--color-primary, var(--theme-primary, #1a73e8)));
+  --codex-ds-primary-strong: var(--primary-dark, var(--color-primary-strong, var(--theme-primary-dark, #1558d6)));
+  --codex-ds-text: var(--text, var(--color-ink, var(--text-primary, #202124)));
+  --codex-ds-muted: var(--muted, var(--color-muted, var(--text-secondary, #5f6368)));
+  --codex-ds-surface: var(--surface, var(--color-surface, var(--bg-surface, #ffffff)));
+  --codex-ds-border: var(--border, var(--color-border, var(--line, #dadce0)));
+  --codex-ds-focus: #1a73e8;
+  --codex-ds-radius: 8px;
+}
+
+:where(body) {
+  color: var(--codex-ds-text);
+}
+
+:where(.text-muted, .muted, .secondary, small, figcaption, caption) {
+  color: var(--codex-ds-muted);
+}
+
+:where(a) {
+  color: var(--codex-ds-primary);
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--codex-ds-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: var(--codex-ds-primary);
+  color: #ffffff;
+}
+
+:where(.btn:hover, .button:hover, button:hover, [role="button"]:hover) {
+  filter: none;
+}
+
+:where(.btn-primary:hover, .button-primary:hover, button[type="submit"]:hover, input[type="submit"]:hover) {
+  background: var(--codex-ds-primary-strong);
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: var(--codex-ds-surface);
+  color: var(--codex-ds-text);
+  border-color: var(--codex-ds-border);
+}
+
+:where(.btn-small, .btn.sm, .button-small, .button.sm) {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+:where(.icon-button, .btn-icon, button.icon, button[aria-label]:not([aria-label=""])) {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: var(--codex-ds-radius);
+}
+
+:where(button svg, .btn svg, .button svg, [role="button"] svg, button .material-icons, .btn .material-icons, .button .material-icons, button .icon, .btn .icon, .button .icon) {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  stroke-width: 2;
+  flex: 0 0 auto;
+}
+
+:where(button .material-icons, .btn .material-icons, .button .material-icons) {
+  font-feature-settings: "liga";
+  vertical-align: middle;
+}
+
+:where(button:focus-visible, .btn:focus-visible, .button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 3px solid var(--codex-ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--codex-ds-surface) 80%, transparent);
+}
+
+:where(button:disabled, .btn:disabled, .button:disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  :where(.btn, .button, button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    width: auto;
+  }
+  :where(.form-actions > .btn, .form-actions > .button, .form-actions > button, .actions > .btn, .actions > .button, .actions > button) {
+    width: 100%;
+  }
+}
+</style>
+<style>
+/* codex-gentle-dark-theme: default graphite theme with soft, kind UI accents */
+:root {
+  color-scheme: dark;
+  --codex-gentle-bg: #15171c;
+  --codex-gentle-bg-soft: #1a1d23;
+  --codex-gentle-surface: #20242b;
+  --codex-gentle-surface-2: #272b33;
+  --codex-gentle-border: #343941;
+  --codex-gentle-text: #eef1f5;
+  --codex-gentle-muted: #c8ced8;
+  --codex-gentle-dim: #9aa4b2;
+  --codex-gentle-primary: #8ab4f8;
+  --codex-gentle-primary-strong: #aecbfa;
+  --codex-gentle-accent: #8fa0b8;
+  --codex-gentle-success: #9be7c1;
+  --bg: var(--codex-gentle-bg);
+  --background: var(--codex-gentle-bg);
+  --surface: var(--codex-gentle-surface);
+  --panel: var(--codex-gentle-surface);
+  --card: var(--codex-gentle-surface);
+  --text: var(--codex-gentle-text);
+  --text-main: var(--codex-gentle-text);
+  --text-primary: var(--codex-gentle-text);
+  --text-muted: var(--codex-gentle-muted);
+  --muted: var(--codex-gentle-muted);
+  --border: var(--codex-gentle-border);
+  --line: var(--codex-gentle-border);
+  --primary: var(--codex-gentle-primary);
+  --primary-dark: #6ea0ef;
+  --codex-ds-primary: var(--codex-gentle-primary);
+  --codex-ds-primary-strong: var(--codex-gentle-primary-strong);
+  --codex-ds-text: var(--codex-gentle-text);
+  --codex-ds-muted: var(--codex-gentle-muted);
+  --codex-ds-surface: var(--codex-gentle-surface);
+  --codex-ds-border: var(--codex-gentle-border);
+}
+
+:where(html, body) {
+  background: var(--codex-gentle-bg) !important;
+  color: var(--codex-gentle-text) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(main, .app, .page, .layout, .content, .main-content, .app-content, .container, .dashboard, .view) {
+  background-color: transparent !important;
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(.card, .panel, .section, .surface, .box, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu, .table-wrapper, .table-wrap, .table-container, form) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+              var(--codex-gentle-surface) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+}
+
+:where(header, nav, aside, footer, .navbar, .sidebar, .topbar, .app-header, .app-footer) {
+  background: rgba(12, 15, 21, 0.92) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, label, span, strong, td, th, legend, small, caption) {
+  color: inherit;
+}
+
+:where(h1, .page-title, .view-title) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(h1:not(.no-emoji), .page-title:not(.no-emoji), .view-title:not(.no-emoji))::after {
+  content: "";
+  font-size: 0.82em;
+}
+
+:where(.empty-state, .empty, .no-data, .no-results, .loading, .placeholder)::before {
+  content: "";
+}
+
+:where(.text-muted, .muted, .secondary, .subtitle, .description, .help-text, .hint, small, figcaption, caption) {
+  color: var(--codex-gentle-muted) !important;
+}
+
+:where(a) {
+  color: var(--codex-gentle-primary-strong) !important;
+}
+
+:where(input, select, textarea) {
+  background: var(--codex-gentle-bg-soft) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--codex-gentle-dim) !important;
+}
+
+:where(table) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(th) {
+  color: var(--codex-gentle-muted) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:where(td) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  background: var(--codex-gentle-surface-2) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: none !important;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: linear-gradient(180deg, rgba(174, 203, 250, 0.24), rgba(138, 180, 248, 0.16)),
+              #182235 !important;
+  color: #f8fbff !important;
+  border-color: rgba(174, 203, 250, 0.45) !important;
+}
+
+:where(button[type="submit"]:not(.icon-button):not(.btn-icon), input[type="submit"])::after {
+  content: "";
+  font-size: 0.9em;
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(.badge, .tag, .chip, .pill, .status) {
+  background: rgba(248, 199, 220, 0.12) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: rgba(248, 199, 220, 0.26) !important;
+}
+
+:where(hr) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(svg, canvas, img) {
+  color: inherit;
+}
+</style>
+
+
+<style id="up-oracular-design-system">
+:root {
+  color-scheme: dark;
+  --uo-bg: #15171c;
+  --uo-panel: #20242b;
+  --uo-text: #e9ecf1;
+  --uo-muted: #b2b9c4;
+  --uo-border: #343941;
+  --uo-accent: #7aa2d6;
+  --uo-radius-group: 10px;
+  --uo-radius-control: 8px;
+}
+
+html, body {
+  background: var(--uo-bg) !important;
+  color: var(--uo-text) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body, input, select, textarea, button {
+  color: var(--uo-text);
+}
+
+.card, .panel, .modal, .dialog, dialog, .container,
+.box, .widget, .section, .sidebar, .drawer, .popover,
+[role="dialog"], [class*="card"], [class*="panel"] {
+  background-color: var(--uo-panel) !important;
+  border-color: var(--uo-border) !important;
+  border-radius: var(--uo-radius-group) !important;
+}
+
+button, input, select, textarea, .btn, .button,
+[role="button"], [role="menuitem"], .dropdown-item,
+.menu-item, [class*="button"], [class*="dropdown-item"] {
+  border-radius: var(--uo-radius-control) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  background-color: var(--uo-panel) !important;
+  border: 1px solid var(--uo-border) !important;
+  padding: 8px !important;
+  box-sizing: border-box;
+}
+
+label, .form-label, [class*="form-label"] {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--uo-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.uo-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.uo-feedback-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  min-width: 220px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--uo-border);
+  border-radius: var(--uo-radius-group);
+  background: var(--uo-panel);
+  color: var(--uo-text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.uo-feedback-box.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.uo-feedback-box[data-kind="ok"] {
+  border-color: #8fc2a6;
+  color: #8fc2a6;
+}
+
+.uo-feedback-box[data-kind="err"] {
+  border-color: #d98b93;
+  color: #d98b93;
+}
+
+form[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+form[aria-busy="true"] :is(button, input[type="submit"], input[type="button"]) {
+  pointer-events: none;
+}
+
+button, .btn-primary, .button-primary,
+[class*="primary"][role="button"] {
+  background-color: var(--uo-accent) !important;
+}
+
+p, small, .muted, .secondary, .subtitle,
+[class*="muted"], [class*="secondary"] {
+  color: var(--uo-muted) !important;
+}
+
+hr, table, th, td, fieldset {
+  border-color: var(--uo-border) !important;
+}
+
+a {
+  color: var(--uo-accent);
+}
+
+/* Geometrias funcionais permanecem circulares. */
+.avatar, .spinner, .loading-ring, .dot, .status-dot,
+[class*="avatar"], [class*="spinner"], [class*="loading-ring"] {
+  border-radius: 50% !important;
+}
+</style>
+<script id="up-oracular-form-feedback">
+(function () {
+  'use strict';
+  if (window.UpOracularFeedback) return;
+
+  var timer = null;
+  function notify(kind, message) {
+    var box = document.getElementById('uo-feedback-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'uo-feedback-box';
+      box.className = 'uo-feedback-box';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      document.body.appendChild(box);
+    }
+    box.dataset.kind = kind === 'err' ? 'err' : 'ok';
+    box.textContent = String(message || (kind === 'err' ? 'Nao foi possivel concluir.' : 'Operacao concluida.'));
+    box.classList.add('is-visible');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      box.classList.remove('is-visible');
+    }, 1000);
+  }
+
+  function connectLabels(form) {
+    form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field, index) {
+      var id = field.id || ('uo-field-' + index + '-' + Math.random().toString(36).slice(2, 7));
+      field.id = id;
+      var label = form.querySelector('label[for="' + id + '"]');
+      if (!label) {
+        var sibling = field.previousElementSibling;
+        if (sibling && sibling.tagName === 'LABEL') {
+          sibling.htmlFor = id;
+          label = sibling;
+        }
+      }
+      if (label && field.parentElement && !field.parentElement.classList.contains('uo-field')) {
+        field.parentElement.classList.add('uo-field');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(connectLabels);
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    form.setAttribute('aria-busy', 'true');
+    notify('ok', 'Enviando...');
+    window.setTimeout(function () {
+      if (form.getAttribute('aria-busy') === 'true') {
+        form.removeAttribute('aria-busy');
+      }
+    }, 10000);
+  }, true);
+
+  window.UpOracularFeedback = {
+    ok: function (message) { notify('ok', message); },
+    err: function (message) { notify('err', message); },
+    done: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('ok', message);
+    },
+    fail: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('err', message);
+    }
+  };
+}());
+</script>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style id="cdx-mi-style">.cdx-mi{font-size:1.1em;line-height:1;vertical-align:-0.15em}</style>
+  <style id="cdx-border-to-color">
+/* Padronização de borders → cores complementares (FROTA-20) */
+input:not([type="hidden"]),
+textarea,
+select,
+[class*="input"],
+[class*="field"],
+[class*="form"],
+.card,
+.panel,
+.box,
+.container,
+.modal,
+[class*="modal"],
+[class*="dialog"],
+dialog {
+  border: none !important;
+  border-width: 0 !important;
+}
+
+input:not([type="hidden"]),
+textarea,
+select {
+  background-color: #20242b !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 2px #e9ecf1 !important;
+}
+  </style>
+
+  <style id="fleet-mobile-wcag-aa">
+    /* Contrato FROTA: ergonomia S20 e WCAG 2.1 AA. */
+    html, body { max-width: 100%; overflow-x: hidden; }
+    :is(button, [role="button"], input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+      min-width: 48px !important;
+      min-height: 48px !important;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1><i class="material-icons cdx-mi" aria-hidden="true">inventory_2</i> Recebimento de Gêneros</h1>
+    <div class="header-sub" id="headerEscola">Selecione sua escola</div>
+  </header>
+  <main class="container">
+    <div id="alertBox" class="alert hidden"></div>
+    <div class="progress-bar"><div class="progress-bar-fill" id="progressFill" style="width: 33%"></div></div>
+    <div class="step-indicator"><span id="stepText" class="current">Passo 1 de 3: Selecionar Escola</span></div>
+
+    <!-- Step 1: Seleção da Escola -->
+    <div class="card" id="cardEscola">
+      <div class="card-title"><i class="material-icons cdx-mi" aria-hidden="true">account_balance</i> Sua Unidade Escolar</div>
+      <div class="form-group">
+        <select id="selectEscola" onchange="selecionarEscola()">
+          <option value="">-- Carregando escolas... --</option>
+        </select>
+      </div>
+      <div class="hint" style="margin-top:8px;font-size:12px;color:var(--text-secondary)">
+        Selecione a escola onde você está registrando o recebimento
+      </div>
+    </div>
+
+    <!-- Step 2: Lista de NFs Pendentes -->
+    <div class="card hidden" id="cardNFsPendentes">
+      <div class="card-title"><i class="material-icons cdx-mi" aria-hidden="true">assignment</i> Notas Fiscais Disponíveis</div>
+      
+      <!-- Filtros e Busca -->
+      <div class="filtros-container">
+        <!-- Busca por NF com Autocomplete -->
+        <div class="form-group autocomplete-wrapper">
+          <label><i class="material-icons cdx-mi" aria-hidden="true">search</i> Buscar NF</label>
+          <input inputmode="text" type="text" id="buscaNF" class="input-autocomplete" placeholder="Digite número da NF ou produto..." oninput="filtrarNFs()" autocomplete="off">
+          <div class="autocomplete-dropdown hidden" id="dropdownNF"></div>
+        </div>
+        
+        <!-- Filtro por Fornecedor -->
+        <div class="form-group">
+          <label><i class="material-icons cdx-mi" aria-hidden="true">business</i> Fornecedor</label>
+          <select id="filtroFornecedor" onchange="filtrarNFs()">
+            <option value="">Todos os fornecedores</option>
+          </select>
+        </div>
+        
+        <!-- Filtro por Status -->
+        <div class="filtros-inline">
+          <button class="filtro-chip active" data-filtro="pendentes" onclick="setFiltroStatus(this, 'pendentes')"><i class="material-icons cdx-mi" aria-hidden="true">assignment</i> Pendentes</button>
+          <button class="filtro-chip" data-filtro="todos" onclick="setFiltroStatus(this, 'todos')">📑 Todos</button>
+          <button class="filtro-chip" data-filtro="recebidos" onclick="setFiltroStatus(this, 'recebidos')"><i class="material-icons cdx-mi" aria-hidden="true">check_circle</i> Recebidos</button>
+        </div>
+      </div>
+      
+      <!-- Contador de resultados -->
+      <div class="resultados-info" id="resultadosInfo">
+        <span id="contadorNFs">0 NFs encontradas</span>
+      </div>
+      
+      <div id="listaNFsPendentes"><div class="empty-state">Carregando...</div></div>
+    </div>
+
+    <!-- Step 3: Formulário de Recebimento -->
+    <div id="formRecebimento" class="hidden">
+      <div class="card">
+        <div class="card-title"><i class="material-icons cdx-mi" aria-hidden="true">edit_note</i> Registrar Recebimento</div>
+        <div id="infoNFSelecionada" class="nf-resumo"></div>
+        
+        <!-- Gênero Alimentício Auto-Selecionado -->
+        <div class="genero-box" id="generoBox">
+          <div class="genero-header">
+            <span class="genero-icon">🥫</span>
+            <div class="genero-info">
+              <span class="genero-label">Gênero Alimentício</span>
+              <span class="genero-nome" id="generoNome">-</span>
+            </div>
+          </div>
+          <div class="genero-detalhes">
+            <div class="detalhe-item">
+              <span class="detalhe-label">Qtd na NF</span>
+              <span class="detalhe-valor" id="generoQtdNF">0</span>
+            </div>
+            <div class="detalhe-item">
+              <span class="detalhe-label">Valor Unit.</span>
+              <span class="detalhe-valor" id="generoValorUnit">R$ 0,00</span>
+            </div>
+            <div class="detalhe-item destaque">
+              <span class="detalhe-label">Valor Total NF</span>
+              <span class="detalhe-valor" id="generoValorTotal">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="recebimento-box">
+          <h3><i class="material-icons cdx-mi" aria-hidden="true">bar_chart</i> Quantidade Recebida</h3>
+          <div class="qtd-comparativo">
+            <div class="qtd-item esperado"><span class="label">Esperado</span><span class="valor" id="qtdEsperada">0</span><span class="unidade" id="unidadeEsperada">KG</span></div>
+            <div class="qtd-seta">→</div>
+            <div class="qtd-item recebido"><span class="label">Recebido</span><input inputmode="decimal" type="number" id="qtdRecebida" step="0.001" min="0" oninput="calcularDiferencaCompleta()"><span class="unidade" id="unidadeRecebida">KG</span></div>
+          </div>
+          <div class="diferenca-box" id="diferencaBox"></div>
+          
+          <!-- Cálculo de Valores em Caso de Recusa -->
+          <div class="calculo-recusa hidden" id="calculoRecusa">
+            <div class="calculo-titulo"><i class="material-icons cdx-mi" aria-hidden="true">payments</i> Impacto Financeiro da Recusa</div>
+            <div class="calculo-grid">
+              <div class="calculo-item">
+                <span class="calc-label">Qtd Recusada</span>
+                <span class="calc-valor recusa" id="qtdRecusada">0</span>
+                <span class="calc-unidade" id="unidadeRecusada">KG</span>
+              </div>
+              <div class="calculo-item">
+                <span class="calc-label">Valor Recusado</span>
+                <span class="calc-valor recusa" id="valorRecusado">R$ 0,00</span>
+              </div>
+            </div>
+            <div class="calculo-resumo">
+              <div class="resumo-linha">
+                <span>Valor Original NF:</span>
+                <span id="valorOriginalNF">R$ 0,00</span>
+              </div>
+              <div class="resumo-linha desconto">
+                <span>(-) Valor Recusado:</span>
+                <span id="valorDescontado">R$ 0,00</span>
+              </div>
+              <div class="resumo-linha final">
+                <span>(=) Valor a Pagar:</span>
+                <span id="valorFinalPagar">R$ 0,00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="material-icons cdx-mi" aria-hidden="true">check_circle</i> Conferência de Qualidade</div>
+        <div class="check-grid">
+          <div class="check-item"><input type="checkbox" id="checkEmbalagem"><label for="checkEmbalagem">Embalagem íntegra</label></div>
+          <div class="check-item"><input type="checkbox" id="checkValidade"><label for="checkValidade">Validade adequada</label></div>
+          <div class="check-item"><input type="checkbox" id="checkCaracteristicas"><label for="checkCaracteristicas">Características OK</label></div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label>Temperatura (°C) - se perecível</label>
+          <input inputmode="decimal" type="number" id="temperatura" step="0.1" placeholder="Ex: 4.5">
+        </div>
+        
+        <!-- Motivo da Recusa (aparece quando há diferença) -->
+        <div class="motivo-recusa-box hidden" id="motivoRecusaBox">
+          <div class="form-group">
+            <label><i class="material-icons cdx-mi" aria-hidden="true">warning</i> Motivo da Recusa/Diferença *</label>
+            <select id="motivoRecusa">
+              <option value="">-- Selecione o motivo --</option>
+              <option value="QUANTIDADE_INFERIOR">Quantidade inferior à NF</option>
+              <option value="PRODUTO_AVARIADO">Produto avariado/danificado</option>
+              <option value="VALIDADE_VENCIDA">Validade vencida ou próxima</option>
+              <option value="TEMPERATURA_INADEQUADA">Temperatura inadequada</option>
+              <option value="EMBALAGEM_VIOLADA">Embalagem violada</option>
+              <option value="CARACTERISTICAS_ALTERADAS">Características alteradas</option>
+              <option value="NAO_CONFORME_ESPECIFICACAO">Não conforme especificação</option>
+              <option value="OUTRO">Outro motivo</option>
+            </select>
+          </div>
+          <div class="form-group hidden" id="outroMotivoBox">
+            <label>Especifique o motivo</label>
+            <textarea id="outroMotivo" rows="2" placeholder="Descreva o motivo da recusa..."></textarea>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Observações</label>
+          <textarea id="observacoes" rows="2" placeholder="Observações adicionais..."></textarea>
+        </div>
+      </div>
+
+      <!-- Produção da Horta Escolar -->
+      <div class="card" id="cardHorta">
+        <div class="card-title horta-toggle" onclick="toggleHorta()" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+          <span><i class="material-icons cdx-mi" aria-hidden="true">eco</i> Produção da Horta Escolar</span>
+          <span id="hortaChevron" style="font-size:18px;transition:transform 0.2s;">▼</span>
+        </div>
+        <div id="hortaContent" style="display:none;">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;">
+              <input type="checkbox" id="temHortaProducao" onchange="toggleHortaItens()" style="width:auto;accent-color:var(--primary);">
+              Houve contribuição da horta escolar neste período?
+            </label>
+          </div>
+          <div id="hortaItensContainer" style="display:none;">
+            <div id="hortaItens"></div>
+            <button type="button" class="btn" onclick="adicionarItemHorta()"
+              style="width:100%;background:var(--primary-light);color:var(--primary);border:2px dashed var(--primary);margin-bottom:12px;font-weight:600;">
+              ＋ Adicionar Gênero da Horta
+            </button>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Data da Colheita *</label>
+                <input type="date" id="hortaDataColheita">
+              </div>
+              <div class="form-group">
+                <label>Responsável pela Colheita</label>
+                <input inputmode="text" type="text" id="hortaResponsavelColheita" placeholder="Nome do responsável" autocomplete="name">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Destino da Produção</label>
+              <select id="hortaDestinoPadrao">
+                <option value="Cardapio_Dia">Cardápio do Dia</option>
+                <option value="Estoque">Estoque</option>
+                <option value="Descarte">Descarte</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="material-icons cdx-mi" aria-hidden="true">edit</i> Responsável pelo Recebimento</div>
+        <div class="form-row">
+          <div class="form-group"><label>Nome Completo *</label><input inputmode="text" type="text" id="responsavel" placeholder="Seu nome" autocomplete="name"></div>
+          <div class="form-group"><label>Matrícula *</label><input inputmode="text" type="text" id="matricula" placeholder="123456" autocomplete="name"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Data *</label><input type="date" id="dataRecebimento"></div>
+          <div class="form-group"><label>Hora *</label><input type="time" id="horaRecebimento"></div>
+        </div>
+        <div class="check-item assinatura"><input type="checkbox" id="checkAssinatura"><label for="checkAssinatura">Confirmo que assinei o Termo de Recebimento</label></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="bottom-actions" id="bottomActions">
+    <button class="btn btn-secondary hidden" id="btnVoltar" onclick="voltarPasso()">Voltar</button>
+    <button class="btn btn-primary" id="btnAvancar" onclick="avancarPasso()">Selecionar Escola →</button>
+  </div>
+
+  <!-- Modal de Confirmação -->
+  <div class="modal-overlay hidden" id="modalConfirm">
+    <div class="modal">
+      <div class="modal-icon"><i class="material-icons cdx-mi" aria-hidden="true">inventory_2</i></div>
+      <div class="modal-title">Confirmar Recebimento</div>
+      <div class="modal-text" id="modalResumo"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="fecharModal()">Revisar</button>
+        <button class="btn btn-success" onclick="confirmarRecebimento()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Sucesso -->
+  <div class="modal-overlay hidden" id="modalSucesso">
+    <div class="modal">
+      <div class="success-check"></div>
+      <div class="modal-title">Recebimento Registrado!</div>
+      <div class="modal-text" id="modalSucessoText"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="novoRecebimento()">Registrar Outro</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .alert { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+    .alert-error { background: var(--error-light); color: var(--error); }
+    .alert-success { background: var(--success-light); color: var(--success); }
+    .hidden { display: none !important; }
+    .empty-state { text-align: center; padding: 30px; color: var(--text-secondary); }
+    
+    .nf-card { background: var(--bg); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 2px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .nf-card:active, .nf-card.selected { border-color: var(--primary); background: var(--primary-light); }
+    .nf-card.disabled { opacity: 0.6; cursor: not-allowed; border-color: var(--success); }
+    .nf-card .nf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .nf-card .nf-numero { font-weight: 700; font-size: 15px; }
+    .nf-card .nf-produto { font-size: 14px; font-weight: 500; margin: 6px 0; }
+    .nf-card .nf-info { font-size: 13px; color: var(--text-secondary); }
+    .nf-card .nf-valor { font-weight: 700; color: var(--success); }
+    .nf-card .nf-recebimento-status { margin-top: 8px; padding: 8px; background: rgba(13,101,45,0.1); border-radius: 6px; font-size: 11px; color: var(--success); }
+    .progress-mini { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 4px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--success); transition: width 0.3s; }
+    
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .badge-pendente { background: var(--warning-light); color: var(--warning); }
+    .badge-recebido { background: var(--success-light); color: var(--success); }
+    
+    .nf-resumo { background: var(--bg); border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+    .nf-resumo p { margin: 4px 0; font-size: 13px; }
+    .nf-resumo strong { color: var(--primary); }
+    
+    .recebimento-box { background: var(--primary-light); border-radius: 12px; padding: 16px; border: 2px solid var(--primary); }
+    .recebimento-box h3 { font-size: 14px; color: var(--primary); margin-bottom: 14px; }
+    
+    .qtd-comparativo { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .qtd-item { text-align: center; }
+    .qtd-item .label { display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+    .qtd-item .valor { display: block; font-size: 24px; font-weight: 700; color: var(--text); }
+    .qtd-item.recebido input { width: 100px; text-align: center; font-size: 20px; font-weight: 700; padding: 8px; border: 2px solid var(--primary); border-radius: 8px; }
+    .qtd-item .unidade { display: block; font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .qtd-seta { font-size: 24px; color: var(--primary); }
+    
+    .diferenca-box { margin-top: 12px; padding: 10px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600; }
+    .diferenca-box.conforme { background: var(--success-light); color: var(--success); }
+    .diferenca-box.parcial { background: var(--warning-light); color: var(--warning); }
+    .diferenca-box.recusa { background: var(--error-light); color: var(--error); }
+    
+    .check-grid { display: grid; gap: 10px; }
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: 8px; }
+    .check-item input { width: 22px; height: 22px; accent-color: var(--primary); }
+    .check-item label { font-size: 14px; cursor: pointer; }
+    .check-item.assinatura { background: var(--primary-light); border: 2px solid var(--primary); margin-top: 14px; }
+    
+    .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.6; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--bg); color: var(--primary); border: 2px solid var(--primary); }
+    .btn-success { background: var(--success); color: white; }
+    
+    .bottom-actions { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); padding: 14px 16px calc(14px + var(--safe-bottom)); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; gap: 10px; }
+    .bottom-actions .btn { flex: 1; }
+    
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal { background: var(--surface); border-radius: 16px; padding: 24px; max-width: 340px; width: 100%; text-align: center; }
+    .modal-icon { font-size: 48px; margin-bottom: 16px; }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal-text { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions .btn { flex: 1; padding: 12px; }
+    
+    .success-check { width: 60px; height: 60px; border-radius: 50%; background: var(--success); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; animation: scaleIn 0.3s ease; }
+    .success-check::after { content: '✓'; color: white; font-size: 32px; font-weight: bold; }
+    @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+    
+    .loading { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Filtros e Autocomplete */
+    .filtros-container { margin-bottom: 16px; }
+    .autocomplete-wrapper { position: relative; }
+    .input-autocomplete { padding-right: 40px !important; }
+    .autocomplete-dropdown { 
+      position: absolute; top: 100%; left: 0; right: 0; 
+      background: var(--surface); border: 2px solid var(--primary); 
+      border-top: none; border-radius: 0 0 10px 10px; 
+      max-height: 250px; overflow-y: auto; z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .autocomplete-item { 
+      padding: 12px 14px; cursor: pointer; 
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .autocomplete-item:hover, .autocomplete-item.highlighted { background: var(--primary-light); }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item .nf-num { font-weight: 700; color: var(--primary); }
+    .autocomplete-item .nf-prod { font-size: 13px; color: var(--text); margin-top: 2px; }
+    .autocomplete-item .nf-forn { font-size: 11px; color: var(--text-secondary); }
+    .autocomplete-item .nf-valor { float: right; font-weight: 600; color: var(--success); }
+    .autocomplete-item.disabled { opacity: 0.5; background: #f0f0f0; }
+    .autocomplete-item.disabled::after { content: ' ✓ Já recebido'; font-size: 10px; color: var(--success); }
+    
+    .filtros-inline { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .filtro-chip { 
+      padding: 8px 14px; border: 2px solid var(--border); 
+      border-radius: 20px; background: var(--surface); 
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; color: var(--text-secondary);
+    }
+    .filtro-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .filtro-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    .resultados-info { 
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    /* Highlight de busca */
+    .highlight { background: yellow; padding: 0 2px; border-radius: 2px; }
+    
+    /* Gênero Alimentício Box */
+    .genero-box {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 2px solid var(--success);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .genero-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .genero-icon {
+      font-size: 32px;
+      background: white;
+      padding: 8px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .genero-info {
+      flex: 1;
+    }
+    .genero-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .genero-nome {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--success);
+      margin-top: 2px;
+    }
+    .genero-detalhes {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .detalhe-item {
+      text-align: center;
+    }
+    .detalhe-item.destaque {
+      background: var(--success-light);
+      border-radius: 6px;
+      padding: 4px;
+    }
+    .detalhe-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+    .detalhe-valor {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .detalhe-item.destaque .detalhe-valor {
+      color: var(--success);
+    }
+    
+    /* Cálculo de Recusa */
+    .calculo-recusa {
+      margin-top: 16px;
+      background: var(--error-light);
+      border: 2px solid var(--error);
+      border-radius: 10px;
+      padding: 14px;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .calculo-titulo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--error);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .calculo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .calculo-item {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .calc-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .calc-valor {
+      display: block;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .calc-valor.recusa {
+      color: var(--error);
+    }
+    .calc-unidade {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .calculo-resumo {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .resumo-linha {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .resumo-linha:last-child {
+      border-bottom: none;
+    }
+    .resumo-linha.desconto {
+      color: var(--error);
+      font-weight: 600;
+    }
+    .resumo-linha.final {
+      color: var(--success);
+      font-weight: 700;
+      font-size: 15px;
+      padding-top: 10px;
+      margin-top: 4px;
+      border-top: 2px solid var(--success);
+    }
+    
+    /* Motivo da Recusa */
+    .motivo-recusa-box {
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--warning-light);
+      border: 2px solid var(--warning);
+      border-radius: 10px;
+    }
+    .motivo-recusa-box .form-group {
+      margin-bottom: 0;
+    }
+    .motivo-recusa-box label {
+      color: var(--warning);
+      font-weight: 700;
+    }
+    .motivo-recusa-box select {
+      border-color: var(--warning);
+    }
+    .motivo-recusa-box select:focus {
+      box-shadow: 0 0 0 3px var(--warning-light);
+    }
+  </style>
+
+  <script>
+    var passo = 1;
+    var escolaSelecionada = '';
+    var nfSelecionada = null;
+    var todasNFs = []; // Cache de todas as NFs
+    var filtroStatusAtual = 'pendentes';
+    var highlightedIndex = -1;
+    var hortaItemCount = 0;
+
+    // ========================================
+    // HORTA ESCOLAR — CORTINA / ACCORDION
+    // ========================================
+
+    function toggleHorta() {
+      var content = document.getElementById('hortaContent');
+      var chevron = document.getElementById('hortaChevron');
+      var visible = content.style.display !== 'none';
+      content.style.display = visible ? 'none' : 'block';
+      chevron.style.transform = visible ? '' : 'rotate(180deg)';
+    }
+
+    function toggleHortaItens() {
+      var checked = document.getElementById('temHortaProducao').checked;
+      document.getElementById('hortaItensContainer').style.display = checked ? 'block' : 'none';
+      if (checked && document.getElementById('hortaItens').children.length === 0) {
+        adicionarItemHorta();
+      }
+      // Preenche data padrão com hoje
+      if (checked && !document.getElementById('hortaDataColheita').value) {
+        document.getElementById('hortaDataColheita').valueAsDate = new Date();
+      }
+    }
+
+    function adicionarItemHorta() {
+      hortaItemCount++;
+      var idx = hortaItemCount;
+      var container = document.getElementById('hortaItens');
+      var div = document.createElement('div');
+      div.id = 'hortaItem_' + idx;
+      div.style.cssText = 'border:1px solid #c8e6c9;border-radius:10px;padding:12px;margin-bottom:10px;background:#f1f8e9;';
+      div.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+        '  <strong style="font-size:13px;color:#2e7d32;">🌿 Gênero #' + idx + '</strong>' +
+        '  <button type="button" onclick="removerItemHorta(' + idx + ')" style="background:none;border:none;color:#c62828;cursor:pointer;font-size:18px;line-height:1;">✕</button>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+        '  <div class="form-group" style="margin:0;grid-column:1/-1;">' +
+        '    <label style="font-size:11px;">Gênero Alimentício *</label>' +
+        '    <input inputmode="text" type="text" id="hortaProduto_' + idx + '" placeholder="Ex: Alface, Tomate, Couve..." style="font-size:14px;" autocomplete="name">' +
+        '  </div>' +
+        '  <div class="form-group" style="margin:0;">' +
+        '    <label style="font-size:11px;">Quantidade Colhida (kg) *</label>' +
+        '    <input inputmode="decimal" type="number" id="hortaQtd_' + idx + '" placeholder="0,000" step="0.001" min="0" style="font-size:14px;">' +
+        '  </div>' +
+        '  <div class="form-group" style="margin:0;">' +
+        '    <label style="font-size:11px;">Unidade de Medida</label>' +
+        '    <select id="hortaUnidade_' + idx + '" style="font-size:14px;">' +
+        '      <option value="kg">kg</option>' +
+        '      <option value="unidade">Unidade</option>' +
+        '      <option value="maco">Maço</option>' +
+        '      <option value="caixa">Caixa</option>' +
+        '    </select>' +
+        '  </div>' +
+        '</div>';
+      container.appendChild(div);
+    }
+
+    function removerItemHorta(idx) {
+      var el = document.getElementById('hortaItem_' + idx);
+      if (el) el.remove();
+    }
+
+    function coletarDadosHorta() {
+      if (!document.getElementById('temHortaProducao').checked) return null;
+      var itens = [];
+      var container = document.getElementById('hortaItens');
+      var divs = container.querySelectorAll('[id^="hortaItem_"]');
+      divs.forEach(function(div) {
+        var idx = div.id.replace('hortaItem_', '');
+        var produto = (document.getElementById('hortaProduto_' + idx) || {}).value || '';
+        var qtd = parseFloat((document.getElementById('hortaQtd_' + idx) || {}).value) || 0;
+        var unidade = (document.getElementById('hortaUnidade_' + idx) || {}).value || 'kg';
+        if (produto.trim()) {
+          itens.push({ produto: produto.trim(), quantidadeKg: qtd, unidade: unidade });
+        }
+      });
+      if (itens.length === 0) return null;
+      return {
+        itens: itens,
+        dataColheita: document.getElementById('hortaDataColheita').value,
+        responsavelColheita: document.getElementById('hortaResponsavelColheita').value.trim(),
+        destinoPadrao: document.getElementById('hortaDestinoPadrao').value
+      };
+    }
+
+    // ========================================
+    // AUTOCOMPLETE E FILTROS
+    // ========================================
+    
+    function filtrarNFs() {
+      var busca = document.getElementById('buscaNF').value.toLowerCase().trim();
+      var fornecedor = document.getElementById('filtroFornecedor').value;
+      
+      var nfsFiltradas = todasNFs.filter(function(nf) {
+        // Filtro por status
+        var jaRecebeu = nf.jaRecebeuEscola || (nf.recebimentos && nf.recebimentos.indexOf(escolaSelecionada) >= 0);
+        if (filtroStatusAtual === 'pendentes' && jaRecebeu) return false;
+        if (filtroStatusAtual === 'recebidos' && !jaRecebeu) return false;
+        
+        // Filtro por fornecedor
+        if (fornecedor && (nf.fornecedor || nf.cnpj) !== fornecedor) return false;
+        
+        // Filtro por busca (número, produto, fornecedor)
+        if (busca) {
+          var textoNF = [
+            String(nf.numero || ''),
+            String(nf.produto || ''),
+            String(nf.fornecedor || ''),
+            String(nf.cnpj || '')
+          ].join(' ').toLowerCase();
+          if (textoNF.indexOf(busca) === -1) return false;
+        }
+        
+        return true;
+      });
+      
+      // Atualizar dropdown de autocomplete
+      if (busca.length >= 1) {
+        mostrarDropdownAutocomplete(nfsFiltradas, busca);
+      } else {
+        esconderDropdown();
+      }
+      
+      // Atualizar lista principal
+      renderizarNFsPendentes(nfsFiltradas);
+      
+      // Atualizar contador
+      document.getElementById('contadorNFs').textContent = nfsFiltradas.length + ' NF(s) encontrada(s)';
+    }
+    
+    function mostrarDropdownAutocomplete(nfs, busca) {
+      var dropdown = document.getElementById('dropdownNF');
+      
+      if (nfs.length === 0) {
+        dropdown.innerHTML = '<div class="autocomplete-item" style="color:var(--text-secondary)">Nenhuma NF encontrada</div>';
+        dropdown.classList.remove('hidden');
+        return;
+      }
+      
+      var html = '';
+      nfs.slice(0, 8).forEach(function(nf, idx) {
+        var jaRecebeu = nf.jaRecebeuEscola || (nf.recebimentos && nf.recebimentos.indexOf(escolaSelecionada) >= 0);
+        var numHighlight = highlightText(String(nf.numero), busca);
+        var prodHighlight = highlightText(String(nf.produto || ''), busca);
+        
+        html += '<div class="autocomplete-item' + (jaRecebeu ? ' disabled' : '') + '" ' +
+                'data-index="' + idx + '" ' +
+                'onclick="' + (jaRecebeu ? '' : 'selecionarNFAutocomplete(' + idx + ')') + '">' +
+                '<span class="nf-valor">R$ ' + (nf.valorTotal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span>' +
+                '<div class="nf-num">NF ' + numHighlight + '</div>' +
+                '<div class="nf-prod">🥫 ' + prodHighlight + '</div>' +
+                '<div class="nf-forn">' + (nf.fornecedor || nf.cnpj || '') + ' • ' + nf.quantidade + ' ' + nf.unidade + '</div>' +
+                '</div>';
+      });
+      
+      if (nfs.length > 8) {
+        html += '<div class="autocomplete-item" style="text-align:center;color:var(--text-secondary);font-size:11px">+ ' + (nfs.length - 8) + ' mais resultados</div>';
+      }
+      
+      dropdown.innerHTML = html;
+      dropdown.classList.remove('hidden');
+      highlightedIndex = -1;
+    }
+    
+    function highlightText(text, busca) {
+      if (!busca || !text) return text;
+      var regex = new RegExp('(' + busca.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+    
+    function esconderDropdown() {
+      document.getElementById('dropdownNF').classList.add('hidden');
+      highlightedIndex = -1;
+    }
+    
+    function selecionarNFAutocomplete(idx) {
+      var nfsFiltradas = todasNFs.filter(function(nf) {
+        var jaRecebeu = nf.jaRecebeuEscola || (nf.recebimentos && nf.recebimentos.indexOf(escolaSelecionada) >= 0);
+        if (filtroStatusAtual === 'pendentes' && jaRecebeu) return false;
+        if (filtroStatusAtual === 'recebidos' && !jaRecebeu) return false;
+        
+        var busca = document.getElementById('buscaNF').value.toLowerCase().trim();
+        var fornecedor = document.getElementById('filtroFornecedor').value;
+        
+        if (fornecedor && (nf.fornecedor || nf.cnpj) !== fornecedor) return false;
+        if (busca) {
+          var textoNF = [String(nf.numero || ''), String(nf.produto || ''), String(nf.fornecedor || '')].join(' ').toLowerCase();
+          if (textoNF.indexOf(busca) === -1) return false;
+        }
+        return true;
+      });
+      
+      if (nfsFiltradas[idx]) {
+        nfSelecionada = nfsFiltradas[idx];
+        document.getElementById('buscaNF').value = 'NF ' + nfSelecionada.numero + ' - ' + nfSelecionada.produto;
+        esconderDropdown();
+        
+        // Avançar automaticamente para o formulário
+        passo = 3;
+        prepararFormulario();
+        atualizarUI();
+      }
+    }
+    
+    function setFiltroStatus(el, status) {
+      filtroStatusAtual = status;
+      document.querySelectorAll('.filtro-chip').forEach(function(c) { c.classList.remove('active'); });
+      el.classList.add('active');
+      filtrarNFs();
+    }
+    
+    function popularFiltroFornecedores(nfs) {
+      var fornecedores = {};
+      nfs.forEach(function(nf) {
+        var forn = nf.fornecedor || nf.cnpj || '';
+        if (forn) fornecedores[forn] = true;
+      });
+      
+      var select = document.getElementById('filtroFornecedor');
+      select.innerHTML = '<option value="">Todos os fornecedores</option>';
+      Object.keys(fornecedores).sort().forEach(function(forn) {
+        var opt = document.createElement('option');
+        opt.value = forn;
+        opt.textContent = forn;
+        select.appendChild(opt);
+      });
+    }
+    
+    // Navegação por teclado no autocomplete
+    document.addEventListener('keydown', function(e) {
+      var dropdown = document.getElementById('dropdownNF');
+      if (dropdown.classList.contains('hidden')) return;
+      
+      var items = dropdown.querySelectorAll('.autocomplete-item:not([style*="text-align"])');
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
+        updateHighlight(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        highlightedIndex = Math.max(highlightedIndex - 1, 0);
+        updateHighlight(items);
+      } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+        e.preventDefault();
+        items[highlightedIndex].click();
+      } else if (e.key === 'Escape') {
+        esconderDropdown();
+      }
+    });
+    
+    function updateHighlight(items) {
+      items.forEach(function(item, idx) {
+        item.classList.toggle('highlighted', idx === highlightedIndex);
+      });
+    }
+    
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.autocomplete-wrapper')) {
+        esconderDropdown();
+      }
+    });
+
+    // ========================================
+    // FUNÇÕES ORIGINAIS (ATUALIZADAS)
+    // ========================================
+
+    function atualizarUI() {
+      document.getElementById('progressFill').style.width = (passo * 33) + '%';
+      var textos = ['Passo 1 de 3: Selecionar Escola', 'Passo 2 de 3: Escolher NF', 'Passo 3 de 3: Registrar Recebimento'];
+      document.getElementById('stepText').textContent = textos[passo - 1];
+      
+      document.getElementById('cardEscola').classList.toggle('hidden', passo !== 1);
+      document.getElementById('cardNFsPendentes').classList.toggle('hidden', passo !== 2);
+      document.getElementById('formRecebimento').classList.toggle('hidden', passo !== 3);
+      document.getElementById('btnVoltar').classList.toggle('hidden', passo === 1);
+      
+      var btnTextos = ['Selecionar Escola →', 'Selecionar NF', '✅ Registrar Recebimento'];
+      document.getElementById('btnAvancar').textContent = btnTextos[passo - 1];
+    }
+
+    function selecionarEscola() {
+      escolaSelecionada = document.getElementById('selectEscola').value;
+      document.getElementById('headerEscola').textContent = escolaSelecionada || 'Selecione sua escola';
+    }
+
+    function avancarPasso() {
+      if (passo === 1) {
+        if (!escolaSelecionada) { mostrarAlerta('Selecione sua escola', 'error'); return; }
+        passo = 2;
+        carregarNFsPendentes();
+      } else if (passo === 2) {
+        if (!nfSelecionada) { mostrarAlerta('Selecione uma NF para registrar recebimento', 'error'); return; }
+        passo = 3;
+        prepararFormulario();
+      } else if (passo === 3) {
+        validarEConfirmar();
+      }
+      atualizarUI();
+    }
+
+    function voltarPasso() {
+      if (passo > 1) { passo--; nfSelecionada = null; atualizarUI(); }
+    }
+
+    function carregarNFsPendentes() {
+      document.getElementById('listaNFsPendentes').innerHTML = '<div class="empty-state">Carregando NFs...</div>';
+      document.getElementById('buscaNF').value = '';
+      
+      google.script.run
+        .withSuccessHandler(function(nfs) { 
+          todasNFs = nfs || [];
+          popularFiltroFornecedores(todasNFs);
+          filtrarNFs(); // Aplica filtros iniciais
+        })
+        .withFailureHandler(function() { 
+          todasNFs = [];
+          renderizarNFsPendentes([]); 
+        })
+        .listarNFsPendentesParaEscola(escolaSelecionada);
+    }
+
+    function renderizarNFsPendentes(nfs) {
+      if (nfs.length === 0) {
+        document.getElementById('listaNFsPendentes').innerHTML = '<div class="empty-state">📭 Nenhuma NF pendente de recebimento<br><small style="color:var(--text-secondary)">Aguarde o fornecedor lançar novas NFs</small></div>';
+        return;
+      }
+      var html = '';
+      nfs.forEach(function(nf) {
+        var jaRecebeu = nf.jaRecebeuEscola || (nf.recebimentos && nf.recebimentos.indexOf(escolaSelecionada) >= 0);
+        var totalRecebido = nf.totalRecebido || 0;
+        var saldoRestante = Math.max(0, nf.quantidade - totalRecebido);
+        var qtdEscolas = (nf.recebimentos || []).length;
+        
+        var badge = jaRecebeu 
+          ? '<span class="badge badge-recebido">✓ Já recebido</span>' 
+          : '<span class="badge badge-pendente">Pendente</span>';
+        
+        var statusRecebimento = '';
+        if (totalRecebido > 0) {
+          var percentual = Math.round((totalRecebido / nf.quantidade) * 100);
+          statusRecebimento = '<div class="nf-recebimento-status">' +
+            '<div class="progress-mini"><div class="progress-mini-fill" style="width:' + percentual + '%"></div></div>' +
+            '<span>' + totalRecebido + '/' + nf.quantidade + ' ' + nf.unidade + ' (' + percentual + '%) - ' + qtdEscolas + ' escola(s)</span>' +
+            '</div>';
+        }
+        
+        html += '<div class="nf-card' + (jaRecebeu ? ' disabled' : '') + '" onclick="' + (jaRecebeu ? '' : 'selecionarNF(this)') + '" data-nf=\'' + JSON.stringify(nf).replace(/'/g, "&#39;") + '\'>';
+        html += '<div class="nf-header"><span class="nf-numero">NF ' + nf.numero + '</span>' + badge + '</div>';
+        html += '<div class="nf-produto">🥫 ' + nf.produto + '</div>';
+        html += '<div class="nf-info">Qtd NF: <strong>' + nf.quantidade + ' ' + nf.unidade + '</strong> × R$ ' + (nf.valorUnitario || 0).toFixed(2) + '</div>';
+        html += statusRecebimento;
+        html += '<div class="nf-header" style="margin-top:8px"><span class="nf-info">' + (nf.fornecedor || nf.cnpj) + '</span><span class="nf-valor">R$ ' + (nf.valorTotal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</span></div>';
+        html += '</div>';
+      });
+      document.getElementById('listaNFsPendentes').innerHTML = html;
+    }
+
+    function selecionarNF(el) {
+      document.querySelectorAll('.nf-card').forEach(function(c) { c.classList.remove('selected'); });
+      el.classList.add('selected');
+      nfSelecionada = JSON.parse(el.dataset.nf);
+    }
+
+    function prepararFormulario() {
+      // Info básica da NF
+      document.getElementById('infoNFSelecionada').innerHTML = 
+        '<p><strong>NF:</strong> ' + nfSelecionada.numero + '</p>' +
+        '<p><strong>Fornecedor:</strong> ' + (nfSelecionada.fornecedor || nfSelecionada.cnpj) + '</p>';
+      
+      // Auto-preencher Gênero Alimentício
+      document.getElementById('generoNome').textContent = nfSelecionada.produto || '-';
+      document.getElementById('generoQtdNF').textContent = nfSelecionada.quantidade + ' ' + nfSelecionada.unidade;
+      document.getElementById('generoValorUnit').textContent = 'R$ ' + (nfSelecionada.valorUnitario || 0).toFixed(2);
+      document.getElementById('generoValorTotal').textContent = 'R$ ' + (nfSelecionada.valorTotal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2});
+      
+      // Quantidade esperada e recebida
+      document.getElementById('qtdEsperada').textContent = nfSelecionada.quantidade;
+      document.getElementById('unidadeEsperada').textContent = nfSelecionada.unidade;
+      document.getElementById('unidadeRecebida').textContent = nfSelecionada.unidade;
+      document.getElementById('qtdRecebida').value = nfSelecionada.quantidade;
+      
+      // Resetar campos de recusa
+      document.getElementById('calculoRecusa').classList.add('hidden');
+      document.getElementById('motivoRecusaBox').classList.add('hidden');
+      document.getElementById('motivoRecusa').value = '';
+      document.getElementById('outroMotivoBox').classList.add('hidden');
+      
+      calcularDiferencaCompleta();
+    }
+    
+    function calcularDiferencaCompleta() {
+      var esperado = nfSelecionada ? nfSelecionada.quantidade : 0;
+      var recebido = parseFloat(document.getElementById('qtdRecebida').value) || 0;
+      var diff = esperado - recebido;
+      var valorUnitario = nfSelecionada ? nfSelecionada.valorUnitario : 0;
+      var valorTotal = nfSelecionada ? nfSelecionada.valorTotal : 0;
+      
+      var box = document.getElementById('diferencaBox');
+      var calculoRecusa = document.getElementById('calculoRecusa');
+      var motivoRecusaBox = document.getElementById('motivoRecusaBox');
+      
+      if (recebido >= esperado) {
+        // Quantidade conforme ou superior
+        box.className = 'diferenca-box conforme';
+        box.textContent = '✓ Quantidade conforme';
+        calculoRecusa.classList.add('hidden');
+        motivoRecusaBox.classList.add('hidden');
+      } else if (recebido > 0) {
+        // Recebimento parcial
+        box.className = 'diferenca-box parcial';
+        box.textContent = '⚠️ Faltam ' + diff.toFixed(3) + ' ' + nfSelecionada.unidade;
+        
+        // Mostrar cálculo de valores
+        mostrarCalculoRecusa(diff, recebido, valorUnitario, valorTotal);
+        motivoRecusaBox.classList.remove('hidden');
+      } else {
+        // Recusa total
+        box.className = 'diferenca-box recusa';
+        box.textContent = '✗ Recusa total - Nenhuma quantidade recebida';
+        
+        // Mostrar cálculo de valores (recusa total)
+        mostrarCalculoRecusa(esperado, 0, valorUnitario, valorTotal);
+        motivoRecusaBox.classList.remove('hidden');
+      }
+    }
+    
+    function mostrarCalculoRecusa(qtdRecusada, qtdRecebida, valorUnitario, valorTotal) {
+      var calculoRecusa = document.getElementById('calculoRecusa');
+      calculoRecusa.classList.remove('hidden');
+      
+      var valorRecusado = qtdRecusada * valorUnitario;
+      var valorFinal = valorTotal - valorRecusado;
+      
+      // Atualizar campos
+      document.getElementById('qtdRecusada').textContent = qtdRecusada.toFixed(3);
+      document.getElementById('unidadeRecusada').textContent = nfSelecionada.unidade;
+      document.getElementById('valorRecusado').textContent = 'R$ ' + valorRecusado.toLocaleString('pt-BR', {minimumFractionDigits:2});
+      
+      document.getElementById('valorOriginalNF').textContent = 'R$ ' + valorTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
+      document.getElementById('valorDescontado').textContent = '- R$ ' + valorRecusado.toLocaleString('pt-BR', {minimumFractionDigits:2});
+      document.getElementById('valorFinalPagar').textContent = 'R$ ' + Math.max(0, valorFinal).toLocaleString('pt-BR', {minimumFractionDigits:2});
+    }
+    
+    // Listener para mostrar campo "outro motivo"
+    document.getElementById('motivoRecusa').addEventListener('change', function() {
+      var outroBox = document.getElementById('outroMotivoBox');
+      if (this.value === 'OUTRO') {
+        outroBox.classList.remove('hidden');
+      } else {
+        outroBox.classList.add('hidden');
+      }
+    });
+
+    function calcularDiferenca() {
+      calcularDiferencaCompleta();
+    }
+
+    function validarEConfirmar() {
+      if (!document.getElementById('responsavel').value.trim()) { mostrarAlerta('Informe o nome do responsável', 'error'); return; }
+      if (!document.getElementById('matricula').value.trim()) { mostrarAlerta('Informe a matrícula', 'error'); return; }
+      if (!document.getElementById('checkAssinatura').checked) { mostrarAlerta('Confirme a assinatura no termo', 'error'); return; }
+      
+      var qtdRecebida = parseFloat(document.getElementById('qtdRecebida').value) || 0;
+      var qtdEsperada = nfSelecionada.quantidade;
+      var valorUnitario = nfSelecionada.valorUnitario || 0;
+      var valorTotal = nfSelecionada.valorTotal || 0;
+      
+      // Validar motivo se houver diferença
+      if (qtdRecebida < qtdEsperada) {
+        var motivo = document.getElementById('motivoRecusa').value;
+        if (!motivo) {
+          mostrarAlerta('Selecione o motivo da recusa/diferença', 'error');
+          return;
+        }
+        if (motivo === 'OUTRO' && !document.getElementById('outroMotivo').value.trim()) {
+          mostrarAlerta('Especifique o motivo da recusa', 'error');
+          return;
+        }
+      }
+      
+      var status = qtdRecebida >= qtdEsperada ? 'CONFORME' : qtdRecebida > 0 ? 'PARCIAL' : 'RECUSA_TOTAL';
+      var qtdRecusada = Math.max(0, qtdEsperada - qtdRecebida);
+      var valorRecusado = qtdRecusada * valorUnitario;
+      var valorFinal = valorTotal - valorRecusado;
+      
+      var resumoHTML = 
+        '<strong>' + escolaSelecionada + '</strong><br>' +
+        'NF ' + nfSelecionada.numero + '<br>' +
+        '<span style="color:var(--success)">🥫 ' + nfSelecionada.produto + '</span><br><br>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:center;margin:10px 0">' +
+        '<div style="background:#f0f0f0;padding:8px;border-radius:6px"><small>Esperado</small><br><strong>' + qtdEsperada + ' ' + nfSelecionada.unidade + '</strong></div>' +
+        '<div style="background:#f0f0f0;padding:8px;border-radius:6px"><small>Recebido</small><br><strong>' + qtdRecebida + ' ' + nfSelecionada.unidade + '</strong></div>' +
+        '</div>' +
+        'Status: <strong style="color:' + (status === 'CONFORME' ? 'var(--success)' : status === 'PARCIAL' ? 'var(--warning)' : 'var(--error)') + '">' + status + '</strong>';
+      
+      if (qtdRecusada > 0) {
+        resumoHTML += '<br><br><div style="background:var(--error-light);padding:10px;border-radius:8px;margin-top:8px">' +
+          '<strong style="color:var(--error)">💰 Impacto Financeiro</strong><br>' +
+          '<small>Qtd Recusada: ' + qtdRecusada.toFixed(3) + ' ' + nfSelecionada.unidade + '</small><br>' +
+          '<small>Valor Recusado: R$ ' + valorRecusado.toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</small><br>' +
+          '<strong>Valor a Pagar: R$ ' + valorFinal.toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</strong>' +
+          '</div>';
+      }
+      
+      document.getElementById('modalResumo').innerHTML = resumoHTML;
+      document.getElementById('modalConfirm').classList.remove('hidden');
+    }
+
+    function fecharModal() { document.getElementById('modalConfirm').classList.add('hidden'); }
+
+    function confirmarRecebimento() {
+      fecharModal();
+      var btn = document.getElementById('btnAvancar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Salvando...';
+
+      var qtdRecebida = parseFloat(document.getElementById('qtdRecebida').value) || 0;
+      var qtdEsperada = nfSelecionada.quantidade;
+      var qtdRecusada = Math.max(0, qtdEsperada - qtdRecebida);
+      var valorUnitario = nfSelecionada.valorUnitario || 0;
+      var valorRecusado = qtdRecusada * valorUnitario;
+      var valorFinal = (nfSelecionada.valorTotal || 0) - valorRecusado;
+      
+      var motivo = document.getElementById('motivoRecusa').value;
+      var motivoTexto = motivo === 'OUTRO' ? document.getElementById('outroMotivo').value.trim() : motivo;
+
+      var dados = {
+        nfId: nfSelecionada.id, 
+        nfNumero: nfSelecionada.numero, 
+        escola: escolaSelecionada,
+        produto: nfSelecionada.produto, 
+        quantidadeEsperada: qtdEsperada,
+        quantidadeRecebida: qtdRecebida,
+        quantidadeRecusada: qtdRecusada,
+        unidade: nfSelecionada.unidade, 
+        valorUnitario: valorUnitario,
+        valorTotalNF: nfSelecionada.valorTotal || 0,
+        valorRecusado: valorRecusado,
+        valorFinalPagar: Math.max(0, valorFinal),
+        responsavel: document.getElementById('responsavel').value.trim(),
+        matricula: document.getElementById('matricula').value.trim(),
+        dataRecebimento: document.getElementById('dataRecebimento').value,
+        horaRecebimento: document.getElementById('horaRecebimento').value,
+        embalagemOk: document.getElementById('checkEmbalagem').checked,
+        validadeOk: document.getElementById('checkValidade').checked,
+        caracteristicasOk: document.getElementById('checkCaracteristicas').checked,
+        temperatura: document.getElementById('temperatura').value || null,
+        motivoRecusa: qtdRecusada > 0 ? motivoTexto : null,
+        observacoes: document.getElementById('observacoes').value || '',
+        hortaEscolar: coletarDadosHorta()
+      };
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false; btn.textContent = '✅ Registrar Recebimento';
+          if (res.success) {
+            var msgSucesso = res.mensagem + '<br>ID: <strong>' + res.id + '</strong>';
+            if (qtdRecusada > 0) {
+              msgSucesso += '<br><br><div style="background:var(--warning-light);padding:8px;border-radius:6px;font-size:12px">' +
+                '⚠️ Recusa registrada<br>' +
+                'Qtd: ' + qtdRecusada.toFixed(3) + ' ' + nfSelecionada.unidade + '<br>' +
+                'Valor: R$ ' + valorRecusado.toLocaleString('pt-BR', {minimumFractionDigits:2}) +
+                '</div>';
+            }
+            document.getElementById('modalSucessoText').innerHTML = msgSucesso;
+            document.getElementById('modalSucesso').classList.remove('hidden');
+          } else { mostrarAlerta(res.error || 'Erro ao registrar', 'error'); }
+        })
+        .withFailureHandler(function(err) { btn.disabled = false; btn.textContent = '✅ Registrar Recebimento'; mostrarAlerta('Erro: ' + err.message, 'error'); })
+        .salvarRecebimento(dados);
+    }
+
+    function novoRecebimento() {
+      document.getElementById('modalSucesso').classList.add('hidden');
+      nfSelecionada = null; 
+      passo = 2; 
+      document.getElementById('buscaNF').value = '';
+      document.getElementById('filtroFornecedor').value = '';
+      filtroStatusAtual = 'pendentes';
+      document.querySelectorAll('.filtro-chip').forEach(function(c) { 
+        c.classList.toggle('active', c.dataset.filtro === 'pendentes'); 
+      });
+      atualizarUI(); 
+      carregarNFsPendentes();
+    }
+
+    function mostrarAlerta(msg, tipo) {
+      var box = document.getElementById('alertBox');
+      box.innerHTML = (tipo === 'error' ? '⚠️ ' : '✅ ') + msg;
+      box.className = 'alert alert-' + tipo;
+      box.classList.remove('hidden'); window.scrollTo(0, 0);
+      setTimeout(function() { box.classList.add('hidden'); }, 4000);
+    }
+
+    function carregarEscolas() {
+      google.script.run
+        .withSuccessHandler(function(escolas) {
+          var select = document.getElementById('selectEscola');
+          select.innerHTML = '<option value="">-- Selecione sua escola --</option>';
+          (escolas || []).forEach(function(escola) {
+            var opt = document.createElement('option');
+            opt.value = escola;
+            opt.textContent = escola;
+            select.appendChild(opt);
+          });
+        })
+        .withFailureHandler(function() {
+          var select = document.getElementById('selectEscola');
+          select.innerHTML = '<option value="">Escolas indisponíveis — verifique o cadastro</option>';
+        })
+        .listarEscolasDisponiveis();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var hoje = new Date();
+      document.getElementById('dataRecebimento').value = hoje.toISOString().split('T')[0];
+      document.getElementById('horaRecebimento').value = hoje.toTimeString().slice(0,5);
+      carregarEscolas();
+      atualizarUI();
+    });
+  </script>
+
+<script>
+/* codex-school-community-ux-script: pequenos ajustes de contexto escolar */
+(function() {
+  if (window.__codexSchoolCommunityUx) return;
+  window.__codexSchoolCommunityUx = true;
+
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  }
+
+  ready(function() {
+    document.documentElement.setAttribute('data-community-context', 'school');
+
+    document.querySelectorAll('form').forEach(function(form) {
+      if (!form.getAttribute('aria-label') && !form.getAttribute('aria-labelledby')) {
+        form.setAttribute('aria-label', 'Formulario da comunidade escolar');
+      }
+    });
+
+    document.querySelectorAll('input, select, textarea').forEach(function(field) {
+      if (!field.id && field.name) field.id = 'field-' + String(field.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      if (field.required && !field.getAttribute('aria-required')) field.setAttribute('aria-required', 'true');
+      if (!field.getAttribute('autocomplete')) {
+        var type = (field.getAttribute('type') || '').toLowerCase();
+        var name = (field.getAttribute('name') || field.id || '').toLowerCase();
+        if (type === 'email' || name.indexOf('email') >= 0) field.setAttribute('autocomplete', 'email');
+        else if (name.indexOf('nome') >= 0 || name.indexOf('name') >= 0) field.setAttribute('autocomplete', 'name');
+        else if (name.indexOf('senha') >= 0 || name.indexOf('password') >= 0) field.setAttribute('autocomplete', 'current-password');
+      }
+    });
+
+    document.querySelectorAll('button:not([type])').forEach(function(button) {
+      button.setAttribute('type', 'button');
+    });
+  });
+})();
+</script>
+
+<script>
+/* codex-project-behavior-standardization: microcomportamentos compartilhados */
+(function() {
+  if (window.__codexProjectBehaviorStandardization) return;
+  window.__codexProjectBehaviorStandardization = true;
+
+  var SUBMIT_LOCK_MS = 2500;
+  var invalidFocusPending = false;
+
+  function isElement(value) {
+    return value && value.nodeType === 1;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function unlockForm(form, button) {
+    if (isElement(form)) {
+      delete form.dataset.codexSubmitting;
+      if (form.getAttribute('aria-busy') === 'true') form.setAttribute('aria-busy', 'false');
+    }
+
+    if (isElement(button) && button.dataset.codexSubmitLocked === 'true') {
+      delete button.dataset.codexSubmitLocked;
+      button.disabled = false;
+      button.removeAttribute('aria-disabled');
+    }
+  }
+
+  function restoreSubmitLocks(scope) {
+    var root = scope && scope.querySelectorAll ? scope : document;
+
+    root.querySelectorAll('form[data-codex-submitting="true"]').forEach(function(form) {
+      unlockForm(form);
+    });
+
+    root.querySelectorAll('[data-codex-submit-locked="true"]').forEach(function(button) {
+      unlockForm(null, button);
+    });
+  }
+
+  document.addEventListener('submit', function(event) {
+    var form = event.target;
+    if (!isElement(form) || String(form.tagName).toLowerCase() !== 'form') return;
+    if (form.hasAttribute('data-no-submit-lock')) return;
+
+    if (form.dataset.codexSubmitting === 'true') {
+      event.preventDefault();
+      return;
+    }
+
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+    form.dataset.codexSubmitting = 'true';
+    form.setAttribute('aria-busy', 'true');
+
+    var button = event.submitter || form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+    if (isElement(button) && !button.disabled && !button.hasAttribute('data-no-submit-lock')) {
+      button.dataset.codexSubmitLocked = 'true';
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    }
+
+    window.setTimeout(function() {
+      unlockForm(form, button);
+    }, SUBMIT_LOCK_MS);
+  }, true);
+
+  document.addEventListener('invalid', function(event) {
+    var field = event.target;
+    if (!isElement(field) || invalidFocusPending) return;
+    invalidFocusPending = true;
+
+    window.setTimeout(function() {
+      invalidFocusPending = false;
+      if (!document.documentElement.contains(field)) return;
+      try {
+        field.scrollIntoView({ block: 'center', inline: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        field.focus({ preventScroll: true });
+      } catch (error) {
+        field.focus();
+      }
+    }, 0);
+  }, true);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key !== 'Escape') return;
+    var closedSomething = false;
+
+    var dialogs = Array.prototype.slice.call(document.querySelectorAll('dialog[open]'));
+    var dialog = dialogs[dialogs.length - 1];
+    if (dialog && typeof dialog.close === 'function') {
+      dialog.close();
+      closedSomething = true;
+    }
+
+    if (!closedSomething) {
+      var details = Array.prototype.slice.call(document.querySelectorAll('details[open]'));
+      var detail = details[details.length - 1];
+      if (detail) {
+        detail.removeAttribute('open');
+        closedSomething = true;
+      }
+    }
+
+    document.querySelectorAll('[aria-expanded="true"]').forEach(function(toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      closedSomething = true;
+    });
+
+    if (closedSomething) event.preventDefault();
+  }, true);
+
+  window.addEventListener('pageshow', function() {
+    restoreSubmitLocks(document);
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') restoreSubmitLocks(document);
+  });
+})();
+</script>
+  <?!= include("ClientCall"); ?>
+</body>
+</html>
+
+
+
+

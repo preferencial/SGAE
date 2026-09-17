@@ -1,0 +1,2164 @@
+<style id="up-oracular-design-system">
+:root {
+  color-scheme: dark;
+  --uo-bg: #15171c;
+  --uo-panel: #20242b;
+  --uo-text: #e9ecf1;
+  --uo-muted: #b2b9c4;
+  --uo-border: #343941;
+  --uo-accent: #7aa2d6;
+  --uo-radius-group: 10px;
+  --uo-radius-control: 8px;
+}
+
+html, body {
+  background: var(--uo-bg) !important;
+  color: var(--uo-text) !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body, input, select, textarea, button {
+  color: var(--uo-text);
+}
+
+.card, .panel, .modal, .dialog, dialog, .container,
+.box, .widget, .section, .sidebar, .drawer, .popover,
+[role="dialog"], [class*="card"], [class*="panel"] {
+  background-color: var(--uo-panel) !important;
+  border-color: var(--uo-border) !important;
+  border-radius: var(--uo-radius-group) !important;
+}
+
+button, input, select, textarea, .btn, .button,
+[role="button"], [role="menuitem"], .dropdown-item,
+.menu-item, [class*="button"], [class*="dropdown-item"] {
+  border-radius: var(--uo-radius-control) !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+input, select, textarea {
+  background-color: var(--uo-panel) !important;
+  border: 1px solid var(--uo-border) !important;
+  padding: 8px !important;
+  box-sizing: border-box;
+}
+
+label, .form-label, [class*="form-label"] {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--uo-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+}
+
+.uo-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.uo-feedback-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  min-width: 220px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--uo-border);
+  border-radius: var(--uo-radius-group);
+  background: var(--uo-panel);
+  color: var(--uo-text);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.uo-feedback-box.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.uo-feedback-box[data-kind="ok"] {
+  border-color: #8fc2a6;
+  color: #8fc2a6;
+}
+
+.uo-feedback-box[data-kind="err"] {
+  border-color: #d98b93;
+  color: #d98b93;
+}
+
+form[aria-busy="true"] {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+form[aria-busy="true"] :is(button, input[type="submit"], input[type="button"]) {
+  pointer-events: none;
+}
+
+button, .btn-primary, .button-primary,
+[class*="primary"][role="button"] {
+  background-color: var(--uo-accent) !important;
+}
+
+p, small, .muted, .secondary, .subtitle,
+[class*="muted"], [class*="secondary"] {
+  color: var(--uo-muted) !important;
+}
+
+hr, table, th, td, fieldset {
+  border-color: var(--uo-border) !important;
+}
+
+a {
+  color: var(--uo-accent);
+}
+
+/* Geometrias funcionais permanecem circulares. */
+.avatar, .spinner, .loading-ring, .dot, .status-dot,
+[class*="avatar"], [class*="spinner"], [class*="loading-ring"] {
+  border-radius: 50% !important;
+}
+</style>
+<script id="up-oracular-form-feedback">
+(function () {
+  'use strict';
+  if (window.UpOracularFeedback) return;
+
+  var timer = null;
+  function notify(kind, message) {
+    var box = document.getElementById('uo-feedback-box');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'uo-feedback-box';
+      box.className = 'uo-feedback-box';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      document.body.appendChild(box);
+    }
+    box.dataset.kind = kind === 'err' ? 'err' : 'ok';
+    box.textContent = String(message || (kind === 'err' ? 'Nao foi possivel concluir.' : 'Operacao concluida.'));
+    box.classList.add('is-visible');
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      box.classList.remove('is-visible');
+    }, 1000);
+  }
+
+  function connectLabels(form) {
+    form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(function (field, index) {
+      var id = field.id || ('uo-field-' + index + '-' + Math.random().toString(36).slice(2, 7));
+      field.id = id;
+      var label = form.querySelector('label[for="' + id + '"]');
+      if (!label) {
+        var sibling = field.previousElementSibling;
+        if (sibling && sibling.tagName === 'LABEL') {
+          sibling.htmlFor = id;
+          label = sibling;
+        }
+      }
+      if (label && field.parentElement && !field.parentElement.classList.contains('uo-field')) {
+        field.parentElement.classList.add('uo-field');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(connectLabels);
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== 'FORM') return;
+    form.setAttribute('aria-busy', 'true');
+    notify('ok', 'Enviando...');
+    window.setTimeout(function () {
+      if (form.getAttribute('aria-busy') === 'true') {
+        form.removeAttribute('aria-busy');
+      }
+    }, 10000);
+  }, true);
+
+  window.UpOracularFeedback = {
+    ok: function (message) { notify('ok', message); },
+    err: function (message) { notify('err', message); },
+    done: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('ok', message);
+    },
+    fail: function (form, message) {
+      if (form) form.removeAttribute('aria-busy');
+      notify('err', message);
+    }
+  };
+}());
+</script>
+
+<style>
+/* codex-s20-mobile-first: Samsung S20 / Chrome mobile baseline (360x800 CSS px) */
+@media screen {
+  :where(html) {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  :where(*, *::before, *::after) {
+    box-sizing: border-box;
+  }
+  :where(body) {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  :where(main, .app, .page, .container, .content, .main-content, .dashboard, .view) {
+    max-width: 100%;
+  }
+  :where(img, video, canvas, svg) {
+    max-width: 100%;
+    height: auto;
+  }
+  :where(p, li, td, th, label, legend, button, a, h1, h2, h3, h4, h5, h6) {
+    overflow-wrap: anywhere;
+  }
+  :where(input, select, textarea, button) {
+    font: inherit;
+    max-width: 100%;
+  }
+  :where(input, select, textarea) {
+    font-size: max(16px, 1rem);
+  }
+  :where(button, [role="button"], input, select, textarea, a) {
+    touch-action: manipulation;
+  }
+  :where(.table-wrap, .table-wrapper, .table-responsive, .table-container, .responsive-table, .data-table-wrapper) {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 480px) {
+  :where(body) {
+    font-size: 16px;
+  }
+  :where(.grid, .cards, .dashboard-grid, .stats-grid, .form-grid, .filters-grid) {
+    grid-template-columns: 1fr !important;
+  }
+  :where(.toolbar, .actions, .button-row, .filters, .form-actions, .modal-actions, .header-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  :where(.btn, button, input, select, textarea) {
+    min-height: 44px;
+  }
+  :where(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  :where(th, td) {
+    white-space: nowrap;
+  }
+  :where(.card, .panel, .modal, .dialog, .drawer) {
+    max-width: calc(100vw - 24px);
+  }
+}
+@media (max-width: 360px) {
+  :where(body) {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  :where(.card, .panel, .section, .modal-content, .dialog-content) {
+    padding: 12px;
+  }
+  :where(h1) {
+    font-size: clamp(1.45rem, 1.2rem + 2vw, 2rem);
+  }
+  :where(h2) {
+    font-size: clamp(1.2rem, 1rem + 1.4vw, 1.55rem);
+  }
+}
+
+
+
+/* codex-school-community-ux: ajustes finos para uso recorrente por comunidade escolar */
+:root {
+  --codex-school-focus: #ffd166;
+  --codex-school-touch: 44px;
+  --codex-school-radius: 8px;
+  --codex-school-field-radius: 7px;
+  --codex-school-form-gap: 14px;
+  --codex-school-field-border: rgba(120, 132, 156, 0.45);
+  --codex-school-field-bg: rgba(255, 255, 255, 0.96);
+  --codex-school-field-text: #1f2937;
+  --codex-school-muted-text: #64748b;
+  --codex-school-soft-surface: rgba(248, 250, 252, 0.82);
+  --codex-school-safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+:where(html) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+:where(body) {
+  overscroll-behavior-y: contain;
+}
+
+:where(p, li, dd, dt, blockquote, figcaption, label, td, th) {
+  line-height: 1.5;
+}
+
+:where(main, .main, .content, .page, .app, .app-shell, .container, .dashboard, .workspace) {
+  padding-bottom: var(--codex-school-safe-bottom);
+}
+
+:where(a, button, .btn, .button, [role="button"], input, select, textarea, summary) {
+  min-height: var(--codex-school-touch);
+  touch-action: manipulation;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="submit"], input[type="button"]) {
+  border-radius: var(--codex-school-radius) !important;
+  font-weight: 700;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--codex-school-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(label) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+  font-weight: 700;
+}
+
+:where(form) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(fieldset) {
+  border-radius: var(--codex-school-radius) !important;
+  border-color: var(--codex-school-field-border);
+}
+
+:where(legend) {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+:where(.form-group, .input-field, .field, .form-field, .control-group) {
+  margin-bottom: var(--codex-school-form-gap);
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+  width: min(100%, 100%);
+  border-radius: var(--codex-school-field-radius) !important;
+  border-color: var(--codex-school-field-border) !important;
+  background-color: var(--input-bg, var(--field-bg, var(--codex-school-field-bg)));
+  color: var(--input-text, var(--text-color, var(--codex-school-field-text)));
+  font-size: 16px !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--placeholder-color, #94a3b8);
+  opacity: 1;
+}
+
+:where(input[required], select[required], textarea[required]) {
+  border-left: 3px solid var(--codex-gentle-primary-strong, #aecbfa) !important;
+}
+
+:where(input:disabled, select:disabled, textarea:disabled, button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed !important;
+  opacity: 0.68;
+}
+
+:where(.help, .hint, .help-text, .form-help, small) {
+  line-height: 1.45;
+  color: var(--codex-gentle-muted, var(--text-muted, var(--codex-school-muted-text)));
+}
+
+:where(.actions, .form-actions, .button-row, .toolbar, .topbar, nav, [role="toolbar"]) {
+  gap: 8px;
+}
+
+:where(.actions, .form-actions, .button-row) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+:where(.actions, .form-actions, .button-row) > :where(button, .btn, .button, [role="button"]) {
+  flex: 1 1 148px;
+}
+
+:where(.card, .panel, .box, .tile, .item, .list-item, .action-card) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.section, .surface, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu) {
+  border-radius: var(--codex-school-radius) !important;
+}
+
+:where(.filters, .search-panel, .form-section) {
+  border-radius: var(--codex-school-radius) !important;
+  background: var(--codex-school-soft-surface);
+}
+
+:where(table) {
+  border-collapse: collapse;
+}
+
+:where(table, .table, .data-table) {
+  max-width: 100%;
+}
+
+:where(.table-wrap, .table-wrapper, .table-container, .responsive-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(th, td) {
+  vertical-align: top;
+}
+
+:where(.toast, .alert, .notice, .snackbar, [role="status"], [role="alert"]) {
+  border-radius: var(--codex-school-radius) !important;
+  line-height: 1.45;
+}
+
+@media (max-width: 420px) {
+  :where(body) {
+    font-size: 16px;
+  }
+
+  :where(h1) {
+    font-size: clamp(1.55rem, 1.35rem + 1vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  :where(h2) {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.55rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  :where(.toolbar, .topbar, nav, [role="toolbar"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  :where(.hide-mobile, .desktop-only) {
+    display: none !important;
+  }
+}
+</style>
+<style>
+/* codex-design-system: shared contrast, button sizing and minimal button icon styling */
+:root {
+  --codex-ds-primary: var(--primary, var(--color-primary, var(--theme-primary, #1a73e8)));
+  --codex-ds-primary-strong: var(--primary-dark, var(--color-primary-strong, var(--theme-primary-dark, #1558d6)));
+  --codex-ds-text: var(--text, var(--color-ink, var(--text-primary, #202124)));
+  --codex-ds-muted: var(--muted, var(--color-muted, var(--text-secondary, #5f6368)));
+  --codex-ds-surface: var(--surface, var(--color-surface, var(--bg-surface, #ffffff)));
+  --codex-ds-border: var(--border, var(--color-border, var(--line, #dadce0)));
+  --codex-ds-focus: #1a73e8;
+  --codex-ds-radius: 8px;
+}
+
+:where(body) {
+  color: var(--codex-ds-text);
+}
+
+:where(.text-muted, .muted, .secondary, small, figcaption, caption) {
+  color: var(--codex-ds-muted);
+}
+
+:where(a) {
+  color: var(--codex-ds-primary);
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--codex-ds-radius);
+  border: 1px solid transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: var(--codex-ds-primary);
+  color: #ffffff;
+}
+
+:where(.btn:hover, .button:hover, button:hover, [role="button"]:hover) {
+  filter: none;
+}
+
+:where(.btn-primary:hover, .button-primary:hover, button[type="submit"]:hover, input[type="submit"]:hover) {
+  background: var(--codex-ds-primary-strong);
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: var(--codex-ds-surface);
+  color: var(--codex-ds-text);
+  border-color: var(--codex-ds-border);
+}
+
+:where(.btn-small, .btn.sm, .button-small, .button.sm) {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+:where(.icon-button, .btn-icon, button.icon, button[aria-label]:not([aria-label=""])) {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: var(--codex-ds-radius);
+}
+
+:where(button svg, .btn svg, .button svg, [role="button"] svg, button .material-icons, .btn .material-icons, .button .material-icons, button .icon, .btn .icon, .button .icon) {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1;
+  stroke-width: 2;
+  flex: 0 0 auto;
+}
+
+:where(button .material-icons, .btn .material-icons, .button .material-icons) {
+  font-feature-settings: "liga";
+  vertical-align: middle;
+}
+
+:where(button:focus-visible, .btn:focus-visible, .button:focus-visible, [role="button"]:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible) {
+  outline: 3px solid var(--codex-ds-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--codex-ds-surface) 80%, transparent);
+}
+
+:where(button:disabled, .btn:disabled, .button:disabled, [aria-disabled="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  :where(.btn, .button, button, input[type="button"], input[type="submit"], input[type="reset"]) {
+    width: auto;
+  }
+  :where(.form-actions > .btn, .form-actions > .button, .form-actions > button, .actions > .btn, .actions > .button, .actions > button) {
+    width: 100%;
+  }
+}
+</style>
+<style>
+/* codex-gentle-dark-theme: default graphite theme with soft, kind UI accents */
+:root {
+  color-scheme: dark;
+  --codex-gentle-bg: #15171c;
+  --codex-gentle-bg-soft: #1a1d23;
+  --codex-gentle-surface: #20242b;
+  --codex-gentle-surface-2: #272b33;
+  --codex-gentle-border: #343941;
+  --codex-gentle-text: #eef1f5;
+  --codex-gentle-muted: #c8ced8;
+  --codex-gentle-dim: #9aa4b2;
+  --codex-gentle-primary: #8ab4f8;
+  --codex-gentle-primary-strong: #aecbfa;
+  --codex-gentle-accent: #8fa0b8;
+  --codex-gentle-success: #9be7c1;
+  --bg: var(--codex-gentle-bg);
+  --background: var(--codex-gentle-bg);
+  --surface: var(--codex-gentle-surface);
+  --panel: var(--codex-gentle-surface);
+  --card: var(--codex-gentle-surface);
+  --text: var(--codex-gentle-text);
+  --text-main: var(--codex-gentle-text);
+  --text-primary: var(--codex-gentle-text);
+  --text-muted: var(--codex-gentle-muted);
+  --muted: var(--codex-gentle-muted);
+  --border: var(--codex-gentle-border);
+  --line: var(--codex-gentle-border);
+  --primary: var(--codex-gentle-primary);
+  --primary-dark: #6ea0ef;
+  --codex-ds-primary: var(--codex-gentle-primary);
+  --codex-ds-primary-strong: var(--codex-gentle-primary-strong);
+  --codex-ds-text: var(--codex-gentle-text);
+  --codex-ds-muted: var(--codex-gentle-muted);
+  --codex-ds-surface: var(--codex-gentle-surface);
+  --codex-ds-border: var(--codex-gentle-border);
+}
+
+:where(html, body) {
+  background: var(--codex-gentle-bg) !important;
+  color: var(--codex-gentle-text) !important;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(main, .app, .page, .layout, .content, .main-content, .app-content, .container, .dashboard, .view) {
+  background-color: transparent !important;
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(.card, .panel, .section, .surface, .box, .widget, .modal-content, .dialog-content, .drawer, .dropdown, .menu, .table-wrapper, .table-wrap, .table-container, form) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+              var(--codex-gentle-surface) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+}
+
+:where(header, nav, aside, footer, .navbar, .sidebar, .topbar, .app-header, .app-footer) {
+  background: rgba(12, 15, 21, 0.92) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, li, label, span, strong, td, th, legend, small, caption) {
+  color: inherit;
+}
+
+:where(h1, .page-title, .view-title) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(h1:not(.no-emoji), .page-title:not(.no-emoji), .view-title:not(.no-emoji))::after {
+  content: "";
+  font-size: 0.82em;
+}
+
+:where(.empty-state, .empty, .no-data, .no-results, .loading, .placeholder)::before {
+  content: "";
+}
+
+:where(.text-muted, .muted, .secondary, .subtitle, .description, .help-text, .hint, small, figcaption, caption) {
+  color: var(--codex-gentle-muted) !important;
+}
+
+:where(a) {
+  color: var(--codex-gentle-primary-strong) !important;
+}
+
+:where(input, select, textarea) {
+  background: var(--codex-gentle-bg-soft) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(input::placeholder, textarea::placeholder) {
+  color: var(--codex-gentle-dim) !important;
+}
+
+:where(table) {
+  color: var(--codex-gentle-text) !important;
+}
+
+:where(th) {
+  color: var(--codex-gentle-muted) !important;
+  background: rgba(255,255,255,0.035) !important;
+}
+
+:where(td) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(button, .btn, .button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  background: var(--codex-gentle-surface-2) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+  box-shadow: none !important;
+}
+
+:where(.btn, .button, .btn-primary, .button-primary, .primary, button[type="submit"], input[type="submit"]) {
+  background: linear-gradient(180deg, rgba(174, 203, 250, 0.24), rgba(138, 180, 248, 0.16)),
+              #182235 !important;
+  color: #f8fbff !important;
+  border-color: rgba(174, 203, 250, 0.45) !important;
+}
+
+:where(button[type="submit"]:not(.icon-button):not(.btn-icon), input[type="submit"])::after {
+  content: "";
+  font-size: 0.9em;
+}
+
+:where(.btn-secondary, .button-secondary, .btn.ghost, .button-quiet, .btn-outline, .secondary, button.secondary) {
+  background: rgba(255,255,255,0.035) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(.badge, .tag, .chip, .pill, .status) {
+  background: rgba(248, 199, 220, 0.12) !important;
+  color: var(--codex-gentle-text) !important;
+  border-color: rgba(248, 199, 220, 0.26) !important;
+}
+
+:where(hr) {
+  border-color: var(--codex-gentle-border) !important;
+}
+
+:where(svg, canvas, img) {
+  color: inherit;
+}
+</style>
+<!-- 
+  UI_Header_AE.html
+  Cabeçalho do Sistema de Alimentação Escolar com Chatbot IA
+  @version 2.0.0
+  
+  Requer: AE_Design_System.html
+-->
+
+<style>
+  /* ============================================
+   HEADER - ALIMENTAÇÃO ESCOLAR
+   Usa tokens do AE Design System
+   ============================================ */
+  .ae-header {
+    background: var(--ae-gradient-primary, linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%));
+    color: var(--ae-text-inverse, white);
+    position: sticky;
+    top: 0;
+    z-index: var(--ae-z-sticky, 200);
+    box-shadow: var(--ae-shadow-md, 0 4px 8px rgba(0, 0, 0, 0.08));
+  }
+
+  .ae-header .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--ae-space-4, 16px);
+  }
+
+  .ae-header-row-1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ae-space-3, 12px) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .ae-header-row-2 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ae-space-2, 8px);
+    padding: var(--ae-space-2, 8px) 0;
+  }
+
+  .ae-logo-section {
+    display: flex;
+    align-items: center;
+    gap: var(--ae-space-3, 12px);
+  }
+
+  .ae-logo-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .ae-logo-text {
+    font-size: var(--ae-font-2xl, 1.5rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .ae-logo-subtitle {
+    font-size: var(--ae-font-xs, 0.75rem);
+    opacity: 0.85;
+    font-weight: 400;
+  }
+
+  /* Botões do Header */
+  .ae-btn-icon {
+    width: var(--ae-touch-min, 44px);
+    height: var(--ae-touch-min, 44px);
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ae-text-inverse, white);
+    border-radius: var(--ae-radius-full, 9999px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--ae-transition-fast, 150ms ease), background-color var(--ae-transition-fast, 150ms ease), color var(--ae-transition-fast, 150ms ease), opacity var(--ae-transition-fast, 150ms ease);
+    position: relative;
+  }
+
+  .ae-btn-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+  }
+
+  .ae-btn-icon:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+  }
+
+  .ae-btn-icon i {
+    font-size: 18px;
+  }
+
+  /* Badge de Notificação */
+  .ae-notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--ae-error, #e53935);
+    color: var(--ae-text-inverse, white);
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 20px;
+    height: 20px;
+    border-radius: var(--ae-radius-full, 9999px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: var(--ae-shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
+  }
+
+  .ae-notification-badge.hidden {
+    display: none;
+  }
+
+  /* Menu Toggle */
+  .ae-menu-toggle {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .ae-menu-toggle {
+      display: flex;
+    }
+  }
+
+  /* ============================================
+   DRAWERS (Painéis Laterais)
+   ============================================ */
+  .ae-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--ae-bg-overlay, rgba(0, 0, 0, 0.5));
+    z-index: var(--ae-z-modal-backdrop, 400);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--ae-transition-base, 200ms ease), visibility var(--ae-transition-base, 200ms ease);
+    backdrop-filter: blur(4px);
+  }
+
+  .ae-drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ae-drawer {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    max-width: 90vw;
+    height: 100vh;
+    background: var(--ae-bg-surface, #fff);
+    z-index: var(--ae-z-modal, 500);
+    transition: right var(--ae-transition-slow, 300ms ease);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .ae-drawer.active {
+    right: 0;
+  }
+
+  .ae-drawer-header {
+    padding: var(--ae-space-4, 16px) var(--ae-space-5, 20px);
+    background: var(--ae-gradient-primary, linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%));
+    color: var(--ae-text-inverse, white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ae-drawer-title {
+    font-size: var(--ae-font-lg, 1.125rem);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--ae-space-2, 8px);
+  }
+
+  .ae-drawer-close {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--ae-text-inverse, white);
+    border-radius: var(--ae-radius-full, 9999px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--ae-transition-fast, 150ms ease);
+  }
+
+  .ae-drawer-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .ae-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--ae-space-4, 16px);
+  }
+
+  /* ============================================
+   CHATBOT DRAWER
+   ============================================ */
+  .ae-chatbot-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 300px;
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    padding-bottom: 16px;
+  }
+
+  .ae-chat-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    animation: fadeInUp 0.3s ease;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .ae-chat-message.user {
+    align-self: flex-end;
+    background: var(--primary, #2e7d32);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .ae-chat-message.assistant {
+    align-self: flex-start;
+    background: var(--bg-secondary, #f5f5f5);
+    color: var(--text-primary, #333);
+    border-bottom-left-radius: 4px;
+  }
+
+  .ae-chat-message.system {
+    align-self: center;
+    background: transparent;
+    color: var(--text-secondary, #666);
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .ae-chat-typing {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--bg-secondary, #f5f5f5);
+    border-radius: 16px;
+    width: fit-content;
+  }
+
+  .ae-chat-typing span {
+    width: 8px;
+    height: 8px;
+    background: var(--text-secondary, #666);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+  }
+
+  .ae-chat-typing span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .ae-chat-typing span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes typing {
+
+    0%,
+    60%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+
+    30% {
+      transform: translateY(-6px);
+      opacity: 1;
+    }
+  }
+
+  /* Input do Chat */
+  .ae-chat-input-container {
+    padding: 16px;
+    border-top: 1px solid var(--border, #e0e0e0);
+    background: var(--bg-surface, #fff);
+  }
+
+  .ae-chat-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .ae-chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border, #e0e0e0);
+    border-radius: 24px;
+    font-size: 14px;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+
+  .ae-chat-input:focus {
+    outline: none;
+    border-color: var(--primary, #2e7d32);
+  }
+
+  .ae-chat-send {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: var(--primary, #2e7d32);
+    color: white;
+    border-radius: var(--ae-radius-full, 9999px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, background-color 0.2s, opacity 0.2s;
+  }
+
+  .ae-chat-send:hover {
+    background: var(--primary-dark, #1b5e20);
+    transform: scale(1.05);
+  }
+
+  .ae-chat-send:disabled {
+    background: var(--text-secondary, #999);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ============================================
+   SEARCH DRAWER
+   ============================================ */
+  .ae-search-input-container {
+    padding: 16px;
+    border-bottom: 1px solid var(--border, #e0e0e0);
+  }
+
+  .ae-search-input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid var(--border, #e0e0e0);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bg-secondary, #f5f5f5) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") no-repeat 12px center;
+    background-size: 20px;
+  }
+
+  .ae-search-input:focus {
+    outline: none;
+    border-color: var(--primary, #2e7d32);
+    background-color: white;
+  }
+
+  .ae-search-results {
+    padding: 8px;
+  }
+
+  .ae-search-result-item {
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ae-search-result-item:hover {
+    background: var(--bg-secondary, #f5f5f5);
+  }
+
+  .ae-search-result-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-light, #e8f5e9);
+    color: var(--primary, #2e7d32);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ae-search-result-info {
+    flex: 1;
+  }
+
+  .ae-search-result-title {
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .ae-search-result-type {
+    font-size: 12px;
+    color: var(--text-secondary, #666);
+  }
+
+  /* ============================================
+   NOTIFICATIONS PANEL
+   ============================================ */
+  .ae-notification-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border, #e0e0e0);
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .ae-notification-item:hover {
+    background: var(--bg-secondary, #f5f5f5);
+  }
+
+  .ae-notification-item.unread {
+    background: var(--primary-light, #e8f5e9);
+  }
+
+  .ae-notification-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .ae-notification-icon.info {
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+
+  .ae-notification-icon.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .ae-notification-icon.warning {
+    background: #fff3e0;
+    color: #f57c00;
+  }
+
+  .ae-notification-icon.error {
+    background: #ffebee;
+    color: #d32f2f;
+  }
+
+  .ae-notification-content {
+    flex: 1;
+  }
+
+  .ae-notification-title {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .ae-notification-text {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+    line-height: 1.4;
+  }
+
+  .ae-notification-time {
+    font-size: 11px;
+    color: var(--text-tertiary, #999);
+    margin-top: 4px;
+  }
+
+  /* ============================================
+   USER DRAWER
+   ============================================ */
+  .ae-user-profile {
+    text-align: center;
+    padding: 24px 16px;
+    border-bottom: 1px solid var(--border, #e0e0e0);
+  }
+
+  .ae-user-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary, #2e7d32) 0%, var(--primary-dark, #1b5e20) 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0 auto 12px;
+  }
+
+  .ae-user-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .ae-user-role {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+  }
+
+  .ae-user-menu {
+    padding: 8px;
+  }
+
+  .ae-user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: var(--text-primary, #333);
+    text-decoration: none;
+  }
+
+  .ae-user-menu-item:hover {
+    background: var(--bg-secondary, #f5f5f5);
+  }
+
+  .ae-user-menu-item.danger {
+    color: #d32f2f;
+  }
+
+  .ae-user-menu-item i {
+    width: 20px;
+    text-align: center;
+  }
+
+  /* Horizontal Nav Styles */
+  .ae-horizontal-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 0 16px;
+    margin-left: 16px;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10px, black 90%, transparent);
+    max-width: calc(100vw - 300px);
+    /* Adjust based on other elements */
+  }
+
+  .ae-horizontal-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ae-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 10px;
+    min-width: 64px;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+    font-size: 10px;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .ae-nav-item i {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .ae-nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .ae-nav-item.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    .ae-horizontal-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-surface, #fff);
+      border-top: 1px solid var(--border, #e0e0e0);
+      padding: 8px;
+      margin: 0;
+      z-index: 900;
+      justify-content: flex-start;
+      max-width: 100%;
+      mask-image: none;
+      -webkit-mask-image: none;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .ae-nav-item {
+      color: var(--text-secondary, #666);
+    }
+
+    .ae-nav-item:hover {
+      background: var(--bg-secondary, #f5f5f5);
+      color: var(--primary, #2e7d32);
+      transform: none;
+    }
+
+    .ae-nav-item.active {
+      background: transparent;
+      color: var(--primary, #2e7d32);
+      box-shadow: none;
+    }
+
+    .ae-header {
+      padding-bottom: 0;
+    }
+  }
+</style>
+
+<!-- ============================================
+     HEADER HTML
+     ============================================ -->
+<header class="ae-header" role="banner">
+    <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <div class="container">
+    <!-- Linha 1: Logo e Menu -->
+    <div class="ae-header-row-1">
+      <div class="ae-logo-section">
+        <button class="ae-btn-icon ae-menu-toggle" id="ae-menu-toggle" aria-label="Abrir menu de navegação"
+          aria-expanded="false" aria-controls="sidebar">
+          <i class="material-icons">menu</i>
+        </button>
+        <span class="ae-logo-icon"><i class="material-icons cdx-mi" aria-hidden="true">nutrition</i></span>
+        <div>
+          <div class="ae-logo-text">AE</div>
+        </div>
+      </div>
+
+      <!-- Navegação Horizontal (Scrollable) -->
+      <nav id="horizontal-nav" class="ae-horizontal-nav" role="navigation" aria-label="Menu principal">
+        <a href="#" class="ae-nav-item active" data-section="dashboard" title="Visão Geral"><i class="material-icons">speed</i><span>Dashboard</span></a>
+        <a href="#" class="ae-nav-item" data-section="cardapios" title="Planejamento de Cardápios"><i class="material-icons">calendar_month</i><span>Cardápios</span></a>
+        <a href="#" class="ae-nav-item" data-section="alunos" title="Gestão de Alunos"><i class="material-icons">group</i><span>Alunos</span></a>
+        <a href="#" class="ae-nav-item" data-section="especiais" title="Alunos com Restrições"><i class="material-icons">favorite</i><span>Especiais</span></a>
+        <a href="#" class="ae-nav-item" data-section="notas" title="Atesto de Notas Fiscais"><i class="material-icons">receipt_long</i><span>Notas</span></a>
+        <a href="#" class="ae-nav-item" data-section="entregas" title="Recebimento de Mercadorias"><i class="material-icons">local_shipping</i><span>Entregas</span></a>
+        <a href="#" class="ae-nav-item" data-section="estoque" title="Controle de Estoque"><i class="material-icons">inventory_2</i><span>Estoque</span></a>
+        <a href="#" class="ae-nav-item" data-section="pedidos" title="Solicitação de Gêneros"><i class="material-icons">shopping_cart</i><span>Pedidos</span></a>
+        <a href="#" class="ae-nav-item" data-section="fornecedores" title="Gestão de Fornecedores"><i class="material-icons">handshake</i><span>Fornecedores</span></a>
+        <a href="#" class="ae-nav-item" data-section="escolas" title="Unidades Escolares"><i class="material-icons">school</i><span>Escolas</span></a>
+        <a href="#" class="ae-nav-item" data-section="nutricao" title="Informações Nutricionais"><i class="material-icons">eco</i><span>Nutrição</span></a>
+        <a href="#" class="ae-nav-item" data-section="fichas" title="Fichas Técnicas"><i class="material-icons">checklist</i><span>Receitas</span></a>
+        <a href="#" class="ae-nav-item" data-section="pnae" title="Agricultura Familiar"><i class="material-icons">agriculture</i><span>PNAE</span></a>
+        <a href="#" class="ae-nav-item" data-section="aceitabilidade" title="Testes de Aceitabilidade"><i class="material-icons">thumb_up</i><span>Aceitação</span></a>
+        <a href="#" class="ae-nav-item" data-section="desperdicio" title="Controle de Desperdício"><i class="material-icons">delete</i><span>Desperdício</span></a>
+        <a href="#" class="ae-nav-item" data-section="visitas" title="Visitas Técnicas"><i class="material-icons">done</i><span>Visitas</span></a>
+        <a href="#" class="ae-nav-item" data-section="capacitacao" title="Capacitação de Pessoal"><i class="material-icons">school</i><span>Capacitação</span></a>
+        <a href="#" class="ae-nav-item" data-section="equipamentos" title="Gestão de Equipamentos"><i class="material-icons">blender</i><span>Equipamentos</span></a>
+        <a href="#" class="ae-nav-item" data-section="manutencao" title="Manutenção"><i class="material-icons">build</i><span>Manutenção</span></a>
+        <a href="#" class="ae-nav-item" data-section="relatorios" title="Relatórios Gerenciais"><i class="material-icons">bar_chart</i><span>Relatórios</span></a>
+        <a href="#" class="ae-nav-item" data-section="ia" title="Relatórios Inteligentes"><i class="material-icons">smart_toy</i><span>IA</span></a>
+        <a href="#" class="ae-nav-item" data-section="docs" title="Documentação"><i class="material-icons">folder_open</i><span>Docs</span></a>
+        <a href="#" class="ae-nav-item" data-section="config" title="Configurações do Sistema"><i class="material-icons">settings</i><span>Config</span></a>
+        <a href="#" class="ae-nav-item" data-section="ajuda" title="Ajuda e Suporte"><i class="material-icons">help</i><span>Ajuda</span></a>
+      </nav>
+    </div>
+
+    <!-- Linha 2: Ações Rápidas -->
+    <div class="ae-header-row-2">
+      <button class="ae-btn-icon" id="ae-tasks-btn" aria-label="Tarefas em andamento" title="Tarefas em Andamento">
+        <i class="material-icons">task_alt</i>
+        <span class="ae-notification-badge hidden" id="tasks-badge">0</span>
+      </button>
+
+      <button class="ae-btn-icon" id="ae-search-btn" aria-label="Buscar" title="Buscar (Ctrl+K)"
+        aria-controls="search-drawer" aria-expanded="false">
+        <i class="material-icons">search</i>
+      </button>
+
+      <button class="ae-btn-icon" id="ae-chatbot-btn" aria-label="Assistente IA" title="Assistente IA (Ctrl+/)"
+        aria-controls="chatbot-drawer" aria-expanded="false">
+        <i class="material-icons">chat</i>
+      </button>
+
+      <button class="ae-btn-icon" id="ae-notifications-btn" aria-label="Notificações" title="Notificações"
+        aria-controls="notification-drawer" aria-expanded="false">
+        <i class="fas fa-bell"></i>
+        <span class="ae-notification-badge hidden" id="notification-badge">0</span>
+      </button>
+
+      <button class="ae-btn-icon" id="ae-user-btn" aria-label="Perfil do usuário" title="Minha Conta"
+        aria-controls="user-drawer" aria-expanded="false">
+        <i class="fas fa-user"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Overlay para Drawers -->
+<div class="ae-drawer-overlay" id="ae-drawer-overlay"></div>
+
+<!-- ============================================
+     CHATBOT DRAWER
+     ============================================ -->
+<aside class="ae-drawer" id="chatbot-drawer" role="dialog" aria-labelledby="chatbot-title" aria-modal="true">
+  <div class="ae-drawer-header">
+    <h2 class="ae-drawer-title" id="chatbot-title">
+      <i class="material-icons">smart_toy</i>
+      Assistente AE
+    </h2>
+    <button class="ae-drawer-close" aria-label="Fechar assistente" onclick="AEHeader.closeDrawer('chatbot')">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+
+  <div class="ae-drawer-body ae-chatbot-messages" id="chatbot-messages">
+    <div class="ae-chat-message system">
+      Olá! Sou o assistente de Alimentação Escolar. Como posso ajudar?
+    </div>
+  </div>
+
+  <div class="ae-chat-input-container">
+    <div class="ae-chat-input-wrapper">
+      <textarea class="ae-chat-input" id="chatbot-input" placeholder="Digite sua mensagem..." rows="1"
+        aria-label="Mensagem para o assistente"></textarea>
+      <button class="ae-chat-send" id="chatbot-send" aria-label="Enviar mensagem">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================
+     SEARCH DRAWER
+     ============================================ -->
+<aside class="ae-drawer" id="search-drawer" role="dialog" aria-labelledby="search-title" aria-modal="true">
+  <div class="ae-drawer-header">
+    <h2 class="ae-drawer-title" id="search-title">
+      <i class="material-icons">search</i>
+      Buscar
+    </h2>
+    <button class="ae-drawer-close" aria-label="Fechar busca" onclick="AEHeader.closeDrawer('search')">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+
+  <div class="ae-search-input-container">
+    <input inputmode="text" type="text" class="ae-search-input" id="search-input" placeholder="Buscar NF, fornecedor, produto..."
+      aria-label="Campo de busca" autocomplete="name">
+  </div>
+
+  <div class="ae-drawer-body ae-search-results" id="search-results">
+    <p style="text-align:center;color:var(--text-secondary);padding:20px;">
+      Digite para buscar na base de dados
+    </p>
+  </div>
+</aside>
+
+<!-- ============================================
+     NOTIFICATIONS DRAWER
+     ============================================ -->
+<aside class="ae-drawer" id="notification-drawer" role="dialog" aria-labelledby="notification-title" aria-modal="true">
+  <div class="ae-drawer-header">
+    <h2 class="ae-drawer-title" id="notification-title">
+      <i class="fas fa-bell"></i>
+      Notificações
+    </h2>
+    <button class="ae-drawer-close" aria-label="Fechar notificações" onclick="AEHeader.closeDrawer('notification')">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+
+  <div class="ae-drawer-body" id="notification-list">
+    <div class="ae-notification-item unread">
+      <div class="ae-notification-icon info"><i class="material-icons">receipt_long</i></div>
+      <div class="ae-notification-content">
+        <div class="ae-notification-title">Nova NF Recebida</div>
+        <div class="ae-notification-text">NF 12345 do fornecedor ABC Alimentos aguarda conferência.</div>
+        <div class="ae-notification-time">Há 5 minutos</div>
+      </div>
+    </div>
+    <div class="ae-notification-item">
+      <div class="ae-notification-icon success"><i class="material-icons">check</i></div>
+      <div class="ae-notification-content">
+        <div class="ae-notification-title">Atesto Concluído</div>
+        <div class="ae-notification-text">Lote de NFs atestado com sucesso.</div>
+        <div class="ae-notification-time">Há 1 hora</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================
+     USER DRAWER
+     ============================================ -->
+<aside class="ae-drawer" id="user-drawer" role="dialog" aria-labelledby="user-title" aria-modal="true">
+  <div class="ae-drawer-header">
+    <h2 class="ae-drawer-title" id="user-title">
+      <i class="fas fa-user"></i>
+      Minha Conta
+    </h2>
+    <button class="ae-drawer-close" aria-label="Fechar perfil" onclick="AEHeader.closeDrawer('user')">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+
+  <div class="ae-drawer-body">
+    <div class="ae-user-profile">
+      <div class="ae-user-avatar" id="user-avatar-initial">U</div>
+      <div class="ae-user-name" id="user-display-name">Usuário</div>
+      <div class="ae-user-role" id="user-display-role">Analista</div>
+    </div>
+
+    <div class="ae-user-menu">
+      <a href="#" class="ae-user-menu-item" onclick="AEHeader.openProfile()">
+        <i class="fas fa-user-edit"></i>
+        <span>Editar Perfil</span>
+      </a>
+      <a href="#" class="ae-user-menu-item" onclick="AEHeader.openSettings()">
+        <i class="material-icons">settings</i>
+        <span>Configurações</span>
+      </a>
+      <a href="#" class="ae-user-menu-item" onclick="AEHeader.openHelp()">
+        <i class="material-icons">help</i>
+        <span>Ajuda</span>
+      </a>
+      <hr style="margin:8px 0;border:none;border-top:1px solid var(--border,#e0e0e0);">
+      <a href="#" class="ae-user-menu-item danger" onclick="AEHeader.logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Sair</span>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================
+     JAVASCRIPT DO HEADER
+     ============================================ -->
+<script>
+  /**
+   * AEHeader - Controlador do Cabeçalho de Alimentação Escolar
+   */
+  var AEHeader = (function () {
+    'use strict';
+
+    // Estado
+    var state = {
+      activeDrawer: null,
+      chatHistory: [],
+      isTyping: false,
+      notifications: [],
+      searchDebounce: null
+    };
+
+    // Elementos
+    var elements = {};
+
+    /**
+     * Inicializa o header
+     */
+    function init() {
+      cacheElements();
+      bindEvents();
+      loadUserInfo();
+      checkGeminiStatus();
+      console.log('AEHeader inicializado');
+    }
+
+    /**
+     * Cache de elementos DOM
+     */
+    function cacheElements() {
+      elements = {
+        overlay: document.getElementById('ae-drawer-overlay'),
+        chatbotDrawer: document.getElementById('chatbot-drawer'),
+        searchDrawer: document.getElementById('search-drawer'),
+        notificationDrawer: document.getElementById('notification-drawer'),
+        userDrawer: document.getElementById('user-drawer'),
+        chatMessages: document.getElementById('chatbot-messages'),
+        chatInput: document.getElementById('chatbot-input'),
+        chatSend: document.getElementById('chatbot-send'),
+        searchInput: document.getElementById('search-input'),
+        searchResults: document.getElementById('search-results'),
+        notificationBadge: document.getElementById('notification-badge'),
+        tasksBadge: document.getElementById('tasks-badge')
+      };
+    }
+
+    /**
+     * Bindagem de eventos
+     */
+    function bindEvents() {
+      // Botões do header
+      document.getElementById('ae-chatbot-btn')?.addEventListener('click', function () { toggleDrawer('chatbot'); });
+      document.getElementById('ae-search-btn')?.addEventListener('click', function () { toggleDrawer('search'); });
+      document.getElementById('ae-notifications-btn')?.addEventListener('click', function () { toggleDrawer('notification'); });
+      document.getElementById('ae-user-btn')?.addEventListener('click', function () { toggleDrawer('user'); });
+      document.getElementById('ae-menu-toggle')?.addEventListener('click', toggleSidebar);
+
+      // Overlay
+      elements.overlay?.addEventListener('click', closeAllDrawers);
+
+      // Chat
+      elements.chatSend?.addEventListener('click', sendChatMessage);
+      elements.chatInput?.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+
+      // Auto-resize textarea
+      elements.chatInput?.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+
+      // Busca com debounce
+      elements.searchInput?.addEventListener('input', function () {
+        clearTimeout(state.searchDebounce);
+        state.searchDebounce = setTimeout(function () {
+          performSearch(elements.searchInput.value);
+        }, 300);
+      });
+
+      // Atalhos de teclado
+      document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === 'k') { e.preventDefault(); toggleDrawer('search'); }
+          if (e.key === '/') { e.preventDefault(); toggleDrawer('chatbot'); }
+        }
+        if (e.key === 'Escape') { closeAllDrawers(); }
+      });
+    }
+
+    /**
+     * Toggle de drawer
+     */
+    function toggleDrawer(name) {
+      var drawer = document.getElementById(name + '-drawer');
+      if (!drawer) return;
+
+      if (state.activeDrawer === name) {
+        closeDrawer(name);
+      } else {
+        closeAllDrawers();
+        openDrawer(name);
+      }
+    }
+
+    /**
+     * Abre um drawer
+     */
+    function openDrawer(name) {
+      var drawer = document.getElementById(name + '-drawer');
+      var btn = document.getElementById('ae-' + name + '-btn');
+
+      if (drawer) {
+        drawer.classList.add('active');
+        elements.overlay?.classList.add('active');
+        state.activeDrawer = name;
+        btn?.setAttribute('aria-expanded', 'true');
+
+        // Focus no input se for search ou chatbot
+        if (name === 'search') elements.searchInput?.focus();
+        if (name === 'chatbot') elements.chatInput?.focus();
+      }
+    }
+
+    /**
+     * Fecha um drawer
+     */
+    function closeDrawer(name) {
+      var drawer = document.getElementById(name + '-drawer');
+      var btn = document.getElementById('ae-' + name + '-btn');
+
+      if (drawer) {
+        drawer.classList.remove('active');
+        btn?.setAttribute('aria-expanded', 'false');
+      }
+
+      if (state.activeDrawer === name) {
+        elements.overlay?.classList.remove('active');
+        state.activeDrawer = null;
+      }
+    }
+
+    /**
+     * Fecha todos os drawers
+     */
+    function closeAllDrawers() {
+      ['chatbot', 'search', 'notification', 'user'].forEach(function (name) {
+        closeDrawer(name);
+      });
+    }
+
+    /**
+     * Toggle sidebar (mobile)
+     */
+    function toggleSidebar() {
+      var sidebar = document.getElementById('sidebar');
+      var btn = document.getElementById('ae-menu-toggle');
+
+      if (sidebar) {
+        sidebar.classList.toggle('open');
+        var isOpen = sidebar.classList.contains('open');
+        btn?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      }
+    }
+
+    /**
+     * Envia mensagem para o chatbot
+     */
+    function sendChatMessage() {
+      var message = elements.chatInput?.value?.trim();
+      if (!message || state.isTyping) return;
+
+      // Adiciona mensagem do usuário
+      addChatMessage(message, 'user');
+      elements.chatInput.value = '';
+      elements.chatInput.style.height = 'auto';
+
+      // Mostra indicador de digitação
+      state.isTyping = true;
+      elements.chatSend.disabled = true;
+      showTypingIndicator();
+
+      // Prepara histórico
+      var historyText = state.chatHistory.slice(-6).map(function (m) {
+        return m.role + ': ' + m.content;
+      }).join('\n');
+
+      // Chama backend
+      google.script.run
+        .withSuccessHandler(function (response) {
+          hideTypingIndicator();
+          state.isTyping = false;
+          elements.chatSend.disabled = false;
+
+          if (response && response.success) {
+            addChatMessage(response.message, 'assistant');
+            state.chatHistory.push({ role: 'Usuário', content: message });
+            state.chatHistory.push({ role: 'Assistente', content: response.message });
+          } else {
+            addChatMessage(response?.message || 'Desculpe, ocorreu um erro.', 'assistant');
+          }
+        })
+        .withFailureHandler(function (error) {
+          hideTypingIndicator();
+          state.isTyping = false;
+          elements.chatSend.disabled = false;
+          addChatMessage('Erro de conexão. Tente novamente.', 'system');
+          console.error('Erro chatbot:', error);
+        })
+        .chatbotMessage(message, historyText);
+    }
+
+    /**
+     * Adiciona mensagem ao chat
+     */
+    function addChatMessage(text, type) {
+      var div = document.createElement('div');
+      div.className = 'ae-chat-message ' + type;
+      div.textContent = text;
+      elements.chatMessages?.appendChild(div);
+      elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+    }
+
+    /**
+     * Mostra indicador de digitação
+     */
+    function showTypingIndicator() {
+      var div = document.createElement('div');
+      div.className = 'ae-chat-typing';
+      div.id = 'typing-indicator';
+      div.innerHTML = '<span></span><span></span><span></span>';
+      elements.chatMessages?.appendChild(div);
+      elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+    }
+
+    /**
+     * Esconde indicador de digitação
+     */
+    function hideTypingIndicator() {
+      var indicator = document.getElementById('typing-indicator');
+      indicator?.remove();
+    }
+
+    /**
+     * Realiza busca na base de dados
+     */
+    function performSearch(query) {
+      if (!query || query.length < 2) {
+        elements.searchResults.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:20px;">Digite para buscar na base de dados</p>';
+        return;
+      }
+
+      elements.searchResults.innerHTML = '<p style="text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Buscando...</p>';
+
+      google.script.run
+        .withSuccessHandler(function (response) {
+          if (response && response.success && response.results.length > 0) {
+            renderSearchResults(response.results);
+          } else {
+            elements.searchResults.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:20px;">Nenhum resultado encontrado</p>';
+          }
+        })
+        .withFailureHandler(function (error) {
+          elements.searchResults.innerHTML = '<p style="text-align:center;color:var(--error);padding:20px;">Erro na busca</p>';
+        })
+        .buscaInteligente(query);
+    }
+
+    /**
+     * Renderiza resultados da busca
+     */
+    function renderSearchResults(results) {
+      var html = results.map(function (item) {
+        var icon = item.tipo === 'Nota Fiscal' ? 'fa-file-invoice' : 'fa-building';
+        return '<div class="ae-search-result-item" onclick="AEHeader.selectSearchResult(\'' + item.id + '\', \'' + item.tipo + '\')">' +
+          '<div class="ae-search-result-icon"><i class="fas ' + icon + '"></i></div>' +
+          '<div class="ae-search-result-info">' +
+          '<div class="ae-search-result-title">' + escapeHtml(item.descricao) + '</div>' +
+          '<div class="ae-search-result-type">' + item.tipo + '</div>' +
+          '</div>' +
+          '</div>';
+      }).join('');
+
+      elements.searchResults.innerHTML = html;
+    }
+
+    /**
+     * Seleciona resultado da busca
+     */
+    function selectSearchResult(id, tipo) {
+      closeDrawer('search');
+      // Navegar para o item selecionado
+      if (typeof navigateTo === 'function') {
+        if (tipo === 'Nota Fiscal') navigateTo('notas');
+        else if (tipo === 'Fornecedor') navigateTo('fornecedores');
+      }
+      console.log('Selecionado:', tipo, id);
+    }
+
+    /**
+     * Carrega informações do usuário
+     */
+    function loadUserInfo() {
+      // Tenta obter do localStorage ou sessionStorage
+      var userName = sessionStorage.getItem('userName') || 'Usuário';
+      var userRole = sessionStorage.getItem('userRole') || 'Analista';
+
+      document.getElementById('user-display-name').textContent = userName;
+      document.getElementById('user-display-role').textContent = userRole;
+      document.getElementById('user-avatar-initial').textContent = userName.charAt(0).toUpperCase();
+    }
+
+    /**
+     * Verifica status do Gemini
+     */
+    function checkGeminiStatus() {
+      google.script.run
+        .withSuccessHandler(function (status) {
+          if (!status || !status.configured) {
+            console.warn('Gemini API não configurada');
+          }
+        })
+        .withFailureHandler(function () { })
+        .getGeminiStatus();
+    }
+
+    /**
+     * Funções de menu do usuário
+     */
+    function openProfile() { closeDrawer('user'); console.log('Abrir perfil'); }
+    function openSettings() { closeDrawer('user'); console.log('Abrir configurações'); }
+    function openHelp() { closeDrawer('user'); console.log('Abrir ajuda'); }
+    function logout() {
+      if (confirm('Deseja realmente sair?')) {
+        sessionStorage.clear();
+        if (typeof handleLogout === 'function') handleLogout();
+        else window.location.reload();
+      }
+    }
+
+    /**
+     * Atualiza badge de notificações
+     */
+    function updateNotificationBadge(count) {
+      var badge = elements.notificationBadge;
+      if (badge) {
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : count;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    }
+
+    /**
+     * Escape HTML
+     */
+    function escapeHtml(text) {
+      return String(text == null ? '' : text).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    // API Pública
+    return {
+      init: init,
+      toggleDrawer: toggleDrawer,
+      openDrawer: openDrawer,
+      closeDrawer: closeDrawer,
+      closeAllDrawers: closeAllDrawers,
+      selectSearchResult: selectSearchResult,
+      openProfile: openProfile,
+      openSettings: openSettings,
+      openHelp: openHelp,
+      logout: logout,
+      updateNotificationBadge: updateNotificationBadge
+    };
+  })();
+
+  // Inicializa quando DOM estiver pronto
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', AEHeader.init);
+  } else {
+    AEHeader.init();
+  }
+</script>
+
+<script>
+/* codex-school-community-ux-script: pequenos ajustes de contexto escolar */
+(function() {
+  if (window.__codexSchoolCommunityUx) return;
+  window.__codexSchoolCommunityUx = true;
+
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  }
+
+  ready(function() {
+    document.documentElement.setAttribute('data-community-context', 'school');
+
+    document.querySelectorAll('form').forEach(function(form) {
+      if (!form.getAttribute('aria-label') && !form.getAttribute('aria-labelledby')) {
+        form.setAttribute('aria-label', 'Formulario da comunidade escolar');
+      }
+    });
+
+    document.querySelectorAll('input, select, textarea').forEach(function(field) {
+      if (!field.id && field.name) field.id = 'field-' + String(field.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      if (field.required && !field.getAttribute('aria-required')) field.setAttribute('aria-required', 'true');
+      if (!field.getAttribute('autocomplete')) {
+        var type = (field.getAttribute('type') || '').toLowerCase();
+        var name = (field.getAttribute('name') || field.id || '').toLowerCase();
+        if (type === 'email' || name.indexOf('email') >= 0) field.setAttribute('autocomplete', 'email');
+        else if (name.indexOf('nome') >= 0 || name.indexOf('name') >= 0) field.setAttribute('autocomplete', 'name');
+        else if (name.indexOf('senha') >= 0 || name.indexOf('password') >= 0) field.setAttribute('autocomplete', 'current-password');
+      }
+    });
+
+    document.querySelectorAll('button:not([type])').forEach(function(button) {
+      button.setAttribute('type', 'button');
+    });
+  });
+})();
+</script>
+
+<script>
+/* codex-project-behavior-standardization: microcomportamentos compartilhados */
+(function() {
+  if (window.__codexProjectBehaviorStandardization) return;
+  window.__codexProjectBehaviorStandardization = true;
+
+  var SUBMIT_LOCK_MS = 2500;
+  var invalidFocusPending = false;
+
+  function isElement(value) {
+    return value && value.nodeType === 1;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function unlockForm(form, button) {
+    if (isElement(form)) {
+      delete form.dataset.codexSubmitting;
+      if (form.getAttribute('aria-busy') === 'true') form.setAttribute('aria-busy', 'false');
+    }
+
+    if (isElement(button) && button.dataset.codexSubmitLocked === 'true') {
+      delete button.dataset.codexSubmitLocked;
+      button.disabled = false;
+      button.removeAttribute('aria-disabled');
+    }
+  }
+
+  function restoreSubmitLocks(scope) {
+    var root = scope && scope.querySelectorAll ? scope : document;
+
+    root.querySelectorAll('form[data-codex-submitting="true"]').forEach(function(form) {
+      unlockForm(form);
+    });
+
+    root.querySelectorAll('[data-codex-submit-locked="true"]').forEach(function(button) {
+      unlockForm(null, button);
+    });
+  }
+
+  document.addEventListener('submit', function(event) {
+    var form = event.target;
+    if (!isElement(form) || String(form.tagName).toLowerCase() !== 'form') return;
+    if (form.hasAttribute('data-no-submit-lock')) return;
+
+    if (form.dataset.codexSubmitting === 'true') {
+      event.preventDefault();
+      return;
+    }
+
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+    form.dataset.codexSubmitting = 'true';
+    form.setAttribute('aria-busy', 'true');
+
+    var button = event.submitter || form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+    if (isElement(button) && !button.disabled && !button.hasAttribute('data-no-submit-lock')) {
+      button.dataset.codexSubmitLocked = 'true';
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    }
+
+    window.setTimeout(function() {
+      unlockForm(form, button);
+    }, SUBMIT_LOCK_MS);
+  }, true);
+
+  document.addEventListener('invalid', function(event) {
+    var field = event.target;
+    if (!isElement(field) || invalidFocusPending) return;
+    invalidFocusPending = true;
+
+    window.setTimeout(function() {
+      invalidFocusPending = false;
+      if (!document.documentElement.contains(field)) return;
+      try {
+        field.scrollIntoView({ block: 'center', inline: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        field.focus({ preventScroll: true });
+      } catch (error) {
+        field.focus();
+      }
+    }, 0);
+  }, true);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key !== 'Escape') return;
+    var closedSomething = false;
+
+    var dialogs = Array.prototype.slice.call(document.querySelectorAll('dialog[open]'));
+    var dialog = dialogs[dialogs.length - 1];
+    if (dialog && typeof dialog.close === 'function') {
+      dialog.close();
+      closedSomething = true;
+    }
+
+    if (!closedSomething) {
+      var details = Array.prototype.slice.call(document.querySelectorAll('details[open]'));
+      var detail = details[details.length - 1];
+      if (detail) {
+        detail.removeAttribute('open');
+        closedSomething = true;
+      }
+    }
+
+    document.querySelectorAll('[aria-expanded="true"]').forEach(function(toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      closedSomething = true;
+    });
+
+    if (closedSomething) event.preventDefault();
+  }, true);
+
+  window.addEventListener('pageshow', function() {
+    restoreSubmitLocks(document);
+  });
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') restoreSubmitLocks(document);
+  });
+})();
+</script>
+
+
+
